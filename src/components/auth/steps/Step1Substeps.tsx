@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   autoCapitalizeEnglishName,
   countWords,
@@ -8,6 +8,7 @@ import {
   validateArabicName,
 } from '@/lib/validation/name-rules';
 import { validateEgyptianNationalId } from '@/lib/validation/national-id';
+import { checkEnglishNameCollision } from '@/app/actions/auth-check';
 import { GenderType } from '@/types/database.types';
 
 export interface Step1Data {
@@ -32,6 +33,7 @@ interface Step1SubstepProps {
 export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [checkingCollision, setCheckingCollision] = useState(false);
 
   // English Name Validations
   const englishValidation = validateEnglishName(data.englishName, data.hasNameCollision);
@@ -71,6 +73,22 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
     onChange({ englishName: formatted });
   };
 
+  const handleEnglishBlur = async () => {
+    if (engWordCount >= 4 && !data.hasNameCollision) {
+      setCheckingCollision(true);
+      try {
+        const isDuplicate = await checkEnglishNameCollision(data.englishName);
+        if (isDuplicate) {
+          onChange({ hasNameCollision: true });
+        }
+      } catch {
+        // Continue gracefully
+      } finally {
+        setCheckingCollision(false);
+      }
+    }
+  };
+
   const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -84,7 +102,6 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
   };
 
   const t = {
-    // 1.1
     s1Title: isRtl ? 'الاسم الكامل بالإنجليزية' : 'English Full Name',
     s1Subtitle: isRtl ? 'أدخل اسمك الرباعي الرسمي باللغة الإنجليزية' : 'Enter your official quadruple name in English',
     engPlaceholder: 'First Father Grandfather Family',
@@ -96,8 +113,8 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
     remainingBadge: isRtl
       ? `تم إدخال ${engWordCount}/${requiredEngWords} أسماء (متبقي ${engRemaining})`
       : `${engWordCount}/${requiredEngWords} names entered (${engRemaining} remaining)`,
+    checkingCollision: isRtl ? 'جاري فحص تشابه الأسماء...' : 'Checking database for name duplicates...',
 
-    // 1.2
     s2Title: isRtl ? 'الاسم الكامل بالعربية' : 'Arabic Full Name',
     s2Subtitle: isRtl
       ? `أدخل اسمك باللغة العربية مطابقاً لعدد أسماء الإنجليزية (${targetArWords} أسماء)`
@@ -107,24 +124,20 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
       ? `تم إدخال ${arWordCount}/${targetArWords} أسماء`
       : `${arWordCount}/${targetArWords} words entered`,
 
-    // 1.3
     s3Title: isRtl ? 'تاريخ الميلاد' : 'Date of Birth',
     s3Subtitle: isRtl ? 'حدد تاريخ ميلادك الرسمي' : 'Select your official date of birth',
     ageBadge: isRtl ? `العمر: ${currentAge} سنة` : `Age: ${currentAge} years old`,
 
-    // 1.4
     s4Title: isRtl ? 'النوع / الجنس' : 'Gender Selection',
     s4Subtitle: isRtl ? 'حدد النوع كما هو مدون في بطاقة الرقم القومي' : 'Select gender as registered in official records',
     male: isRtl ? 'ذكر' : 'Male',
     female: isRtl ? 'أنثى' : 'Female',
 
-    // 1.5
     s5Title: isRtl ? 'الرقم القومي (14 رقم)' : '14-Digit Egyptian National ID',
     s5Subtitle: isRtl ? 'أدخل الرقم القومي الخاص بك بدقة للتحقق التلقائي' : 'Enter your 14-digit Egyptian National ID for live verification',
     nidPlaceholder: '29901010101234',
     provincePrefix: isRtl ? '📍 محافظة الميلاد: ' : '📍 Province: ',
 
-    // 1.6
     s6Title: isRtl ? 'الصورة الشخصية' : 'Profile Photo',
     s6Subtitle: isRtl ? 'التقط صورة بالكاميرا أو قم برفع ملف من جهازك' : 'Take a photo with your camera or upload from device',
     cameraBtn: isRtl ? '📷 التقاط بالكاميرا' : '📷 Take Photo with Camera',
@@ -176,9 +189,16 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
               autoFocus
               value={data.englishName}
               onChange={(e) => handleEnglishChange(e.target.value)}
+              onBlur={handleEnglishBlur}
               placeholder={t.engPlaceholder}
               className="w-full px-4 py-3.5 rounded-2xl border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] text-base placeholder:text-[var(--muted-foreground)] focus:ring-2 focus:ring-[var(--primary)] focus:outline-none transition shadow-sm"
             />
+
+            {checkingCollision && (
+              <p className="text-xs text-blue-500 font-medium animate-pulse">
+                <bdi>{t.checkingCollision}</bdi>
+              </p>
+            )}
 
             {data.englishName && !englishValidation.isValid && (
               <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-medium text-start">
