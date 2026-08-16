@@ -1,3 +1,10 @@
+export interface LocaleMetadata {
+  code: string;
+  name: string;
+  nativeName?: string;
+  direction: 'ltr' | 'rtl';
+}
+
 export const SUPPORTED_LOCALES = [
   'af-ZA', 'am-ET', 'ar-AE', 'ar-BH', 'ar-DZ', 'ar-EG', 'ar-IQ', 'ar-JO',
   'ar-KW', 'ar-LB', 'ar-LY', 'ar-MA', 'ar-OM', 'ar-QA', 'ar-SA', 'ar-SY',
@@ -57,4 +64,13 @@ export function isRtlLocale(locale: string): boolean {
 
 export function getLocaleDirection(locale: string): 'rtl' | 'ltr' {
   return isRtlLocale(locale) ? 'rtl' : 'ltr';
+}
+
+export function getLocaleMetadata(locale: string): LocaleMetadata {
+  const direction = getLocaleDirection(locale);
+  return {
+    code: locale,
+    name: locale,
+    direction,
+  };
 }
