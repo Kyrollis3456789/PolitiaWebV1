@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from '@/i18n/routing';
+import { useRouter, Link } from '@/i18n/routing';
 import { useLocale } from 'next-intl';
 import { createClient } from '@/lib/supabase/client';
 import { isRtlLocale } from '@/i18n/locales';
@@ -39,7 +39,12 @@ export function LoginForm() {
         router.refresh();
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : (isRtl ? 'حدث خطأ أثناء الاتصال بالخادم' : 'An unexpected connection error occurred.');
+      const msg =
+        err instanceof Error
+          ? err.message
+          : isRtl
+          ? 'حدث خطأ أثناء الاتصال بالخادم'
+          : 'An unexpected connection error occurred.';
       setErrorMessage(msg);
       setLoading(false);
     }
@@ -47,13 +52,17 @@ export function LoginForm() {
 
   const t = {
     title: isRtl ? 'تسجيل الدخول' : 'Sign In',
-    subtitle: isRtl ? 'أدخل بريدك الإلكتروني وكلمة المرور للمتابعة' : 'Enter your email and password to access the portal',
+    subtitle: isRtl
+      ? 'أدخل بريدك الإلكتروني وكلمة المرور للمتابعة'
+      : 'Enter your email and password to access the portal',
     emailLabel: isRtl ? 'البريد الإلكتروني' : 'Email Address',
     emailPlaceholder: 'name@example.com',
     passwordLabel: isRtl ? 'كلمة المرور' : 'Password',
     passwordPlaceholder: '••••••••',
     signInButton: isRtl ? 'تسجيل الدخول' : 'Sign In',
     signingIn: isRtl ? 'جاري التحقق...' : 'Signing in...',
+    noAccount: isRtl ? 'ليس لديك حساب؟' : "Don't have an account?",
+    createAccount: isRtl ? 'إنشاء حساب جديد' : 'Create Account',
   };
 
   return (
@@ -135,6 +144,19 @@ export function LoginForm() {
           )}
         </button>
       </form>
+
+      {/* Create Account Action */}
+      <div className="mt-8 pt-6 border-t border-[var(--border)] text-center space-y-3">
+        <p className="text-xs text-[var(--muted-foreground)]">
+          <bdi>{t.noAccount}</bdi>
+        </p>
+        <Link
+          href="/create-account"
+          className="w-full inline-flex items-center justify-center py-2.5 px-4 rounded-xl text-sm font-semibold border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] hover:bg-[var(--muted)] active:scale-[0.99] transition cursor-pointer"
+        >
+          <bdi>{t.createAccount}</bdi>
+        </Link>
+      </div>
     </div>
   );
 }
