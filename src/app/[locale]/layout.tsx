@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { isSupportedLocale, getLocaleDirection } from "@/i18n/locales";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { LanguageSyncProvider } from "@/components/providers/LanguageSyncProvider";
 import "../globals.css";
@@ -36,15 +37,17 @@ export default async function RootLayout({
 }) {
   const { locale } = await params;
 
-  if (!routing.locales.includes(locale as any)) {
+  if (!isSupportedLocale(locale)) {
     notFound();
   }
 
   setRequestLocale(locale);
   const messages = await getMessages();
 
+  const direction = getLocaleDirection(locale);
+
   return (
-    <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"} suppressHydrationWarning>
+    <html lang={locale} dir={direction} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background text-foreground`}
       >
