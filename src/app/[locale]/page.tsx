@@ -12,19 +12,17 @@ export default async function Home({
   setRequestLocale(locale);
   const isRtl = isRtlLocale(locale);
 
-  // Check current auth status
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   const t = {
-    title: isRtl ? 'بولتيا آب' : 'PolitiaApp',
+    title: isRtl ? 'بوليتيا آب' : 'PolitiaApp',
     subtitle: isRtl
-      ? 'منصة البوابة الرقمية الموحدة مع المصادقة المباشرة عبر Supabase ودعم 131 لغة'
-      : 'Unified digital portal platform with Supabase SSR Auth and 131 locales support',
-    signIn: isRtl ? 'تسجيل الدخول' : 'Sign In',
-    goToDashboard: isRtl ? 'الانتقال إلى لوحة التحكم' : 'Go to Dashboard',
+      ? 'منصة بوابة رقمية موحدة مع مصادقة Supabase ودعم 131 لغة'
+      : 'Unified digital portal platform with Supabase auth and 131 locales support',
+    goToDashboard: isRtl ? 'الانتقال إلى لوحة التحكم' : 'Go to dashboard',
     loggedInAs: isRtl ? 'تم تسجيل الدخول كـ' : 'Signed in as',
   };
 
@@ -60,13 +58,35 @@ export default async function Home({
               </Link>
             </div>
           ) : (
-            <Link
-              href="/login"
-              className="w-full py-3 px-4 rounded-xl font-medium text-sm bg-[var(--primary)] text-[var(--primary-foreground)] hover:opacity-90 active:scale-95 transition shadow flex items-center justify-center gap-2 cursor-pointer"
-            >
-              <span><bdi>{t.signIn}</bdi></span>
-              <span className="text-base">→</span>
-            </Link>
+            <div className="space-y-2.5">
+              <Link
+                href="/auth-showcase"
+                className="w-full py-3 px-4 rounded-xl font-bold text-sm bg-[#4A72B2] text-white hover:bg-[#3E6199] active:scale-95 transition shadow-md flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>Preview auth flow</span>
+                <span className="text-base">📱</span>
+              </Link>
+              <div className="grid grid-cols-3 gap-2 pt-1">
+                <Link
+                  href="/login"
+                  className="py-2.5 px-2 rounded-xl text-xs font-semibold border border-[var(--border)] hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="py-2.5 px-2 rounded-xl text-xs font-semibold border border-[var(--border)] hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                >
+                  Register
+                </Link>
+                <Link
+                  href="/verify"
+                  className="py-2.5 px-2 rounded-xl text-xs font-semibold border border-[var(--border)] hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+                >
+                  Verify
+                </Link>
+              </div>
+            </div>
           )}
         </div>
       </div>

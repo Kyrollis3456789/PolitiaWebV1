@@ -1,30 +1,59 @@
 @import "tailwindcss";
 
+@theme {
+  --color-brand-bg: var(--color-bg);
+  --color-brand-card: var(--color-card);
+  --color-brand-text: var(--color-text);
+  --color-brand-button: var(--color-button);
+  --color-brand-accent: var(--color-accent);
+  --color-brand-navy: var(--color-text);
+  --color-brand-blue: var(--color-button);
+  --color-brand-gold: var(--color-accent);
+  --color-brand-white: var(--color-card);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #09090b;
-  --card: #ffffff;
-  --card-foreground: #09090b;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --border: #e4e4e7;
-  --primary: #18181b;
-  --primary-foreground: #fafafa;
+  /* Light Mode Variables */
+  --color-bg: #F2F7FF;
+  --color-card: #FFFFFF;
+  --color-text: #10316B;
+  --color-button: #0B409C;
+  --color-accent: #FDBE34;
+
+  /* Aliases for general theme tokens */
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
+  --card: var(--color-card);
+  --card-foreground: var(--color-text);
+  --muted: #E6EEFC;
+  --muted-foreground: #475569;
+  --border: #DBE5F5;
+  --primary: var(--color-button);
+  --primary-foreground: #FFFFFF;
 }
 
 .dark {
-  --background: #09090b;
-  --foreground: #fafafa;
-  --card: #121215;
-  --card-foreground: #fafafa;
-  --muted: #1c1c21;
-  --muted-foreground: #a1a1aa;
-  --border: #27272a;
-  --primary: #fafafa;
-  --primary-foreground: #18181b;
+  /* Dark Mode Variables */
+  --color-bg: #070F22;
+  --color-card: #101E3D;
+  --color-text: #F2F7FF;
+  --color-button: #1A53C0;
+  --color-accent: #FDBE34;
+
+  /* Aliases for general theme tokens in Dark Mode */
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
+  --card: var(--color-card);
+  --card-foreground: var(--color-text);
+  --muted: #152238;
+  --muted-foreground: #94A3B8;
+  --border: #1E2D4A;
+  --primary: var(--color-button);
+  --primary-foreground: #FFFFFF;
 }
 
 body {
-  background-color: var(--background);
-  color: var(--foreground);
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }

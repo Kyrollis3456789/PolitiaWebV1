@@ -1,7 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 import { redirect } from '@/i18n/routing';
 import { createClient } from '@/lib/supabase/server';
-import { LoginForm } from '@/components/auth/LoginForm';
+import { LoginView } from '@/components/auth-flow/LoginView';
 
 export default async function LoginPage({
   params,
@@ -22,8 +22,8 @@ export default async function LoginPage({
   }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] flex flex-col items-center justify-center p-6">
-      <LoginForm />
+    <main className="min-h-[100dvh] w-full flex flex-col items-center justify-center">
+      <LoginView />
     </main>
   );
 }
