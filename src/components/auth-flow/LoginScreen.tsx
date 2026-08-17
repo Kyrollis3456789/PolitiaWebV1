@@ -2,12 +2,11 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
-import { Loader2, ChevronDown, UserCircle2, Moon, Sun } from 'lucide-react';
+import { Loader2, ChevronDown, UserCircle2 } from 'lucide-react';
 import { useRouter, Link } from '@/i18n/routing';
 import { useLocale } from 'next-intl';
 import { isRtlLocale } from '@/i18n/locales';
 import { createClient } from '@/lib/supabase/client';
-import { useTheme } from '@/components/providers/ThemeProvider';
 
 interface LoginScreenProps {
   onNavigateRegister?: () => void;
@@ -23,7 +22,6 @@ export function LoginScreen({
   const router = useRouter();
   const locale = useLocale();
   const isRtl = isRtlLocale(locale);
-  const { theme, setTheme } = useTheme();
 
   const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState('');
@@ -125,12 +123,12 @@ export function LoginScreen({
           </div>
         </div>
 
-        <div className="w-full md:w-1/2 flex flex-col justify-start pt-0 md:pt-4">
+        <div className="w-full md:w-1/2 flex flex-col justify-start pt-8 md:pt-16 lg:pt-20 md:mt-6 lg:mt-8">
           {step === 1 ? (
-            <form onSubmit={handleEmailNext} className="w-full space-y-4">
+            <form onSubmit={handleEmailNext} className="w-full space-y-4 md:space-y-5">
               <div>
                 <label htmlFor="email-input" className="sr-only">
-                  {isRtl ? 'البريد الإلكتروني أو الهاتف' : 'Email or phone'}
+                  {isRtl ? 'البريد الإلكتروني أو اسم المستخدم أو الهاتف' : 'Email, username, or phone'}
                 </label>
                 <input
                   id="email-input"
@@ -141,7 +139,7 @@ export function LoginScreen({
                     setEmail(e.target.value);
                     if (errorMessage) setErrorMessage(null);
                   }}
-                  placeholder={isRtl ? 'البريد الإلكتروني أو الهاتف' : 'Email or phone'}
+                  placeholder={isRtl ? 'البريد الإلكتروني أو اسم المستخدم أو الهاتف' : 'Email, username, or phone'}
                   className={`w-full h-[56px] px-4 text-[16px] text-[#1F1F1F] dark:text-[#E3E3E3] placeholder:text-[#444746] dark:placeholder:text-[#8E918F] bg-transparent rounded-[4px] border focus:outline-none transition-all box-border ${
                     errorMessage
                       ? 'border-[#B3261E] dark:border-[#F2B8B5] border-2'
@@ -157,7 +155,7 @@ export function LoginScreen({
                 </p>
               )}
 
-              <div className="pt-1">
+              <div className="pt-2">
                 <button
                   type="button"
                   className="text-sm font-medium text-[#0B57D0] dark:text-[#A8C7FA] hover:underline cursor-pointer p-0"
@@ -166,12 +164,12 @@ export function LoginScreen({
                 </button>
               </div>
 
-              <div className="mt-2">
+              <div className="mt-4">
                 <p className="text-sm text-[#444746] dark:text-[#C4C7C5] leading-normal">
                   <bdi>
                     {isRtl
-                      ? 'هل هذا ليس جهازك؟ استخدم وضع الضيف لتسجيل الدخول بشكل خاص.'
-                      : 'Not your computer? Use Guest mode to sign in privately.'}
+                      ? 'هل تستخدم جهازًا مشتركًا؟ حافظ على أمان حساب بوليتيا وسجّل الدخول فقط من خلال بياناتك الشخصية.'
+                      : 'Using a shared device? Keep your Politia account secure by signing in only with your own details.'}
                   </bdi>{' '}
                   <button
                     type="button"
@@ -179,14 +177,14 @@ export function LoginScreen({
                   >
                     <bdi>
                       {isRtl
-                        ? 'اعرف المزيد حول استخدام وضع الضيف'
-                        : 'Learn more about using Guest mode'}
+                        ? 'اعرف المزيد عن أمان حساب بوليتيا'
+                        : 'Learn more about Politia account security'}
                     </bdi>
                   </button>
                 </p>
               </div>
 
-              <div className="flex justify-between md:justify-end items-center gap-4 pt-3">
+              <div className="flex justify-between md:justify-end items-center gap-4 pt-4">
                 <button
                   type="button"
                   onClick={handleCreateAccount}
@@ -204,7 +202,7 @@ export function LoginScreen({
               </div>
             </form>
           ) : (
-            <form onSubmit={handlePasswordSubmit} className="w-full space-y-4">
+            <form onSubmit={handlePasswordSubmit} className="w-full space-y-4 md:space-y-5">
               <div className="flex items-center justify-between gap-3">
                 <button
                   type="button"
@@ -269,7 +267,7 @@ export function LoginScreen({
                 </button>
               </div>
 
-              <div className="flex justify-end pt-2">
+              <div className="flex justify-end pt-4">
                 <button
                   type="submit"
                   disabled={loading}
@@ -351,16 +349,6 @@ export function LoginScreen({
             <bdi>{isRtl ? 'البنود' : 'Terms'}</bdi>
           </Link>
 
-          <div className="flex items-center gap-1 border-l border-gray-300 dark:border-gray-700 pl-3">
-            <button
-              type="button"
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
-              title="Toggle theme"
-            >
-              {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-            </button>
-          </div>
         </div>
       </div>
     </div>
