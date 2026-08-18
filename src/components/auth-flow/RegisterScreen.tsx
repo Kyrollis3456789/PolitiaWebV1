@@ -574,21 +574,9 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
     >
       {/* Main Authentication Card */}
       <div className="relative z-20 w-full max-w-[1040px] bg-white/95 dark:bg-[#1B212D]/95 rounded-[28px] sm:rounded-[36px] p-6 sm:p-8 md:p-12 shadow-2xl border border-white/60 dark:border-slate-800/80 flex flex-col md:flex-row gap-8 md:gap-14 min-h-fit h-auto items-start transition-all duration-300 ease-in-out">
-        {/* Left Column: Logo, Dynamic Progress Indicator & Step Headers */}
+        {/* Left Column: Dynamic Progress Indicator & Step Headers */}
         <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start min-h-[420px]">
-          {/* Logo with high-contrast badge in dark mode */}
-          <div className="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800/90 p-2 shadow-sm border border-slate-200/60 dark:border-slate-700/80 flex items-center justify-center transition-all shrink-0">
-            <Image
-              src="/logo.png"
-              alt="Politia logo"
-              width={48}
-              height={48}
-              priority
-              className="object-contain w-full h-full"
-            />
-          </div>
-
-          <div className="mt-6 space-y-3 w-full">
+          <div className="space-y-3 w-full">
             {/* Integrated Step Progress Bar & Milestone Indicator */}
             {mainStepIndex <= 8 && (
               <div className="space-y-2.5 w-full">
