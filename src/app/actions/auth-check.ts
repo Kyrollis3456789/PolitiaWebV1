@@ -99,7 +99,12 @@ export async function checkUserAccountExists(identifier: string): Promise<Accoun
         }
       }
 
-      // Explicitly not found
+      // If email has standard format, allow proceeding to password entry for Supabase Auth to verify
+      const isValidEmailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
+      if (isValidEmailFormat) {
+        return { exists: true, resolvedEmail: trimmed };
+      }
+
       return { exists: false, error: 'notFound' };
     }
 
