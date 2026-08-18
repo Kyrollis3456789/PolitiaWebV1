@@ -5,18 +5,15 @@ import Image from 'next/image';
 import { useLocale } from 'next-intl';
 import { useRouter } from '@/i18n/routing';
 import { isRtlLocale } from '@/i18n/locales';
+import { createClient } from '@/lib/supabase/client';
 
-interface SplashScreenProps {
-  userEmail?: string | null;
-}
-
-export function SplashScreen({ userEmail }: SplashScreenProps) {
+export function SplashScreen() {
   const locale = useLocale();
   const router = useRouter();
   const isRtl = isRtlLocale(locale);
 
   const [isExiting, setIsExiting] = useState(false);
-  const targetPage = userEmail ? '/dashboard' : '/login';
+  const [targetPage, setTargetPage] = useState<string>('/login');
 
   const handleSkip = () => {
     setIsExiting(true);
@@ -26,6 +23,16 @@ export function SplashScreen({ userEmail }: SplashScreenProps) {
   };
 
   useEffect(() => {
+    // Client-side session check (identical to At Church index.html auth check)
+    try {
+      const supabase = createClient();
+      supabase.auth.getUser().then(({ data }) => {
+        if (data?.user) {
+          setTargetPage('/dashboard');
+        }
+      });
+    } catch (e) {}
+
     // Wait for 2.5 seconds to show the entrance animation and logo
     const exitTimer = setTimeout(() => {
       setIsExiting(true);

@@ -4,8 +4,18 @@ import { cookies } from 'next/headers';
 export async function createClient() {
   const cookieStore = await cookies();
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
+
+  if (!supabaseUrl || !supabaseKey) {
+    return {
+      auth: {
+        async getUser() {
+          return { data: { user: null }, error: null };
+        },
+      },
+    } as any;
+  }
 
   return createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
