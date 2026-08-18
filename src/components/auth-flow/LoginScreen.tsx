@@ -168,7 +168,7 @@ export function LoginScreen({
       {/* Main Authentication Card */}
       <div className="relative z-20 w-full max-w-[1040px] bg-white/95 dark:bg-[#1B212D]/95 rounded-[28px] sm:rounded-[36px] p-6 sm:p-8 md:p-12 shadow-2xl border border-white/60 dark:border-slate-800/80 flex flex-col md:flex-row gap-8 md:gap-14 min-h-fit h-auto items-start transition-all duration-300 ease-in-out">
         {/* Left Column */}
-        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start min-h-[420px]">
+        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start min-h-auto md:min-h-[320px]">
           <div className="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800/90 p-2 shadow-sm border border-slate-200/60 dark:border-slate-700/80 flex items-center justify-center transition-all">
             <Image
               src="/logo.png"
@@ -191,10 +191,10 @@ export function LoginScreen({
         </div>
 
         {/* Right Column: Interactive Forms */}
-        <div className="w-full md:w-1/2 flex flex-col justify-between min-h-[420px] overflow-hidden transition-all duration-300 ease-in-out">
+        <div className="w-full md:w-1/2 flex flex-col justify-between min-h-auto md:min-h-[320px] overflow-hidden transition-all duration-300 ease-in-out">
           {step === 1 ? (
-            <form onSubmit={handleEmailNext} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4 md:space-y-5">
-              <div className="space-y-4 md:space-y-5">
+            <form onSubmit={handleEmailNext} className="w-full flex-1 flex flex-col justify-between">
+              <div className="space-y-4">
                 <div className="relative">
                   <input
                     id="email-input"
@@ -241,21 +241,21 @@ export function LoginScreen({
                     <bdi>{errorMessage}</bdi>
                   </div>
                 )}
+
+                <div className="pt-1">
+                  <p className="text-sm text-[#444746] dark:text-[#C4C7C5] leading-normal">
+                    <bdi>{t('sharedDeviceNotice')}</bdi>{' '}
+                    <button
+                      type="button"
+                      className="font-medium text-[#0B57D0] dark:text-[#A8C7FA] hover:underline cursor-pointer inline p-0"
+                    >
+                      <bdi>{t('learnMoreSecurity')}</bdi>
+                    </button>
+                  </p>
+                </div>
               </div>
 
-              <div className="mt-4">
-                <p className="text-sm text-[#444746] dark:text-[#C4C7C5] leading-normal">
-                  <bdi>{t('sharedDeviceNotice')}</bdi>{' '}
-                  <button
-                    type="button"
-                    className="font-medium text-[#0B57D0] dark:text-[#A8C7FA] hover:underline cursor-pointer inline p-0"
-                  >
-                    <bdi>{t('learnMoreSecurity')}</bdi>
-                  </button>
-                </p>
-              </div>
-
-              <div className="flex justify-between md:justify-end items-center gap-4 pt-4">
+              <div className="flex justify-between md:justify-end items-center gap-4 pt-8 mt-auto">
                 {onNavigateRegister ? (
                   <button
                     type="button"
@@ -380,7 +380,7 @@ export function LoginScreen({
                 </div>
               </div>
 
-              <div className="flex justify-end pt-4">
+              <div className="flex justify-end pt-8 mt-auto">
                 <button
                   type="submit"
                   disabled={loading}
