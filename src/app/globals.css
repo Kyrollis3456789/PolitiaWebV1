@@ -235,3 +235,15 @@ html.dark {
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
+
+/* Color calendar-picker-indicator (date input icon) depending on theme */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  filter: invert(0.3); /* Subdued gray in light mode */
+  transition: filter 0.2s ease;
+}
+
+.dark input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.9); /* Near white in dark mode */
+}
