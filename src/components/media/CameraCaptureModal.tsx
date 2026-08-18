@@ -48,15 +48,17 @@ export function CameraCaptureModal({
     setCapturedImageUrl(null);
     setCapturedBlob(null);
 
-    try {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error(
-          isRtl
-            ? 'المتصفح لا يدعم الوصول للكاميرا بشكل مباشر.'
-            : 'Your browser does not support live camera access.'
-        );
-      }
+    if (typeof window !== 'undefined' && (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia)) {
+      setCameraState('error');
+      setErrorMessage(
+        isRtl
+          ? 'المتصفح لا يتيح الكاميرا المباشرة عبر هذا الاتصال (يلزم اتصال HTTPS آمن أو localhost). يمكنك استخدام خيار رفع ملف بدلاً من ذلك.'
+          : 'Live camera is unavailable on insecure HTTP connections (requires HTTPS or localhost). Please use file upload instead.'
+      );
+      return;
+    }
 
+    try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: mode,
@@ -80,7 +82,7 @@ export function CameraCaptureModal({
 
       await checkMultipleCameras();
     } catch (err: unknown) {
-      console.error('Camera access error:', err);
+      console.warn('Camera access notice:', err);
       setCameraState('error');
       const msg =
         err instanceof Error
