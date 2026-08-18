@@ -179,6 +179,36 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
         avatar_url: avatarUrl,
         avatar_skipped_at: photoGracePeriodUntil,
         landline_phone: landlineNumber,
+        // Contact & Social
+        primary_email: primaryEmail,
+        primary_phone: `${validPhones[0].countryCode}${validPhones[0].number}`,
+        facebook_url: payload.socials?.facebook?.url || null,
+        instagram_url: payload.socials?.instagram?.url || null,
+        linkedin_url: payload.socials?.linkedin?.url || null,
+        // Family Relations
+        marital_status: payload.maritalStatus || null,
+        guardian_name: payload.guardianName || null,
+        guardian_phone: payload.guardianPhone || null,
+        // Education & Work
+        education_stage: payload.educationStage || null,
+        faculty_or_school: payload.facultyOrSchool || null,
+        profession: payload.profession || null,
+        // Locations & Addresses
+        address_governorate: payload.governorate || null,
+        address_city: payload.city || null,
+        address_street: payload.streetAddress || null,
+        address_building: payload.buildingNumber || null,
+        address_floor: payload.floorNumber || null,
+        address_apartment: payload.apartmentNumber || null,
+        secondary_address: payload.secondaryAddress || null,
+        // Church Commitment
+        diocese: payload.diocese || null,
+        primary_church: payload.primaryChurch || null,
+        secondary_church: payload.secondaryChurch || null,
+        priest_name: payload.priestName || null,
+        // Additional Info
+        hobbies: payload.hobbies || [],
+        languages: payload.languages || [],
       });
     } catch (profileErr) {
       console.warn('Profile insertion note:', profileErr);

@@ -31,7 +31,7 @@ export async function checkEnglishNameCollision(name: string): Promise<boolean> 
     const { data, error } = await supabase
       .from('profiles')
       .select('id')
-      .ilike('english_full_name', trimmed)
+      .ilike('full_name_en', trimmed)
       .limit(1);
 
     if (error) {
@@ -60,7 +60,26 @@ export async function checkUserAccountExists(identifier: string): Promise<Accoun
 
     // 1. Check if identifier is an email
     if (trimmed.includes('@')) {
-      // 1.1 Check user_emails table
+      // 1.1 Check profiles table first
+      try {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('id, primary_email, full_name_en, full_name_ar')
+          .ilike('primary_email', trimmed)
+          .limit(1);
+
+        if (profileData && profileData.length > 0) {
+          return {
+            exists: true,
+            resolvedEmail: profileData[0].primary_email || trimmed,
+            displayName: profileData[0].full_name_en || profileData[0].full_name_ar || undefined,
+          };
+        }
+      } catch (e) {
+        console.warn('profiles primary_email lookup warning:', e);
+      }
+
+      // 1.2 Check user_emails table
       try {
         const { data: emailData, error: emailError } = await supabase
           .from('user_emails')
@@ -78,7 +97,7 @@ export async function checkUserAccountExists(identifier: string): Promise<Accoun
         console.warn('user_emails lookup warning:', e);
       }
 
-      // 1.2 Check auth.admin users if admin client is available
+      // 1.3 Check auth.admin users if admin client is available
       if (admin) {
         try {
           const { data: authUsers } = await admin.auth.admin.listUsers();
@@ -113,6 +132,26 @@ export async function checkUserAccountExists(identifier: string): Promise<Accoun
     const isPhoneCandidate = /^\+?\d{6,15}$/.test(cleanPhone);
 
     if (isPhoneCandidate) {
+      // 2.0 Check profiles table first by primary_phone
+      try {
+        const { data: profilePhoneData } = await supabase
+          .from('profiles')
+          .select('id, primary_email, primary_phone, full_name_en, full_name_ar')
+          .eq('primary_phone', cleanPhone)
+          .limit(1);
+
+        if (profilePhoneData && profilePhoneData.length > 0) {
+          return {
+            exists: true,
+            resolvedEmail: profilePhoneData[0].primary_email || `${cleanPhone}@politia.internal`,
+            displayName:
+              profilePhoneData[0].full_name_en || profilePhoneData[0].full_name_ar || undefined,
+          };
+        }
+      } catch (e) {
+        console.warn('profiles primary_phone lookup warning:', e);
+      }
+
       // 2.1 Check user_phones table
       try {
         const { data: phoneData } = await supabase
@@ -143,24 +182,16 @@ export async function checkUserAccountExists(identifier: string): Promise<Accoun
       try {
         const { data: nationalIdData } = await supabase
           .from('profiles')
-          .select('id, english_full_name, arabic_full_name')
+          .select('id, primary_email, full_name_en, full_name_ar')
           .eq('national_id', cleanPhone)
           .limit(1);
 
         if (nationalIdData && nationalIdData.length > 0) {
-          const userId = nationalIdData[0].id;
-          const { data: userEmailData } = await supabase
-            .from('user_emails')
-            .select('email')
-            .eq('user_id', userId)
-            .order('is_primary', { ascending: false })
-            .limit(1);
-
           return {
             exists: true,
-            resolvedEmail: userEmailData?.[0]?.email || `${cleanPhone}@politia.internal`,
+            resolvedEmail: nationalIdData[0].primary_email || `${cleanPhone}@politia.internal`,
             displayName:
-              nationalIdData[0].english_full_name || nationalIdData[0].arabic_full_name,
+              nationalIdData[0].full_name_en || nationalIdData[0].full_name_ar,
           };
         }
       } catch (e) {
@@ -195,23 +226,15 @@ export async function checkUserAccountExists(identifier: string): Promise<Accoun
     try {
       const { data: nameData } = await supabase
         .from('profiles')
-        .select('id, english_full_name, arabic_full_name')
-        .or(`english_full_name.ilike.${trimmed},arabic_full_name.ilike.${trimmed}`)
+        .select('id, primary_email, full_name_en, full_name_ar')
+        .or(`full_name_en.ilike.${trimmed},full_name_ar.ilike.${trimmed}`)
         .limit(1);
 
       if (nameData && nameData.length > 0) {
-        const userId = nameData[0].id;
-        const { data: userEmailData } = await supabase
-          .from('user_emails')
-          .select('email')
-          .eq('user_id', userId)
-          .order('is_primary', { ascending: false })
-          .limit(1);
-
         return {
           exists: true,
-          resolvedEmail: userEmailData?.[0]?.email || trimmed,
-          displayName: nameData[0].english_full_name || nameData[0].arabic_full_name,
+          resolvedEmail: nameData[0].primary_email || trimmed,
+          displayName: nameData[0].full_name_en || nameData[0].full_name_ar,
         };
       }
     } catch (e) {
