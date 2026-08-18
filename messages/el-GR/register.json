@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "Δημιουργία λογαριασμού Politia",
+  "enterNameSubtitle": "Εισαγάγετε το όνομά σας",
+  "fullNameLabel": "Πλήρες όνομα (στα Αγγλικά)",
+  "enterFullNameError": "Εισαγάγετε το πλήρες όνομά σας",
+  "fourNamesRequiredError": "Εισαγάγετε το πλήρες όνομά σας στα Αγγλικά (4 ονόματα)",
+  "enterEnglishOnlyError": "Επιτρέπονται μόνο αγγλικοί χαρακτήρες",
+  "next": "Επόμενο",
+  "back": "Πίσω",
+  "help": "Βοήθεια",
+  "privacy": "Απόρρητο",
+  "terms": "Όροι",
+  "searchLanguages": "Αναζήτηση γλωσσών...",
+  "noLanguagesFound": "Δεν βρέθηκαν γλώσσες"
+}

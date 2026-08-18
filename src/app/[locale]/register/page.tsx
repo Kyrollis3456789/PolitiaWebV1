@@ -1,5 +1,10 @@
 import { setRequestLocale } from 'next-intl/server';
 import { RegisterView } from '@/components/auth-flow/RegisterView';
+import { routing } from '@/i18n/routing';
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export default async function RegisterPage({
   params,
@@ -15,3 +20,4 @@ export default async function RegisterPage({
     </main>
   );
 }
+

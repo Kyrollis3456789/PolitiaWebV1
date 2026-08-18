@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *, .dark, .dark *));
+
 @theme {
   --color-brand-bg: var(--color-bg);
   --color-brand-card: var(--color-card);
@@ -30,9 +32,22 @@
   --border: #DBE5F5;
   --primary: var(--color-button);
   --primary-foreground: #FFFFFF;
+
+  /* Auth Theme Specific Tokens (Light Mode) */
+  --auth-page-bg: #F0F4F9;
+  --auth-card-bg: #FFFFFF;
+  --auth-card-border: rgba(228, 228, 231, 0.8);
+  --auth-input-bg: #FFFFFF;
+  --auth-input-border: #747775;
+  --auth-primary: #0B57D0;
+  --auth-primary-hover: #0842A0;
+  --auth-text-primary: #1F1F1F;
+  --auth-text-muted: #444746;
+  --auth-error: #B3261E;
 }
 
-.dark {
+.dark,
+[data-theme="dark"] {
   /* Dark Mode Variables */
   --color-bg: #070F22;
   --color-card: #101E3D;
@@ -50,10 +65,173 @@
   --border: #1E2D4A;
   --primary: var(--color-button);
   --primary-foreground: #FFFFFF;
+
+  /* Auth Theme Specific Tokens (Dark Mode) */
+  --auth-page-bg: #0E121A;
+  --auth-card-bg: #1B212D;
+  --auth-card-border: rgba(39, 39, 42, 0.8);
+  --auth-input-bg: #1B212D;
+  --auth-input-border: #8E918F;
+  --auth-primary: #A8C7FA;
+  --auth-primary-hover: #82B1FF;
+  --auth-text-primary: #E3E3E3;
+  --auth-text-muted: #8E918F;
+  --auth-error: #F2B8B5;
 }
 
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Lateral Google-Style Step Transitions */
+@keyframes slideInFromRight {
+  0% {
+    transform: translateX(36px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  0% {
+    transform: translateX(-36px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-forward {
+  animation: slideInFromRight 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-backward {
+  animation: slideInFromLeft 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 50px rgba(59, 130, 246, 0.6);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 3s infinite ease-in-out;
+}
+
+/* Unified Background from At Church with full auto-theme support */
+:root {
+  --splash-overlay-1: rgba(248, 250, 252, 0.85);
+  --splash-overlay-2: rgba(248, 250, 252, 0.95);
+}
+
+.dark,
+[data-theme="dark"],
+html.dark {
+  --splash-overlay-1: rgba(9, 13, 22, 0.9);
+  --splash-overlay-2: rgba(9, 13, 22, 0.97);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light):not([data-theme="light"]) {
+    --splash-overlay-1: rgba(9, 13, 22, 0.9);
+    --splash-overlay-2: rgba(9, 13, 22, 0.97);
+  }
+}
+
+.shared-bg {
+  background-image: linear-gradient(var(--splash-overlay-1), var(--splash-overlay-2)), url('/splash-bg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  min-height: 100vh;
+  transition: background-image 0.3s ease, background 0.3s ease;
+}
+
+/* --- At Church Splash Screen Theme Variables & Animations --- */
+:root {
+  --theme-color-hex: #b45309;
+  --theme-color-rgb: 180, 83, 9;
+}
+
+@keyframes logoEntrance {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes glowPulse {
+  0% {
+    filter: drop-shadow(0 0 0 rgba(var(--theme-color-rgb), 0.4));
+  }
+  70% {
+    filter: drop-shadow(0 0 30px rgba(var(--theme-color-rgb), 0.7));
+  }
+  100% {
+    filter: drop-shadow(0 0 0 rgba(var(--theme-color-rgb), 0));
+  }
+}
+
+@keyframes screenExit {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.1);
+    visibility: hidden;
+  }
+}
+
+.logo-container {
+  animation: logoEntrance 1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+.logo-icon {
+  animation: glowPulse 2.5s infinite;
+}
+
+.exit-animation {
+  animation: screenExit 0.8s cubic-bezier(0.8, 0, 0.2, 1) forwards !important;
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(var(--theme-color-rgb), 0.2);
+  border-top-color: var(--theme-color-hex);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }

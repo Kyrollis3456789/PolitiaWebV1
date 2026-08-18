@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "Een Politia-account maken",
+  "enterNameSubtitle": "Voer je naam in",
+  "fullNameLabel": "Volledige naam (in het Engels)",
+  "enterFullNameError": "Voer je volledige naam in",
+  "fourNamesRequiredError": "Voer je volledige vierdelige naam in het Engels in (4 namen)",
+  "enterEnglishOnlyError": "Alleen Engelse letters toegestaan",
+  "next": "Volgende",
+  "back": "Terug",
+  "help": "Hulp",
+  "privacy": "Privacy",
+  "terms": "Voorwaarden",
+  "searchLanguages": "Talen zoeken...",
+  "noLanguagesFound": "Geen talen gevonden"
+}

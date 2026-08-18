@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "إنشاء حساب على بوليتيا",
+  "enterNameSubtitle": "أدخل اسمك",
+  "fullNameLabel": "الاسم بالكامل (بالإنجليزية)",
+  "enterFullNameError": "أدخل اسمك بالكامل",
+  "fourNamesRequiredError": "أدخل الاسم الرباعي باللغة الإنجليزية (4 أسماء)",
+  "enterEnglishOnlyError": "يُسمح فقط بالحروف الإنجليزية",
+  "next": "التالي",
+  "back": "رجوع",
+  "help": "المساعدة",
+  "privacy": "الخصوصية",
+  "terms": "البنود",
+  "searchLanguages": "بحث في اللغات...",
+  "noLanguagesFound": "لم يتم العثور على لغات"
+}

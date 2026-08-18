@@ -4,43 +4,77 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Loader2, ChevronDown, UserCircle2 } from 'lucide-react';
 import { useRouter, Link } from '@/i18n/routing';
-import { useLocale } from 'next-intl';
-import { isRtlLocale } from '@/i18n/locales';
+import { useLocale, useTranslations } from 'next-intl';
+import { isRtlLocale, SUPPORTED_LOCALES, getLocaleDisplayName } from '@/i18n/locales';
 import { createClient } from '@/lib/supabase/client';
+import { checkUserAccountExists } from '@/app/actions/auth-check';
 
 interface LoginScreenProps {
   onNavigateRegister?: () => void;
-  onNavigateVerify?: () => void;
+  onNavigateForgot?: () => void;
   onSubmit?: (e: React.FormEvent) => void;
   isStandaloneMobile?: boolean;
 }
 
 export function LoginScreen({
   onNavigateRegister,
+  onNavigateForgot,
   onSubmit,
 }: LoginScreenProps) {
   const router = useRouter();
   const locale = useLocale();
   const isRtl = isRtlLocale(locale);
+  const t = useTranslations('signin');
 
   const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState('');
+  const [resolvedEmail, setResolvedEmail] = useState('');
+  const [displayName, setDisplayName] = useState<string | null>(null);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLangOpen, setIsLangOpen] = useState(false);
 
-  const handleEmailNext = (e: React.FormEvent) => {
+  const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isPasswordFocused, setIsPasswordFocused] = useState(false);
+
+  const isEmailFloating = isEmailFocused || email.length > 0 || Boolean(errorMessage);
+  const isPasswordFloating = isPasswordFocused || password.length > 0 || Boolean(errorMessage);
+
+  const handleEmailNext = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (!email.trim()) {
-      setErrorMessage(isRtl ? 'أدخل بريدًا إلكترونيًا أو رقم هاتف' : 'Enter an email or phone number');
+    const trimmed = email.trim();
+    if (!trimmed) {
+      setErrorMessage(t('emptyIdentifierError'));
       return;
     }
 
-    setStep(2);
+    setLoading(true);
+
+    try {
+      const result = await checkUserAccountExists(trimmed);
+
+      if (!result.exists) {
+        setErrorMessage(t('accountNotFoundError'));
+        return;
+      }
+
+      if (result.resolvedEmail) {
+        setResolvedEmail(result.resolvedEmail);
+      }
+      if (result.displayName) {
+        setDisplayName(result.displayName);
+      }
+
+      setStep(2);
+    } catch {
+      setErrorMessage(t('genericError'));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePasswordSubmit = async (e: React.FormEvent) => {
@@ -56,17 +90,14 @@ export function LoginScreen({
 
     try {
       const supabase = createClient();
+      const targetEmail = (resolvedEmail || email).trim();
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
+        email: targetEmail,
         password,
       });
 
       if (error) {
-        setErrorMessage(
-          isRtl
-            ? 'كلمة المرور غير صحيحة. حاول مرة أخرى أو اختر "نسيت كلمة المرور؟".'
-            : 'Wrong password. Try again or click Forgot password to reset it.'
-        );
+        setErrorMessage(t('wrongPasswordError'));
         return;
       }
 
@@ -75,18 +106,27 @@ export function LoginScreen({
         router.refresh();
       }
     } catch {
-      setErrorMessage(
-        isRtl
-          ? 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.'
-          : 'An unexpected error occurred. Please try again.'
-      );
+      setErrorMessage(t('genericError'));
     } finally {
       setLoading(false);
     }
   };
 
+  const [langSearch, setLangSearch] = useState('');
+
+  const filteredLocales = langSearch.trim()
+    ? SUPPORTED_LOCALES.filter((loc) => {
+        const q = langSearch.toLowerCase();
+        return (
+          loc.toLowerCase().includes(q) ||
+          getLocaleDisplayName(loc).toLowerCase().includes(q)
+        );
+      })
+    : SUPPORTED_LOCALES;
+
   const handleLanguageChange = (newLocale: string) => {
     setIsLangOpen(false);
+    setLangSearch('');
     router.replace('/login', { locale: newLocale });
   };
 
@@ -95,176 +135,255 @@ export function LoginScreen({
     else router.push('/register');
   };
 
+  const handleForgotEmail = () => {
+    if (onNavigateForgot) {
+      onNavigateForgot();
+      return;
+    }
+    router.push('/forgot');
+  };
+
+  const handleForgotPassword = () => {
+    if (onNavigateForgot) {
+      onNavigateForgot();
+      return;
+    }
+    const target = (resolvedEmail || email).trim();
+    if (target) {
+      router.push(`/forgot?email=${encodeURIComponent(target)}`);
+    } else {
+      router.push('/forgot');
+    }
+  };
+
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
-      className="w-full min-h-screen bg-[#F0F4F9] dark:bg-[#0E121A] flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 transition-colors duration-300"
+      className="relative w-full min-h-screen shared-bg flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 transition-colors duration-300 overflow-x-hidden"
     >
-      <div className="w-full max-w-[1040px] bg-white dark:bg-[#1B212D] rounded-[28px] sm:rounded-[36px] p-6 sm:p-8 md:p-12 shadow-[0_1px_3px_0_rgba(60,64,67,0.08),0_4px_8px_3px_rgba(60,64,67,0.04)] dark:shadow-none border border-transparent dark:border-slate-800/80 flex flex-col md:flex-row gap-8 md:gap-14 min-h-[440px] items-start">
-        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start">
-          <div className="w-14 h-14 flex items-center justify-start">
+      {/* Main Authentication Card */}
+      <div className="relative z-20 w-full max-w-[1040px] bg-white/95 dark:bg-[#1B212D]/95 rounded-[28px] sm:rounded-[36px] p-6 sm:p-8 md:p-12 shadow-2xl border border-white/60 dark:border-slate-800/80 flex flex-col md:flex-row gap-8 md:gap-14 min-h-fit h-auto items-start transition-all duration-300 ease-in-out">
+        {/* Left Column */}
+        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start min-h-[420px]">
+          <div className="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800/90 p-2 shadow-sm border border-slate-200/60 dark:border-slate-700/80 flex items-center justify-center transition-all">
             <Image
               src="/logo.png"
               alt="Politia logo"
-              width={56}
-              height={56}
+              width={48}
+              height={48}
               priority
-              className="object-contain w-14 h-14"
+              className="object-contain w-full h-full"
             />
           </div>
 
           <div className="mt-6 space-y-2">
             <h1 className="text-[34px] sm:text-[38px] font-normal text-[#1F1F1F] dark:text-[#E3E3E3] tracking-tight leading-[1.15]">
-              <bdi>{isRtl ? 'تسجيل الدخول' : 'Sign in'}</bdi>
+              <bdi>{t('title')}</bdi>
             </h1>
             <p className="text-[16px] text-[#1F1F1F] dark:text-[#C4C7C5] font-normal leading-relaxed">
-              <bdi>{isRtl ? 'استخدم حسابك على بوليتيا' : 'Use your Politia account to continue'}</bdi>
+              <bdi>{t('subtitle')}</bdi>
             </p>
           </div>
         </div>
 
-        <div className="w-full md:w-1/2 flex flex-col justify-start pt-8 md:pt-16 lg:pt-20 md:mt-6 lg:mt-8">
+        {/* Right Column: Interactive Forms */}
+        <div className="w-full md:w-1/2 flex flex-col justify-between min-h-[420px] overflow-hidden transition-all duration-300 ease-in-out">
           {step === 1 ? (
-            <form onSubmit={handleEmailNext} className="w-full space-y-4 md:space-y-5">
-              <div>
-                <label htmlFor="email-input" className="sr-only">
-                  {isRtl ? 'البريد الإلكتروني أو اسم المستخدم أو الهاتف' : 'Email, username, or phone'}
-                </label>
-                <input
-                  id="email-input"
-                  type="text"
-                  autoFocus
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (errorMessage) setErrorMessage(null);
-                  }}
-                  placeholder={isRtl ? 'البريد الإلكتروني أو اسم المستخدم أو الهاتف' : 'Email, username, or phone'}
-                  className={`w-full h-[56px] px-4 text-[16px] text-[#1F1F1F] dark:text-[#E3E3E3] placeholder:text-[#444746] dark:placeholder:text-[#8E918F] bg-transparent rounded-[4px] border focus:outline-none transition-all box-border ${
-                    errorMessage
-                      ? 'border-[#B3261E] dark:border-[#F2B8B5] border-2'
-                      : 'border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA]'
-                  }`}
-                />
-              </div>
+            <form onSubmit={handleEmailNext} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4 md:space-y-5">
+              <div className="space-y-4 md:space-y-5">
+                <div className="relative">
+                  <input
+                    id="email-input"
+                    type="text"
+                    autoFocus
+                    value={email}
+                    onFocus={() => setIsEmailFocused(true)}
+                    onBlur={() => setIsEmailFocused(false)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (errorMessage) setErrorMessage(null);
+                    }}
+                    className={`w-full h-[56px] px-4 text-[16px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
+                      errorMessage
+                        ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                        : isEmailFocused
+                        ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                        : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                    }`}
+                  />
+                  <label
+                    htmlFor="email-input"
+                    className={`absolute pointer-events-none transition-all duration-150 start-3 ${
+                      isEmailFloating
+                        ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
+                        : 'top-4 text-[16px]'
+                    } ${
+                      errorMessage
+                        ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                        : isEmailFocused
+                        ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                        : 'text-[#444746] dark:text-[#8E918F]'
+                    }`}
+                  >
+                    <bdi>{t('identifierLabel')}</bdi>
+                  </label>
+                </div>
 
-              {errorMessage && (
-                <p className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5]">
-                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-current text-[10px] font-bold">!</span>
-                  <bdi>{errorMessage}</bdi>
-                </p>
-              )}
+                {errorMessage && (
+                  <div className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5] mt-1.5">
+                    <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#B3261E] dark:bg-[#F2B8B5] text-white dark:text-[#601410] text-[11px] font-bold select-none leading-none pb-[1px]">
+                      !
+                    </span>
+                    <bdi>{errorMessage}</bdi>
+                  </div>
+                )}
+              </div>
 
               <div className="pt-2">
                 <button
                   type="button"
-                  className="text-sm font-medium text-[#0B57D0] dark:text-[#A8C7FA] hover:underline cursor-pointer p-0"
+                  onClick={handleForgotEmail}
+                  className="text-sm font-medium text-[#0B57D0] dark:text-[#A8C7FA] hover:underline cursor-pointer p-0 bg-transparent border-0"
                 >
-                  <bdi>{isRtl ? 'هل نسيت البريد الإلكتروني؟' : 'Forgot email?'}</bdi>
+                  <bdi>{t('forgotUsername')}</bdi>
                 </button>
               </div>
 
               <div className="mt-4">
                 <p className="text-sm text-[#444746] dark:text-[#C4C7C5] leading-normal">
-                  <bdi>
-                    {isRtl
-                      ? 'هل تستخدم جهازًا مشتركًا؟ حافظ على أمان حساب بوليتيا وسجّل الدخول فقط من خلال بياناتك الشخصية.'
-                      : 'Using a shared device? Keep your Politia account secure by signing in only with your own details.'}
-                  </bdi>{' '}
+                  <bdi>{t('sharedDeviceNotice')}</bdi>{' '}
                   <button
                     type="button"
                     className="font-medium text-[#0B57D0] dark:text-[#A8C7FA] hover:underline cursor-pointer inline p-0"
                   >
-                    <bdi>
-                      {isRtl
-                        ? 'اعرف المزيد عن أمان حساب بوليتيا'
-                        : 'Learn more about Politia account security'}
-                    </bdi>
+                    <bdi>{t('learnMoreSecurity')}</bdi>
                   </button>
                 </p>
               </div>
 
               <div className="flex justify-between md:justify-end items-center gap-4 pt-4">
-                <button
-                  type="button"
-                  onClick={handleCreateAccount}
-                  className="text-sm font-medium text-[#0B57D0] dark:text-[#A8C7FA] hover:bg-[#F2F6FC] dark:hover:bg-[#1E2738] px-4 py-2 rounded-full transition-colors cursor-pointer"
-                >
-                  <bdi>{isRtl ? 'إنشاء حساب' : 'Create account'}</bdi>
-                </button>
+                {onNavigateRegister ? (
+                  <button
+                    type="button"
+                    onClick={handleCreateAccount}
+                    className="text-sm font-medium text-[#0B57D0] dark:text-[#A8C7FA] hover:bg-[#F2F6FC] dark:hover:bg-[#1E2738] px-4 py-2 rounded-full transition-colors cursor-pointer"
+                  >
+                    <bdi>{t('createAccount')}</bdi>
+                  </button>
+                ) : (
+                  <Link
+                    href="/register"
+                    className="text-sm font-medium text-[#0B57D0] dark:text-[#A8C7FA] hover:bg-[#F2F6FC] dark:hover:bg-[#1E2738] px-4 py-2 rounded-full transition-colors cursor-pointer inline-flex items-center justify-center"
+                  >
+                    <bdi>{t('createAccount')}</bdi>
+                  </Link>
+                )}
 
                 <button
                   type="submit"
-                  className="bg-[#0B57D0] hover:bg-[#0842A0] active:bg-[#06337E] text-white text-sm font-medium px-6 py-2.5 rounded-full transition-colors cursor-pointer"
+                  disabled={loading}
+                  className="bg-[#0B57D0] hover:bg-[#0842A0] active:bg-[#06337E] text-white text-sm font-medium px-6 py-2.5 rounded-full transition-colors cursor-pointer disabled:opacity-60 flex items-center justify-center gap-2 min-w-[80px]"
                 >
-                  <bdi>{isRtl ? 'التالي' : 'Next'}</bdi>
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span><bdi>{t('next')}</bdi></span>
+                    </>
+                  ) : (
+                    <bdi>{t('next')}</bdi>
+                  )}
                 </button>
               </div>
             </form>
           ) : (
-            <form onSubmit={handlePasswordSubmit} className="w-full space-y-4 md:space-y-5">
-              <div className="flex items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setStep(1);
-                    setErrorMessage(null);
-                  }}
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#747775] dark:border-slate-700 hover:bg-[#F2F6FC] dark:hover:bg-slate-800 transition-colors text-sm text-[#1F1F1F] dark:text-[#E3E3E3] cursor-pointer"
-                >
-                  <UserCircle2 className="w-4 h-4 text-[#0B57D0] dark:text-[#A8C7FA]" />
-                  <span className="font-mono text-xs sm:text-sm truncate max-w-[220px]">{email}</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
-                </button>
-              </div>
+            <form onSubmit={handlePasswordSubmit} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4 md:space-y-5">
+              <div className="space-y-4 md:space-y-5">
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setStep(1);
+                      setErrorMessage(null);
+                    }}
+                    className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#747775] dark:border-slate-700 hover:bg-[#F2F6FC] dark:hover:bg-slate-800 transition-colors text-sm text-[#1F1F1F] dark:text-[#E3E3E3] cursor-pointer"
+                  >
+                    <UserCircle2 className="w-4 h-4 text-[#0B57D0] dark:text-[#A8C7FA]" />
+                    <span className="font-mono text-xs sm:text-sm truncate max-w-[240px]">
+                      {displayName ? `${displayName} (${email})` : email}
+                    </span>
+                    <ChevronDown className="w-3.5 h-3.5 text-gray-500" />
+                  </button>
+                </div>
 
-              <div>
-                <label htmlFor="password-input" className="sr-only">
-                  {isRtl ? 'كلمة المرور' : 'Password'}
-                </label>
-                <input
-                  id="password-input"
-                  type={showPassword ? 'text' : 'password'}
-                  autoFocus
-                  disabled={loading}
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                    if (errorMessage) setErrorMessage(null);
-                  }}
-                  placeholder={isRtl ? 'أدخل كلمة المرور' : 'Enter your password'}
-                  className={`w-full h-[56px] px-4 text-[16px] text-[#1F1F1F] dark:text-[#E3E3E3] placeholder:text-[#444746] dark:placeholder:text-[#8E918F] bg-transparent rounded-[4px] border focus:outline-none transition-all disabled:opacity-50 box-border ${
-                    errorMessage
-                      ? 'border-[#B3261E] dark:border-[#F2B8B5] border-2'
-                      : 'border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA]'
-                  }`}
-                />
-              </div>
+                <div>
+                  <div className="relative">
+                    <input
+                      id="password-input"
+                      type={showPassword ? 'text' : 'password'}
+                      autoFocus
+                      disabled={loading}
+                      value={password}
+                      onFocus={() => setIsPasswordFocused(true)}
+                      onBlur={() => setIsPasswordFocused(false)}
+                      onChange={(e) => {
+                        setPassword(e.target.value);
+                        if (errorMessage) setErrorMessage(null);
+                      }}
+                      className={`w-full h-[56px] px-4 text-[16px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all disabled:opacity-50 box-border ${
+                        errorMessage
+                          ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                          : isPasswordFocused
+                          ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                          : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                      }`}
+                    />
+                    <label
+                      htmlFor="password-input"
+                      className={`absolute pointer-events-none transition-all duration-150 start-3 ${
+                        isPasswordFloating
+                          ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
+                          : 'top-4 text-[16px]'
+                      } ${
+                        errorMessage
+                          ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                          : isPasswordFocused
+                          ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                          : 'text-[#444746] dark:text-[#8E918F]'
+                      }`}
+                    >
+                      <bdi>{t('passwordLabel')}</bdi>
+                    </label>
+                  </div>
 
-              {errorMessage && (
-                <p className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5]">
-                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full border border-current text-[10px] font-bold">!</span>
-                  <bdi>{errorMessage}</bdi>
-                </p>
-              )}
+                  {errorMessage && (
+                    <div className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5] mt-1.5">
+                      <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#B3261E] dark:bg-[#F2B8B5] text-white dark:text-[#601410] text-[11px] font-bold select-none leading-none pb-[1px]">
+                        !
+                      </span>
+                      <bdi>{errorMessage}</bdi>
+                    </div>
+                  )}
+                </div>
 
-              <div className="flex items-center justify-between gap-4 text-sm">
-                <label className="flex items-center gap-2 cursor-pointer text-[#444746] dark:text-[#C4C7C5]">
-                  <input
-                    type="checkbox"
-                    checked={showPassword}
-                    onChange={(e) => setShowPassword(e.target.checked)}
-                    className="w-4 h-4 rounded-[2px] border-[#747775] text-[#0B57D0] focus:ring-[#0B57D0] cursor-pointer"
-                  />
-                  <span><bdi>{isRtl ? 'إظهار كلمة المرور' : 'Show password'}</bdi></span>
-                </label>
+                <div className="flex items-center justify-between gap-4 text-sm">
+                  <label className="flex items-center gap-2 cursor-pointer text-[#444746] dark:text-[#C4C7C5]">
+                    <input
+                      type="checkbox"
+                      checked={showPassword}
+                      onChange={(e) => setShowPassword(e.target.checked)}
+                      className="w-4 h-4 rounded-[2px] border-[#747775] text-[#0B57D0] focus:ring-[#0B57D0] cursor-pointer"
+                    />
+                    <span><bdi>{t('showPassword')}</bdi></span>
+                  </label>
 
-                <button
-                  type="button"
-                  className="text-sm font-medium text-[#0B57D0] dark:text-[#A8C7FA] hover:underline cursor-pointer p-0"
-                >
-                  <bdi>{isRtl ? 'نسيت كلمة المرور؟' : 'Forgot password?'}</bdi>
-                </button>
+                  <button
+                    type="button"
+                    onClick={handleForgotPassword}
+                    className="text-sm font-medium text-[#0B57D0] dark:text-[#A8C7FA] hover:underline cursor-pointer p-0 bg-transparent border-0"
+                  >
+                    <bdi>{t('forgotPassword')}</bdi>
+                  </button>
+                </div>
               </div>
 
               <div className="flex justify-end pt-4">
@@ -276,10 +395,10 @@ export function LoginScreen({
                   {loading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span><bdi>{isRtl ? 'جارٍ تسجيل الدخول...' : 'Signing in...'}</bdi></span>
+                      <span><bdi>{t('signingIn')}</bdi></span>
                     </>
                   ) : (
-                    <span><bdi>{isRtl ? 'التالي' : 'Next'}</bdi></span>
+                    <span><bdi>{t('next')}</bdi></span>
                   )}
                 </button>
               </div>
@@ -288,51 +407,57 @@ export function LoginScreen({
         </div>
       </div>
 
-      <div className="w-full max-w-[1040px] flex flex-col sm:flex-row items-center justify-between text-xs text-[#444746] dark:text-[#8E918F] px-4 sm:px-6 mt-4 gap-3">
+      <div className="relative z-20 w-full max-w-[1040px] flex flex-col sm:flex-row items-center justify-between text-xs text-[#444746] dark:text-[#8E918F] px-4 sm:px-6 mt-4 gap-3">
         <div className="relative">
           <button
             type="button"
-            onClick={() => setIsLangOpen(!isLangOpen)}
-            className="flex items-center gap-2 py-1.5 px-2 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer text-xs"
+            onClick={() => {
+              setIsLangOpen(!isLangOpen);
+              setLangSearch('');
+            }}
+            className="flex items-center gap-2 py-1.5 px-2.5 rounded-full hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer text-xs"
           >
-            <span>
-              {locale === 'en-US'
-                ? 'English (United States)'
-                : locale === 'ar-EG'
-                ? 'العربية (مصر)'
-                : locale === 'ar-SA'
-                ? 'العربية (السعودية)'
-                : locale}
-            </span>
+            <span>{getLocaleDisplayName(locale)}</span>
             <ChevronDown className="w-3.5 h-3.5 text-[#444746] dark:text-[#8E918F]" />
           </button>
 
           {isLangOpen && (
             <>
               <div className="fixed inset-0 z-40" onClick={() => setIsLangOpen(false)} />
-              <div className="absolute bottom-8 left-0 w-60 max-h-64 overflow-y-auto bg-white dark:bg-[#1B212D] border border-gray-200 dark:border-slate-700 rounded-xl shadow-lg p-1.5 z-50 text-xs">
-                {['en-US', 'ar-EG', 'ar-SA', 'fr-FR', 'es-ES', 'de-DE'].map((loc) => (
-                  <button
-                    key={loc}
-                    type="button"
-                    onClick={() => handleLanguageChange(loc)}
-                    className={`w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors cursor-pointer ${
-                      locale === loc ? 'font-bold text-[#0B57D0]' : ''
-                    }`}
-                  >
-                    {loc === 'en-US'
-                      ? 'English (United States)'
-                      : loc === 'ar-EG'
-                      ? 'العربية (مصر)'
-                      : loc === 'ar-SA'
-                      ? 'العربية (السعودية)'
-                      : loc === 'fr-FR'
-                      ? 'Français'
-                      : loc === 'es-ES'
-                      ? 'Español'
-                      : 'Deutsch'}
-                  </button>
-                ))}
+              <div className="absolute bottom-full mb-2 start-0 w-72 max-h-80 bg-white dark:bg-[#1B212D] border border-gray-200 dark:border-slate-700 rounded-xl shadow-xl p-2 z-50 text-xs flex flex-col">
+                <div className="pb-2 border-b border-gray-100 dark:border-slate-800">
+                  <input
+                    type="text"
+                    placeholder={t('searchLanguages')}
+                    value={langSearch}
+                    onChange={(e) => setLangSearch(e.target.value)}
+                    className="w-full px-2.5 py-1.5 bg-gray-50 dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-lg text-xs text-[#1F1F1F] dark:text-[#E3E3E3] placeholder-[#747775] dark:placeholder-[#8E918F] focus:outline-none focus:border-[#0B57D0] dark:focus:border-[#A8C7FA]"
+                    autoFocus
+                  />
+                </div>
+                <div className="overflow-y-auto flex-1 mt-1 space-y-0.5 max-h-60">
+                  {filteredLocales.length === 0 ? (
+                    <div className="p-3 text-center text-gray-400">
+                      {t('noLanguagesFound')}
+                    </div>
+                  ) : (
+                    filteredLocales.map((loc) => (
+                      <button
+                        key={loc}
+                        type="button"
+                        onClick={() => handleLanguageChange(loc)}
+                        className={`w-full text-start px-2.5 py-2 rounded-lg transition-colors cursor-pointer flex items-center justify-between gap-2 ${
+                          locale === loc
+                            ? 'bg-[#E8F0FE] dark:bg-[#1E293B] text-[#0B57D0] dark:text-[#A8C7FA] font-medium'
+                            : 'hover:bg-gray-100 dark:hover:bg-slate-800 text-[#1F1F1F] dark:text-[#E3E3E3]'
+                        }`}
+                      >
+                        <span className="truncate">{getLocaleDisplayName(loc)}</span>
+                        <span className="text-[10px] text-gray-400 font-mono shrink-0">{loc}</span>
+                      </button>
+                    ))
+                  )}
+                </div>
               </div>
             </>
           )}
@@ -340,15 +465,14 @@ export function LoginScreen({
 
         <div className="flex items-center gap-7 text-xs">
           <Link href="/help" className="hover:text-[#1F1F1F] dark:hover:text-white transition-colors">
-            <bdi>{isRtl ? 'المساعدة' : 'Help'}</bdi>
+            <bdi>{t('help')}</bdi>
           </Link>
           <Link href="/privacy" className="hover:text-[#1F1F1F] dark:hover:text-white transition-colors">
-            <bdi>{isRtl ? 'الخصوصية' : 'Privacy'}</bdi>
+            <bdi>{t('privacy')}</bdi>
           </Link>
           <Link href="/terms" className="hover:text-[#1F1F1F] dark:hover:text-white transition-colors">
-            <bdi>{isRtl ? 'البنود' : 'Terms'}</bdi>
+            <bdi>{t('terms')}</bdi>
           </Link>
-
         </div>
       </div>
     </div>

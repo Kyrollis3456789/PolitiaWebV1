@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "Politia Hesabı oluşturun",
+  "enterNameSubtitle": "Adınızı girin",
+  "fullNameLabel": "Ad Soyad (İngilizce)",
+  "enterFullNameError": "Tam adınızı girin",
+  "fourNamesRequiredError": "İngilizce olarak 4 kelimelik tam adınızı girin",
+  "enterEnglishOnlyError": "Yalnızca İngilizce harfler kullanılabilir",
+  "next": "İleri",
+  "back": "Geri",
+  "help": "Yardım",
+  "privacy": "Gizlilik",
+  "terms": "Şartlar",
+  "searchLanguages": "Dillerde ara...",
+  "noLanguagesFound": "Dil bulunamadı"
+}

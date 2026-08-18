@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "Создать аккаунт Politia",
+  "enterNameSubtitle": "Введите имя",
+  "fullNameLabel": "Полное имя (на английском)",
+  "enterFullNameError": "Введите полное имя",
+  "fourNamesRequiredError": "Введите полное имя из 4 частей на английском языке",
+  "enterEnglishOnlyError": "Разрешены только английские буквы",
+  "next": "Далее",
+  "back": "Назад",
+  "help": "Справка",
+  "privacy": "Конфиденциальность",
+  "terms": "Условия",
+  "searchLanguages": "Поиск языков...",
+  "noLanguagesFound": "Языки не найдены"
+}

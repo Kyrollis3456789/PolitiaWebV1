@@ -25,72 +25,52 @@ interface ThemeProviderProps {
   disableTransitionOnChange?: boolean;
 }
 
-export function ThemeProvider({
-  children,
-  defaultTheme = 'system',
-  storageKey = 'theme',
-}: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(defaultTheme);
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  const [theme, setThemeState] = useState<Theme>('system');
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
 
-  // Initialize theme from localStorage on client
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const stored = localStorage.getItem(storageKey) as Theme | null;
-    if (stored && (stored === 'light' || stored === 'dark' || stored === 'system')) {
-      setThemeState(stored);
-    }
-  }, [storageKey]);
-
-  // Apply theme to document element
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const root = document.documentElement;
-
-    const applyTheme = (currentTheme: Theme) => {
-      let resolved: 'light' | 'dark' = 'light';
-
-      if (currentTheme === 'system') {
-        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        resolved = systemPrefersDark ? 'dark' : 'light';
-      } else {
-        resolved = currentTheme;
-      }
-
-      setResolvedTheme(resolved);
-
-      if (resolved === 'dark') {
-        root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
-      }
-    };
-
-    applyTheme(theme);
+    // Clear any previous fixed localStorage manual override to strictly follow device
+    try {
+      localStorage.removeItem('theme');
+    } catch (e) {}
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleMediaChange = () => {
-      if (theme === 'system') {
-        applyTheme('system');
+
+    const syncWithDeviceTheme = () => {
+      const isDark = mediaQuery.matches;
+      const resolved = isDark ? 'dark' : 'light';
+      setResolvedTheme(resolved);
+
+      const root = document.documentElement;
+      if (isDark) {
+        root.classList.add('dark');
+        root.setAttribute('data-theme', 'dark');
+      } else {
+        root.classList.remove('dark');
+        root.setAttribute('data-theme', 'light');
       }
     };
 
-    mediaQuery.addEventListener('change', handleMediaChange);
-    return () => mediaQuery.removeEventListener('change', handleMediaChange);
-  }, [theme]);
+    // Execute immediately on mount
+    syncWithDeviceTheme();
 
-  const setTheme = (newTheme: Theme) => {
-    setThemeState(newTheme);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(storageKey, newTheme);
+    // Listen to real-time device OS / browser theme changes
+    if (typeof mediaQuery.addEventListener === 'function') {
+      mediaQuery.addEventListener('change', syncWithDeviceTheme);
+      return () => mediaQuery.removeEventListener('change', syncWithDeviceTheme);
+    } else if (typeof (mediaQuery as any).addListener === 'function') {
+      (mediaQuery as any).addListener(syncWithDeviceTheme);
+      return () => (mediaQuery as any).removeListener(syncWithDeviceTheme);
     }
-  };
+  }, []);
 
   const value = useMemo(
     () => ({
       theme,
-      setTheme,
+      setTheme: setThemeState,
       resolvedTheme,
     }),
     [theme, resolvedTheme]

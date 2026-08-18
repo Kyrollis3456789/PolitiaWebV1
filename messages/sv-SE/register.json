@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "Skapa ett Politia-konto",
+  "enterNameSubtitle": "Ange ditt namn",
+  "fullNameLabel": "Fullständigt namn (på engelska)",
+  "enterFullNameError": "Ange ditt fullständiga namn",
+  "fourNamesRequiredError": "Ange ditt fullständiga namn i 4 delar på engelska",
+  "enterEnglishOnlyError": "Endast engelska bokstäver är tillåtna",
+  "next": "Nästa",
+  "back": "Tillbaka",
+  "help": "Hjälp",
+  "privacy": "Sekretess",
+  "terms": "Villkor",
+  "searchLanguages": "Sök språk...",
+  "noLanguagesFound": "Inga språk hittades"
+}

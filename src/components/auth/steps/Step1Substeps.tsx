@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
+import { Pencil, Trash2 } from 'lucide-react';
 import {
   autoCapitalizeEnglishName,
   countWords,
@@ -10,6 +11,7 @@ import {
 import { validateEgyptianNationalId } from '@/lib/validation/national-id';
 import { checkEnglishNameCollision } from '@/app/actions/auth-check';
 import { GenderType } from '@/types/database.types';
+import { CameraCaptureModal, PhotoEditorModal } from '@/components/media';
 
 export interface Step1Data {
   englishName: string;
@@ -32,8 +34,10 @@ interface Step1SubstepProps {
 
 export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
   const [checkingCollision, setCheckingCollision] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [rawImageToEdit, setRawImageToEdit] = useState<string | null>(null);
 
   // English Name Validations
   const englishValidation = validateEnglishName(data.englishName, data.hasNameCollision);
@@ -43,13 +47,13 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
 
   // Arabic Name Validations
   const targetArWords = Math.max(requiredEngWords, engWordCount || requiredEngWords);
-  const arabicValidation = validateArabicName(data.arabicName, targetArWords);
+  const arValidation = validateArabicName(data.arabicName, targetArWords);
   const arWordCount = countWords(data.arabicName);
 
   // Age calculation
-  const calculateAge = (dobString: string): number | null => {
-    if (!dobString) return null;
-    const birthDate = new Date(dobString);
+  const calculateAge = (): number | null => {
+    if (!data.dob) return null;
+    const birthDate = new Date(data.dob + 'T00:00:00');
     if (isNaN(birthDate.getTime())) return null;
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -59,7 +63,7 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
     }
     return age >= 0 ? age : null;
   };
-  const currentAge = calculateAge(data.dob);
+  const currentAge = calculateAge();
 
   // National ID Validation & Cross-checks
   const nationalIdValidation = validateEgyptianNationalId(
@@ -68,7 +72,7 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
     data.gender || undefined
   );
 
-  const handleEnglishChange = (val: string) => {
+  const handleEnglishNameChange = (val: string) => {
     const formatted = autoCapitalizeEnglishName(val);
     onChange({ englishName: formatted });
   };
@@ -98,7 +102,28 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
         avatarPreview: previewUrl,
         photoSkippedGracePeriod: false,
       });
+      setRawImageToEdit(previewUrl);
+      setIsEditorOpen(true);
     }
+    e.target.value = '';
+  };
+
+  const handleCameraCapture = (file: File, previewUrl: string) => {
+    onChange({
+      avatarFile: file,
+      avatarPreview: previewUrl,
+      photoSkippedGracePeriod: false,
+    });
+    setRawImageToEdit(previewUrl);
+    setIsEditorOpen(true);
+  };
+
+  const handleEditorSave = (file: File, previewUrl: string) => {
+    onChange({
+      avatarFile: file,
+      avatarPreview: previewUrl,
+      photoSkippedGracePeriod: false,
+    });
   };
 
   const t = {
@@ -188,33 +213,33 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
               type="text"
               autoFocus
               value={data.englishName}
-              onChange={(e) => handleEnglishChange(e.target.value)}
+              onChange={(e) => handleEnglishNameChange(e.target.value)}
               onBlur={handleEnglishBlur}
               placeholder={t.engPlaceholder}
               className="w-full px-4 py-3.5 rounded-2xl border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] text-base placeholder:text-[var(--muted-foreground)] focus:ring-2 focus:ring-[var(--primary)] focus:outline-none transition shadow-sm"
             />
 
             {checkingCollision && (
-              <p className="text-xs text-blue-500 font-medium animate-pulse">
+              <p className="text-xs text-[var(--muted-foreground)] animate-pulse">
                 <bdi>{t.checkingCollision}</bdi>
               </p>
             )}
 
-            {data.englishName && !englishValidation.isValid && (
-              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-medium text-start">
-                <bdi>{englishValidation.error}</bdi>
+            {!englishValidation.isValid && data.englishName && (
+              <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-medium text-start space-y-1">
+                <p className="font-bold">{isRtl ? 'خطأ في التحقق من الاسم:' : 'Name Validation Error:'}</p>
+                <p><bdi>{englishValidation.error}</bdi></p>
               </div>
             )}
 
-            <div className="flex items-center gap-2 pt-2">
-              <input
-                type="checkbox"
-                id="collisionToggle"
-                checked={data.hasNameCollision}
-                onChange={(e) => onChange({ hasNameCollision: e.target.checked })}
-                className="w-4 h-4 rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)] cursor-pointer"
-              />
-              <label htmlFor="collisionToggle" className="text-xs text-[var(--muted-foreground)] cursor-pointer font-medium">
+            <div className="pt-2">
+              <label className="flex items-center gap-2.5 text-xs text-[var(--muted-foreground)] cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={data.hasNameCollision}
+                  onChange={(e) => onChange({ hasNameCollision: e.target.checked })}
+                  className="rounded border-[var(--border)] text-[var(--primary)] focus:ring-[var(--primary)] w-4 h-4 cursor-pointer"
+                />
                 <bdi>{t.collisionLabel}</bdi>
               </label>
             </div>
@@ -241,7 +266,7 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
               </span>
               <span
                 className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                  arabicValidation.isValid
+                  arWordCount === targetArWords
                     ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold'
                     : 'bg-[var(--muted)] text-[var(--muted-foreground)]'
                 }`}
@@ -260,9 +285,10 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
               className="w-full px-4 py-3.5 rounded-2xl border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] text-base placeholder:text-[var(--muted-foreground)] focus:ring-2 focus:ring-[var(--primary)] focus:outline-none transition shadow-sm text-right"
             />
 
-            {data.arabicName && !arabicValidation.isValid && (
-              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs font-medium text-start">
-                <bdi>{arabicValidation.error}</bdi>
+            {!arValidation.isValid && data.arabicName && (
+              <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-xs font-medium text-start space-y-1">
+                <p className="font-bold">{isRtl ? 'خطأ في الاسم العربي:' : 'Arabic Name Error:'}</p>
+                <p><bdi>{arValidation.error}</bdi></p>
               </div>
             )}
           </div>
@@ -287,7 +313,7 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
                 {isRtl ? 'تاريخ الميلاد' : 'Date of Birth'}
               </span>
               {currentAge !== null && (
-                <span className="text-xs px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 font-semibold">
+                <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold">
                   <bdi>{t.ageBadge}</bdi>
                 </span>
               )}
@@ -298,7 +324,7 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
               autoFocus
               value={data.dob}
               onChange={(e) => onChange({ dob: e.target.value })}
-              className="w-full px-4 py-3.5 rounded-2xl border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] text-base focus:ring-2 focus:ring-[var(--primary)] focus:outline-none transition shadow-sm"
+              className="w-full px-4 py-3.5 rounded-2xl border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] text-base placeholder:text-[var(--muted-foreground)] focus:ring-2 focus:ring-[var(--primary)] focus:outline-none transition shadow-sm"
             />
           </div>
         </div>
@@ -316,31 +342,31 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 pt-2">
+          <div className="grid grid-cols-2 gap-4">
             <button
               type="button"
               onClick={() => onChange({ gender: 'Male' })}
-              className={`p-6 rounded-2xl border-2 text-center transition flex flex-col items-center justify-center gap-3 cursor-pointer ${
+              className={`p-5 rounded-2xl border-2 flex flex-col items-center justify-center gap-3 transition cursor-pointer ${
                 data.gender === 'Male'
-                  ? 'border-[var(--primary)] bg-[var(--muted)] text-[var(--foreground)] shadow-md ring-2 ring-[var(--primary)]'
-                  : 'border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:border-[var(--foreground)]'
+                  ? 'border-[var(--primary)] bg-[var(--primary)]/5 font-semibold text-[var(--primary)] shadow-sm'
+                  : 'border-[var(--border)] hover:border-[var(--muted-foreground)] text-[var(--foreground)]'
               }`}
             >
-              <span className="text-4xl">👨</span>
-              <span className="font-bold text-base"><bdi>{t.male}</bdi></span>
+              <span className="text-3xl">👨</span>
+              <span className="text-sm"><bdi>{t.male}</bdi></span>
             </button>
 
             <button
               type="button"
               onClick={() => onChange({ gender: 'Female' })}
-              className={`p-6 rounded-2xl border-2 text-center transition flex flex-col items-center justify-center gap-3 cursor-pointer ${
+              className={`p-5 rounded-2xl border-2 flex flex-col items-center justify-center gap-3 transition cursor-pointer ${
                 data.gender === 'Female'
-                  ? 'border-[var(--primary)] bg-[var(--muted)] text-[var(--foreground)] shadow-md ring-2 ring-[var(--primary)]'
-                  : 'border-[var(--border)] bg-[var(--card)] text-[var(--muted-foreground)] hover:border-[var(--foreground)]'
+                  ? 'border-[var(--primary)] bg-[var(--primary)]/5 font-semibold text-[var(--primary)] shadow-sm'
+                  : 'border-[var(--border)] hover:border-[var(--muted-foreground)] text-[var(--foreground)]'
               }`}
             >
-              <span className="text-4xl">👩</span>
-              <span className="font-bold text-base"><bdi>{t.female}</bdi></span>
+              <span className="text-3xl">👩</span>
+              <span className="text-sm"><bdi>{t.female}</bdi></span>
             </button>
           </div>
         </div>
@@ -408,14 +434,60 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
           </div>
 
           <div className="p-6 rounded-3xl border border-[var(--border)] bg-[var(--card)] flex flex-col items-center text-center space-y-5">
-            <div className="w-28 h-28 rounded-3xl bg-[var(--muted)] border-2 border-[var(--border)] overflow-hidden flex items-center justify-center shadow-inner">
-              {data.avatarPreview ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={data.avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-5xl text-[var(--muted-foreground)]">👤</span>
+            <div className="relative group">
+              <div className="w-28 h-28 rounded-full bg-[var(--muted)] border-2 border-[var(--border)] overflow-hidden flex items-center justify-center shadow-inner">
+                {data.avatarPreview ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={data.avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-5xl text-[var(--muted-foreground)]">👤</span>
+                )}
+              </div>
+
+              {data.avatarPreview && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRawImageToEdit(data.avatarPreview);
+                      setIsEditorOpen(true);
+                    }}
+                    title={isRtl ? 'تعديل وقص الصورة' : 'Edit & crop photo'}
+                    className="absolute bottom-0 start-0 p-1.5 rounded-full bg-[#0B57D0] text-white shadow-md hover:bg-[#0842A0] transition cursor-pointer"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onChange({
+                        avatarFile: null,
+                        avatarPreview: null,
+                      })
+                    }
+                    title={isRtl ? 'حذف الصورة' : 'Remove photo'}
+                    className="absolute bottom-0 end-0 p-1.5 rounded-full bg-red-600 text-white shadow-md hover:bg-red-700 transition cursor-pointer"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </>
               )}
             </div>
+
+            {data.avatarPreview && (
+              <button
+                type="button"
+                onClick={() => {
+                  setRawImageToEdit(data.avatarPreview);
+                  setIsEditorOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold text-[#0B57D0] dark:text-[#A8C7FA] bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 border border-blue-200 dark:border-blue-800/60 transition cursor-pointer"
+              >
+                <Pencil className="w-3.5 h-3.5" />
+                <span><bdi>{isRtl ? 'تعديل وقص الصورة' : 'Edit & Crop Photo'}</bdi></span>
+              </button>
+            )}
 
             {data.photoSkippedGracePeriod && (
               <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-medium">
@@ -425,11 +497,10 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
 
             <div className="flex flex-wrap items-center justify-center gap-3 w-full">
               <input ref={fileInputRef} type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
-              <input ref={cameraInputRef} type="file" accept="image/*" capture="user" onChange={handlePhotoUpload} className="hidden" />
 
               <button
                 type="button"
-                onClick={() => cameraInputRef.current?.click()}
+                onClick={() => setIsCameraOpen(true)}
                 className="px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--background)] text-xs font-semibold hover:bg-[var(--muted)] active:scale-95 transition cursor-pointer"
               >
                 <bdi>{t.cameraBtn}</bdi>
@@ -460,6 +531,23 @@ export function Step1Substeps({ substep, data, onChange, isRtl }: Step1SubstepPr
           </div>
         </div>
       )}
+
+      {/* Live Camera Modal */}
+      <CameraCaptureModal
+        isOpen={isCameraOpen}
+        onClose={() => setIsCameraOpen(false)}
+        onCapture={handleCameraCapture}
+        isRtl={isRtl}
+      />
+
+      {/* Interactive Photo Editor Modal */}
+      <PhotoEditorModal
+        isOpen={isEditorOpen}
+        imageUrl={rawImageToEdit}
+        onClose={() => setIsEditorOpen(false)}
+        onSave={handleEditorSave}
+        isRtl={isRtl}
+      />
     </div>
   );
 }

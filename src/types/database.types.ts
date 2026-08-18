@@ -10,14 +10,16 @@ export type GenderType = 'Male' | 'Female';
 
 export interface Profile {
   id: string; // references auth.users.id
-  english_full_name: string;
-  arabic_full_name: string;
+  username?: string | null;
+  full_name_en: string;
+  full_name_ar: string;
   date_of_birth: string; // YYYY-MM-DD
   gender: GenderType;
   national_id: string; // 14 digits
+  birth_province_code?: string | null;
   avatar_url?: string | null;
-  photo_grace_period_until?: string | null;
-  landline_number?: string | null;
+  avatar_skipped_at?: string | null;
+  landline_phone?: string | null;
   created_at?: string;
   updated_at?: string;
 }
@@ -27,8 +29,8 @@ export interface UserPhone {
   user_id: string;
   phone_number: string;
   is_primary: boolean;
-  is_verified: boolean;
   created_at?: string;
+  updated_at?: string;
 }
 
 export interface UserEmail {
@@ -36,8 +38,8 @@ export interface UserEmail {
   user_id: string;
   email: string;
   is_primary: boolean;
-  is_verified: boolean;
   created_at?: string;
+  updated_at?: string;
 }
 
 export type SocialPlatform =
@@ -55,10 +57,11 @@ export interface UserSocialLink {
   user_id: string;
   platform: SocialPlatform;
   profile_url: string;
-  username?: string | null;
   display_name?: string | null;
+  bio_snippet?: string | null;
   avatar_url?: string | null;
   created_at?: string;
+  updated_at?: string;
 }
 
 export interface Database {
@@ -66,34 +69,22 @@ export interface Database {
     Tables: {
       profiles: {
         Row: Profile;
-        Insert: Omit<Profile, 'created_at' | 'updated_at'> & {
-          created_at?: string;
-          updated_at?: string;
-        };
+        Insert: Partial<Profile> & Pick<Profile, 'id' | 'full_name_en' | 'full_name_ar' | 'date_of_birth' | 'gender' | 'national_id'>;
         Update: Partial<Profile>;
       };
       user_phones: {
         Row: UserPhone;
-        Insert: Omit<UserPhone, 'id' | 'created_at'> & {
-          id?: string;
-          created_at?: string;
-        };
+        Insert: Partial<UserPhone> & Pick<UserPhone, 'user_id' | 'phone_number'>;
         Update: Partial<UserPhone>;
       };
       user_emails: {
         Row: UserEmail;
-        Insert: Omit<UserEmail, 'id' | 'created_at'> & {
-          id?: string;
-          created_at?: string;
-        };
+        Insert: Partial<UserEmail> & Pick<UserEmail, 'user_id' | 'email'>;
         Update: Partial<UserEmail>;
       };
       user_social_links: {
         Row: UserSocialLink;
-        Insert: Omit<UserSocialLink, 'id' | 'created_at'> & {
-          id?: string;
-          created_at?: string;
-        };
+        Insert: Partial<UserSocialLink> & Pick<UserSocialLink, 'user_id' | 'platform' | 'profile_url'>;
         Update: Partial<UserSocialLink>;
       };
     };

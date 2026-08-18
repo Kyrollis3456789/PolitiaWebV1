@@ -3,6 +3,7 @@ export interface NameValidationResult {
   wordCount: number;
   requiredWordCount: number;
   error?: string;
+  errorAr?: string;
 }
 
 const ENGLISH_NAME_REGEX = /^[A-Za-z\s]+$/;
@@ -28,7 +29,7 @@ export function countWords(input: string): number {
 
 /**
  * Validates an English full name.
- * Minimum 4 words (quadruple name), or 5 words if hasCollision is true.
+ * Requires 4 words (First, Middle, Grandfather, Family name), or 5 if hasCollision is true.
  */
 export function validateEnglishName(
   name: string,
@@ -43,7 +44,8 @@ export function validateEnglishName(
       isValid: false,
       wordCount: 0,
       requiredWordCount: requiredCount,
-      error: 'English full name is required.',
+      error: 'Please enter your full name',
+      errorAr: 'يرجى إدخال الاسم الكامل بالإنجليزية',
     };
   }
 
@@ -52,19 +54,28 @@ export function validateEnglishName(
       isValid: false,
       wordCount: words,
       requiredWordCount: requiredCount,
-      error: 'English name must contain only English alphabet characters and spaces.',
+      error: 'Please use English/Latin letters only',
+      errorAr: 'يرجى استخدام الحروف الإنجليزية فقط',
     };
   }
 
-  if (words < requiredCount) {
-    const missing = requiredCount - words;
+  if (words < 4) {
     return {
       isValid: false,
       wordCount: words,
-      requiredWordCount: requiredCount,
-      error: hasCollision
-        ? `Name collision detected. Please provide a 5th name (${missing} more required).`
-        : `Please enter at least 4 names (${missing} more required).`,
+      requiredWordCount: 4,
+      error: 'Please enter your full four-part name (First, Middle, Grandfather, Family name)',
+      errorAr: 'يرجى إدخال الاسم الرباعي بالكامل (الاسم الأول، الأب، الجد، العائلة)',
+    };
+  }
+
+  if (hasCollision && words < 5) {
+    return {
+      isValid: false,
+      wordCount: words,
+      requiredWordCount: 5,
+      error: 'Name collision detected. Please provide a 5th name.',
+      errorAr: 'تم اكتشاف تطابق في الاسم. يرجى إدخال اسم خامس لفض التشابه.',
     };
   }
 
@@ -76,21 +87,23 @@ export function validateEnglishName(
 }
 
 /**
- * Validates an Arabic full name, ensuring Arabic script and strict word count synchronization.
+ * Validates an Arabic full name, ensuring Arabic script and 4 words.
  */
 export function validateArabicName(
   name: string,
-  targetWordCount: number
+  targetWordCount = 4
 ): NameValidationResult {
   const trimmed = name.trim();
   const words = countWords(trimmed);
+  const minRequired = Math.max(4, targetWordCount);
 
   if (!trimmed) {
     return {
       isValid: false,
       wordCount: 0,
-      requiredWordCount: targetWordCount,
-      error: 'Arabic full name is required.',
+      requiredWordCount: minRequired,
+      error: 'Please enter your full name in Arabic',
+      errorAr: 'يرجى إدخال الاسم باللغة العربية',
     };
   }
 
@@ -98,23 +111,25 @@ export function validateArabicName(
     return {
       isValid: false,
       wordCount: words,
-      requiredWordCount: targetWordCount,
-      error: 'Arabic name must contain only Arabic letters and spaces.',
+      requiredWordCount: minRequired,
+      error: 'Please use Arabic characters only',
+      errorAr: 'يرجى استخدام الحروف العربية فقط',
     };
   }
 
-  if (words !== targetWordCount) {
+  if (words < 4) {
     return {
       isValid: false,
       wordCount: words,
-      requiredWordCount: targetWordCount,
-      error: `Arabic name must have exactly ${targetWordCount} words to match the English name (currently ${words}).`,
+      requiredWordCount: 4,
+      error: 'Please enter your full four-part name in Arabic',
+      errorAr: 'يرجى إدخال الاسم الرباعي بالكامل باللغة العربية',
     };
   }
 
   return {
     isValid: true,
     wordCount: words,
-    requiredWordCount: targetWordCount,
+    requiredWordCount: minRequired,
   };
 }

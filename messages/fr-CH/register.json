@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "Créer un compte Politia",
+  "enterNameSubtitle": "Saisissez votre nom",
+  "fullNameLabel": "Nom complet (en anglais)",
+  "enterFullNameError": "Saisissez votre nom complet",
+  "fourNamesRequiredError": "Saisissez votre nom complet en 4 parties en anglais",
+  "enterEnglishOnlyError": "Seules les lettres anglaises sont autorisées",
+  "next": "Suivant",
+  "back": "Retour",
+  "help": "Aide",
+  "privacy": "Confidentialité",
+  "terms": "Conditions",
+  "searchLanguages": "Rechercher des langues...",
+  "noLanguagesFound": "Aucune langue trouvée"
+}

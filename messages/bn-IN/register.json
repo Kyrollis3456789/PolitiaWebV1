@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "Create a Politia Account",
+  "enterNameSubtitle": "Enter your name",
+  "fullNameLabel": "Full name (in English)",
+  "enterFullNameError": "Enter your full name",
+  "fourNamesRequiredError": "Enter your full quadruple name in English (4 names)",
+  "enterEnglishOnlyError": "English alphabet only is allowed",
+  "next": "Next",
+  "back": "Back",
+  "help": "Help",
+  "privacy": "Privacy",
+  "terms": "Terms",
+  "searchLanguages": "Search languages...",
+  "noLanguagesFound": "No languages found"
+}

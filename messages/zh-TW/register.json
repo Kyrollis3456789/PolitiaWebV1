@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "创建 Politia 账号",
+  "enterNameSubtitle": "输入您的姓名",
+  "fullNameLabel": "全名（英文）",
+  "enterFullNameError": "请输入全名",
+  "fourNamesRequiredError": "请输入英文四段式全名（4 个名字）",
+  "enterEnglishOnlyError": "仅限英文字母",
+  "next": "下一步",
+  "back": "返回",
+  "help": "帮助",
+  "privacy": "隐私权",
+  "terms": "条款",
+  "searchLanguages": "搜索语言...",
+  "noLanguagesFound": "未找到语言"
+}

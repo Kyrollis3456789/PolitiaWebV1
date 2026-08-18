@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "Politia-Konto erstellen",
+  "enterNameSubtitle": "Namen eingeben",
+  "fullNameLabel": "Vollständiger Name (auf Englisch)",
+  "enterFullNameError": "Gib deinen vollständigen Namen ein",
+  "fourNamesRequiredError": "Gib deinen vollständigen vierteiligen Namen auf Englisch ein (4 Namen)",
+  "enterEnglishOnlyError": "Nur englische Buchstaben erlaubt",
+  "next": "Weiter",
+  "back": "Zurück",
+  "help": "Hilfe",
+  "privacy": "Datenschutz",
+  "terms": "Bedingungen",
+  "searchLanguages": "Sprachen suchen...",
+  "noLanguagesFound": "Keine Sprachen gefunden"
+}

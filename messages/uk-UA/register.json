@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "Створити обліковий запис Politia",
+  "enterNameSubtitle": "Введіть ім'я",
+  "fullNameLabel": "Повне ім'я (англійською)",
+  "enterFullNameError": "Введіть своє повне ім'я",
+  "fourNamesRequiredError": "Введіть своє повне ім'я з 4 частин англійською мовою",
+  "enterEnglishOnlyError": "Дозволені лише англійські літери",
+  "next": "Далі",
+  "back": "Назад",
+  "help": "Довідка",
+  "privacy": "Конфіденційність",
+  "terms": "Умови",
+  "searchLanguages": "Пошук мов...",
+  "noLanguagesFound": "Мов не знайдено"
+}

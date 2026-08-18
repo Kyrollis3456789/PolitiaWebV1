@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "Crear una cuenta de Politia",
+  "enterNameSubtitle": "Introduce tu nombre",
+  "fullNameLabel": "Nombre completo (en inglés)",
+  "enterFullNameError": "Introduce tu nombre completo",
+  "fourNamesRequiredError": "Introduce tu nombre completo de 4 partes en inglés",
+  "enterEnglishOnlyError": "Solo se permiten letras en inglés",
+  "next": "Siguiente",
+  "back": "Atrás",
+  "help": "Ayuda",
+  "privacy": "Privacidad",
+  "terms": "Términos",
+  "searchLanguages": "Buscar idiomas...",
+  "noLanguagesFound": "No se encontraron idiomas"
+}

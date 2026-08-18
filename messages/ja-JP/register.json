@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "Politia アカウントを作成",
+  "enterNameSubtitle": "お名前を入力してください",
+  "fullNameLabel": "氏名（英語）",
+  "enterFullNameError": "氏名を入力してください",
+  "fourNamesRequiredError": "英語で4つの名前（フルネーム）を入力してください",
+  "enterEnglishOnlyError": "英語のアルファベットのみ有効です",
+  "next": "次へ",
+  "back": "戻る",
+  "help": "ヘルプ",
+  "privacy": "プライバシー",
+  "terms": "利用規約",
+  "searchLanguages": "言語を検索...",
+  "noLanguagesFound": "言語が見つかりません"
+}

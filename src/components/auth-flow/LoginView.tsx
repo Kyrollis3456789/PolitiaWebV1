@@ -8,11 +8,8 @@ export function LoginView() {
   const router = useRouter();
 
   return (
-    <div className="w-full min-h-screen">
-      <LoginScreen
-        onNavigateRegister={() => router.push('/register')}
-        onNavigateVerify={() => router.push('/verify')}
-      />
-    </div>
+    <LoginScreen
+      onNavigateRegister={() => router.push('/register')}
+    />
   );
 }

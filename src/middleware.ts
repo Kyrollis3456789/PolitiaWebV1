@@ -18,17 +18,19 @@ export default async function middleware(request: NextRequest) {
 
   if (isDashboardRoute && !user) {
     const segments = pathname.split('/').filter(Boolean);
-    const locale = segments[0] || 'en-US';
-    const loginUrl = new URL(`/${locale}/login`, request.url);
+    const hasLocalePrefix = routing.locales.includes(segments[0] as any);
+    const localePrefix = hasLocalePrefix ? `/${segments[0]}` : '';
+    const loginUrl = new URL(`${localePrefix}/login`, request.url);
     return NextResponse.redirect(loginUrl);
   }
 
   // 4. Authenticated users visiting /login are redirected to /dashboard
-  const isLoginRoute = pathname.includes('/login');
+  const isLoginRoute = pathname.endsWith('/login') || pathname === '/login';
   if (isLoginRoute && user) {
     const segments = pathname.split('/').filter(Boolean);
-    const locale = segments[0] || 'en-US';
-    const dashboardUrl = new URL(`/${locale}/dashboard`, request.url);
+    const hasLocalePrefix = routing.locales.includes(segments[0] as any);
+    const localePrefix = hasLocalePrefix ? `/${segments[0]}` : '';
+    const dashboardUrl = new URL(`${localePrefix}/dashboard`, request.url);
     return NextResponse.redirect(dashboardUrl);
   }
 

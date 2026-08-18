@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "ایجاد حساب Politia",
+  "enterNameSubtitle": "نام خود را وارد کنید",
+  "fullNameLabel": "نام کامل (به انگلیسی)",
+  "enterFullNameError": "نام کامل خود را وارد کنید",
+  "fourNamesRequiredError": "نام چهاربخشی کامل خود را به انگلیسی وارد کنید (۴ نام)",
+  "enterEnglishOnlyError": "فقط حروف انگلیسی مجاز است",
+  "next": "بعدی",
+  "back": "بازگشت",
+  "help": "راهنما",
+  "privacy": "حریم خصوصی",
+  "terms": "شرایط",
+  "searchLanguages": "جستجوی زبان‌ها...",
+  "noLanguagesFound": "زبانی یافت نشد"
+}

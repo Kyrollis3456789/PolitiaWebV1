@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "Politia اکاؤنٹ بنائیں",
+  "enterNameSubtitle": "اپنا نام درج کریں",
+  "fullNameLabel": "مکمل نام (انگریزی میں)",
+  "enterFullNameError": "اپنا مکمل نام درج کریں",
+  "fourNamesRequiredError": "انگریزی میں اپنا 4 حصوں والا مکمل نام درج کریں",
+  "enterEnglishOnlyError": "صرف انگریزی حروف کی اجازت ہے",
+  "next": "اگلا",
+  "back": "پیچھے",
+  "help": "مدد",
+  "privacy": "رازداری",
+  "terms": "شرائط",
+  "searchLanguages": "زبانیں تلاش کریں...",
+  "noLanguagesFound": "کوئی زبان نہیں ملی"
+}

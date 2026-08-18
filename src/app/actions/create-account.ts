@@ -21,6 +21,32 @@ export interface CreateAccountPayload {
   landlineNumber?: string;
   socials: Record<SocialPlatform, { url: string; displayName?: string; avatarUrl?: string }>;
   password?: string;
+  // Step 3: Relations
+  maritalStatus?: string;
+  guardianName?: string;
+  guardianPhone?: string;
+  familyRelationType?: string;
+  // Step 4: Education & Work
+  educationStage?: string;
+  facultyOrSchool?: string;
+  profession?: string;
+  workplace?: string;
+  // Step 5: Locations
+  governorate?: string;
+  city?: string;
+  streetAddress?: string;
+  buildingNumber?: string;
+  floorNumber?: string;
+  apartmentNumber?: string;
+  secondaryAddress?: string;
+  // Step 6: Church Commitment
+  diocese?: string;
+  primaryChurch?: string;
+  secondaryChurch?: string;
+  priestName?: string;
+  // Step 7: Additional Info
+  hobbies?: string[];
+  languages?: string[];
 }
 
 export interface ActionResponse {
@@ -86,6 +112,11 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
           arabic_full_name: payload.arabicName,
           national_id: payload.nationalId,
           primary_phone: `${validPhones[0].countryCode}${validPhones[0].number}`,
+          education_stage: payload.educationStage || null,
+          profession: payload.profession || null,
+          governorate: payload.governorate || null,
+          diocese: payload.diocese || null,
+          primary_church: payload.primaryChurch || null,
         },
       },
     });
@@ -139,14 +170,15 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
     try {
       await supabase.from('profiles').upsert({
         id: userId,
-        english_full_name: payload.englishName,
-        arabic_full_name: payload.arabicName,
+        full_name_en: payload.englishName,
+        full_name_ar: payload.arabicName,
         date_of_birth: payload.dob,
         gender: payload.gender,
         national_id: payload.nationalId,
+        birth_province_code: payload.governorate || null,
         avatar_url: avatarUrl,
-        photo_grace_period_until: photoGracePeriodUntil,
-        landline_number: landlineNumber,
+        avatar_skipped_at: photoGracePeriodUntil,
+        landline_phone: landlineNumber,
       });
     } catch (profileErr) {
       console.warn('Profile insertion note:', profileErr);

@@ -1,7 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from '@/i18n/routing';
-import { CreateAccountWizard } from '@/components/auth/CreateAccountWizard';
+import { RegisterView } from '@/components/auth-flow/RegisterView';
 
 export default async function CreateAccountPage({
   params,
@@ -22,8 +22,8 @@ export default async function CreateAccountPage({
   }
 
   return (
-    <main className="min-h-screen bg-[var(--background)] flex flex-col items-center justify-center p-4 sm:p-8 py-12">
-      <CreateAccountWizard />
+    <main className="min-h-[100dvh] w-full flex flex-col items-center justify-center">
+      <RegisterView />
     </main>
   );
 }

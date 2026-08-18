@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "יצירת חשבון Politia",
+  "enterNameSubtitle": "הזן את שמך",
+  "fullNameLabel": "שם מלא (באנגלית)",
+  "enterFullNameError": "הזן את שמך המלא",
+  "fourNamesRequiredError": "הזן את שמך המלא באנגלית (4 שמות)",
+  "enterEnglishOnlyError": "מותרות רק אותיות באנגלית",
+  "next": "הבא",
+  "back": "חזרה",
+  "help": "עזרה",
+  "privacy": "פרטיות",
+  "terms": "תנאים",
+  "searchLanguages": "חיפוש שפות...",
+  "noLanguagesFound": "לא נמצאו שפות"
+}

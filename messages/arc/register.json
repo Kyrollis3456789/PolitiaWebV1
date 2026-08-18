@@ -1,0 +1,15 @@
+{
+  "createAccountTitle": "ܒܪܝ ܚܘܫܒܢܐ ܕPolitia",
+  "enterNameSubtitle": "ܐܥܠ ܫܡܟ",
+  "fullNameLabel": "ܫܡܐ ܡܫܡܠܝܐ (ܒܐܢܓܠܝܐ)",
+  "enterFullNameError": "ܐܥܠ ܫܡܟ ܡܫܡܠܝܐ",
+  "fourNamesRequiredError": "ܐܥܠ ܫܡܟ ܡܫܡܠܝܐ ܕ4 ܫܡܗ̈ܐ ܒܠܫܢܐ ܐܢܓܠܝܐ",
+  "enterEnglishOnlyError": "ܒܠܚܘܕ ܐܬܘ̈ܬܐ ܒܠܫܢܐ ܐܢܓܠܝܐ",
+  "next": "ܕܒܬܪ",
+  "back": "ܕܥܘܟ",
+  "help": "ܥܘܕܪܢܐ",
+  "privacy": "ܕܝܠܢܝܘܬܐ",
+  "terms": "ܬܢܘ̈ܝ",
+  "searchLanguages": "ܒܨܝ ܠܫܢ̈ܐ...",
+  "noLanguagesFound": "ܠܐ ܐܫܬܟܚܘ ܠܫܢ̈ܐ"
+}
