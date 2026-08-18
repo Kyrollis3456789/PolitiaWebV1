@@ -42,18 +42,18 @@ interface RegisterScreenProps {
 }
 
 const COUNTRY_CODES = [
-  { code: '+20', label: 'Egypt (+20)' },
-  { code: '+966', label: 'Saudi Arabia (+966)' },
-  { code: '+971', label: 'UAE (+971)' },
-  { code: '+1', label: 'United States (+1)' },
-  { code: '+44', label: 'United Kingdom (+44)' },
-  { code: '+49', label: 'Germany (+49)' },
-  { code: '+33', label: 'France (+33)' },
-  { code: '+61', label: 'Australia (+61)' },
-  { code: '+1-CA', label: 'Canada (+1)' },
-  { code: '+965', label: 'Kuwait (+965)' },
-  { code: '+974', label: 'Qatar (+974)' },
-  { code: '+962', label: 'Jordan (+962)' },
+  { code: '+20', nameEn: 'Egypt', nameAr: 'مصر', flag: '🇪🇬', placeholder: '010 1234 5678' },
+  { code: '+966', nameEn: 'Saudi Arabia', nameAr: 'المملكة العربية السعودية', flag: '🇸🇦', placeholder: '050 123 4567' },
+  { code: '+971', nameEn: 'United Arab Emirates', nameAr: 'الإمارات', flag: '🇦🇪', placeholder: '050 123 4567' },
+  { code: '+1', nameEn: 'United States', nameAr: 'الولايات المتحدة', flag: '🇺🇸', placeholder: '(555) 000-0000' },
+  { code: '+44', nameEn: 'United Kingdom', nameAr: 'المملكة المتحدة', flag: '🇬🇧', placeholder: '07123 456789' },
+  { code: '+49', nameEn: 'Germany', nameAr: 'ألمانيا', flag: '🇩🇪', placeholder: '0151 12345678' },
+  { code: '+33', nameEn: 'France', nameAr: 'فرنسا', flag: '🇫🇷', placeholder: '06 12 34 56 78' },
+  { code: '+61', nameEn: 'Australia', nameAr: 'أستراليا', flag: '🇦🇺', placeholder: '0412 345 678' },
+  { code: '+1-CA', nameEn: 'Canada', nameAr: 'كندا', flag: '🇨🇦', placeholder: '(555) 000-0000' },
+  { code: '+965', nameEn: 'Kuwait', nameAr: 'الكويت', flag: '🇰🇼', placeholder: '9012 3456' },
+  { code: '+974', nameEn: 'Qatar', nameAr: 'قطر', flag: '🇶🇦', placeholder: '3312 3456' },
+  { code: '+962', nameEn: 'Jordan', nameAr: 'الأردن', flag: '🇯🇴', placeholder: '07 9123 4567' },
 ];
 
 const EGYPTIAN_GOVERNORATES = [
@@ -1150,60 +1150,84 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
               >
                 {/* 2.1: Phone Number */}
               {subStepIndex === 1 && (
-                <div className="flex gap-2 py-2">
-                  <div className="w-[110px] shrink-0 relative">
+                <div className="space-y-4 py-2">
+                  {/* Country Selector */}
+                  <div className="relative">
                     <select
-                      id="reg-country-code"
+                      id="reg-country"
                       value={countryCode}
                       onChange={(e) => setCountryCode(e.target.value)}
-                      className="w-full h-[56px] px-2 text-xs font-mono text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] border border-[#747775] dark:border-[#8E918F] focus:outline-none transition-all box-border cursor-pointer"
+                      className="w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] border border-[#747775] dark:border-[#8E918F] focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] focus:outline-none transition-all box-border cursor-pointer appearance-none"
                     >
                       {COUNTRY_CODES.map((c) => (
-                        <option key={c.code} value={c.code} className="bg-white dark:bg-[#1B212D] text-[#1F1F1F] dark:text-[#E3E3E3]">
-                          {c.code}
+                        <option
+                          key={c.code}
+                          value={c.code}
+                          className="bg-white dark:bg-[#1B212D] text-[#1F1F1F] dark:text-[#E3E3E3]"
+                        >
+                          {c.flag} {isRtl ? c.nameAr : c.nameEn} ({c.code})
                         </option>
                       ))}
                     </select>
-                    <label htmlFor="reg-country-code" className="absolute -top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D] text-[#444746] dark:text-[#8E918F] start-2 pointer-events-none">
-                      <bdi>{isRtl ? 'الكود' : 'Code'}</bdi>
+                    <label
+                      htmlFor="reg-country"
+                      className="absolute -top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D] text-[#0B57D0] dark:text-[#A8C7FA] start-3 pointer-events-none"
+                    >
+                      <bdi>{isRtl ? 'الدولة' : 'Country'}</bdi>
                     </label>
+                    <div className="absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 dark:text-slate-400">
+                      <ChevronDown className="w-4 h-4" />
+                    </div>
                   </div>
 
-                  <div className="flex-1 relative">
-                    <input
-                      id="reg-phone"
-                      type="tel"
-                      dir="ltr"
-                      autoFocus
-                      value={phoneNumber}
-                      onFocus={() => setIsPhoneFocused(true)}
-                      onBlur={() => setIsPhoneFocused(false)}
-                      onChange={(e) => {
-                        setPhoneNumber(e.target.value);
-                        if (errorMessage) setErrorMessage(null);
-                      }}
-                      className={`w-full h-[56px] px-4 text-[15px] font-mono text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
-                        errorMessage
-                          ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                          : isPhoneFocused
-                          ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                          : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
-                      }`}
-                    />
-                    <label
-                      htmlFor="reg-phone"
-                      className={`absolute pointer-events-none transition-all duration-150 start-3 ${
-                        isPhoneFloating ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]' : 'top-4 text-[15px]'
-                      } ${
-                        errorMessage
-                          ? 'text-[#B3261E] dark:text-[#F2B8B5]'
-                          : isPhoneFocused
-                          ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                          : 'text-[#444746] dark:text-[#8E918F]'
-                      }`}
-                    >
-                      <bdi>{isRtl ? 'رقم الهاتف المحمول' : 'Phone Number'}</bdi>
-                    </label>
+                  {/* Phone Number Input with Dial Code Badge */}
+                  <div className="flex gap-2.5 items-center">
+                    <div className="h-[56px] px-3.5 flex items-center justify-center rounded-[4px] border border-[#747775] dark:border-[#8E918F] bg-slate-50 dark:bg-slate-800/50 text-[#1F1F1F] dark:text-[#E3E3E3] font-mono text-sm font-semibold shrink-0">
+                      {countryCode}
+                    </div>
+
+                    <div className="flex-1 relative">
+                      <input
+                        id="reg-phone"
+                        type="tel"
+                        dir="ltr"
+                        autoFocus
+                        placeholder={
+                          COUNTRY_CODES.find((c) => c.code === countryCode)?.placeholder ||
+                          '010 1234 5678'
+                        }
+                        value={phoneNumber}
+                        onFocus={() => setIsPhoneFocused(true)}
+                        onBlur={() => setIsPhoneFocused(false)}
+                        onChange={(e) => {
+                          setPhoneNumber(e.target.value);
+                          if (errorMessage) setErrorMessage(null);
+                        }}
+                        className={`w-full h-[56px] px-4 text-[15px] font-mono text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
+                          errorMessage
+                            ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                            : isPhoneFocused
+                            ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                            : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                        }`}
+                      />
+                      <label
+                        htmlFor="reg-phone"
+                        className={`absolute pointer-events-none transition-all duration-150 start-3 ${
+                          isPhoneFloating
+                            ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
+                            : 'top-4 text-[15px]'
+                        } ${
+                          errorMessage
+                            ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                            : isPhoneFocused
+                            ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                            : 'text-[#444746] dark:text-[#8E918F]'
+                        }`}
+                      >
+                        <bdi>{isRtl ? 'رقم الهاتف المحمول' : 'Mobile Phone Number'}</bdi>
+                      </label>
+                    </div>
                   </div>
                 </div>
               )}
