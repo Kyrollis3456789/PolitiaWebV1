@@ -48,35 +48,7 @@ export default async function RootLayout({
 
   return (
     <html lang={locale} dir={direction} suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  var m = window.matchMedia('(prefers-color-scheme: dark)');
-                  var apply = function(e) {
-                    var isDark = e ? e.matches : m.matches;
-                    if (isDark) {
-                      document.documentElement.classList.add('dark');
-                      document.documentElement.setAttribute('data-theme', 'dark');
-                    } else {
-                      document.documentElement.classList.remove('dark');
-                      document.documentElement.setAttribute('data-theme', 'light');
-                    }
-                  };
-                  apply();
-                  if (m.addEventListener) {
-                    m.addEventListener('change', apply);
-                  } else if (m.addListener) {
-                    m.addListener(apply);
-                  }
-                } catch (e) {}
-              })();
-            `,
-          }}
-        />
-      </head>
+      <head />
       <body
         suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-background text-foreground`}
