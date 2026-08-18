@@ -109,6 +109,104 @@ const AVAILABLE_LANGUAGES = [
   { id: 'it', labelEn: 'Italian', labelAr: 'الإيطالية' },
 ];
 
+// LocalStorage Persistence Helpers for granular field-by-field storage
+function getLocalItem(key: string, defaultValue: string): string {
+  if (typeof window === 'undefined') return defaultValue;
+  try {
+    const val = localStorage.getItem(`politia_reg_${key}`);
+    return val !== null ? val : defaultValue;
+  } catch {
+    return defaultValue;
+  }
+}
+
+function getLocalNumber(key: string, defaultValue: number): number {
+  if (typeof window === 'undefined') return defaultValue;
+  try {
+    const val = localStorage.getItem(`politia_reg_${key}`);
+    if (val !== null) {
+      const num = Number(val);
+      if (!isNaN(num) && num > 0) return num;
+    }
+    return defaultValue;
+  } catch {
+    return defaultValue;
+  }
+}
+
+function getLocalJson<T>(key: string, defaultValue: T): T {
+  if (typeof window === 'undefined') return defaultValue;
+  try {
+    const val = localStorage.getItem(`politia_reg_${key}`);
+    if (val) return JSON.parse(val);
+    return defaultValue;
+  } catch {
+    return defaultValue;
+  }
+}
+
+function setLocalItem(key: string, value: string | number | boolean | object | null | undefined) {
+  if (typeof window === 'undefined') return;
+  try {
+    if (value === undefined || value === null) {
+      localStorage.removeItem(`politia_reg_${key}`);
+    } else if (typeof value === 'object') {
+      localStorage.setItem(`politia_reg_${key}`, JSON.stringify(value));
+    } else {
+      localStorage.setItem(`politia_reg_${key}`, String(value));
+    }
+  } catch (e) {
+    console.warn(`Failed to save ${key} to localStorage`, e);
+  }
+}
+
+function clearAllRegistrationDrafts() {
+  if (typeof window === 'undefined') return;
+  const keysToRemove = [
+    'main_step',
+    'sub_step',
+    'full_name_en',
+    'full_name_ar',
+    'gender',
+    'dob',
+    'national_id',
+    'avatar_preview',
+    'photo_skipped',
+    'country_code',
+    'phone_number',
+    'email',
+    'landline_area_code',
+    'landline_number',
+    'socials',
+    'marital_status',
+    'guardian_name',
+    'guardian_phone',
+    'family_relation_type',
+    'education_stage',
+    'faculty_or_school',
+    'profession',
+    'workplace',
+    'governorate',
+    'city',
+    'street_address',
+    'building_number',
+    'floor_number',
+    'apartment_number',
+    'secondary_address',
+    'diocese',
+    'primary_church',
+    'secondary_church',
+    'priest_name',
+    'hobbies',
+    'languages',
+  ];
+  keysToRemove.forEach((k) => {
+    try {
+      localStorage.removeItem(`politia_reg_${k}`);
+    } catch {}
+  });
+}
+
 export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const router = useRouter();
   const locale = useLocale();
@@ -116,78 +214,79 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const t = useTranslations('register');
 
   // Dynamic Navigation state:
-  // mainStep: 1 to 7 for milestones, 8 for Password, 9 for Success
-  const [mainStepIndex, setMainStepIndex] = useState<number>(1);
-  const [subStepIndex, setSubStepIndex] = useState<number>(1);
+  const [mainStepIndex, setMainStepIndex] = useState<number>(() => getLocalNumber('main_step', 1));
+  const [subStepIndex, setSubStepIndex] = useState<number>(() => getLocalNumber('sub_step', 1));
   const [slideDirection, setSlideDirection] = useState<'forward' | 'backward'>('forward');
 
   // Milestone 1: Personal Info
-  const [englishFullName, setEnglishFullName] = useState('');
+  const [englishFullName, setEnglishFullName] = useState<string>(() => getLocalItem('full_name_en', ''));
   const [isEnglishFullNameFocused, setIsEnglishFullNameFocused] = useState(false);
-  const [arabicFullName, setArabicFullName] = useState('');
+  const [arabicFullName, setArabicFullName] = useState<string>(() => getLocalItem('full_name_ar', ''));
   const [isArabicFullNameFocused, setIsArabicFullNameFocused] = useState(false);
-  const [gender, setGender] = useState<GenderType>('Male');
-  const [dob, setDob] = useState('');
+  const [gender, setGender] = useState<GenderType>(() => (getLocalItem('gender', 'Male') as GenderType));
+  const [dob, setDob] = useState<string>(() => getLocalItem('dob', ''));
   const [isDobFocused, setIsDobFocused] = useState(false);
-  const [nationalId, setNationalId] = useState('');
+  const [nationalId, setNationalId] = useState<string>(() => getLocalItem('national_id', ''));
   const [isNationalIdFocused, setIsNationalIdFocused] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [photoSkippedGracePeriod, setPhotoSkippedGracePeriod] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(() => getLocalItem('avatar_preview', ''));
+  const [photoSkippedGracePeriod, setPhotoSkippedGracePeriod] = useState<boolean>(() => getLocalItem('photo_skipped', 'false') === 'true');
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [rawImageToEdit, setRawImageToEdit] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Milestone 2: Contact & Social
-  const [countryCode, setCountryCode] = useState('+20');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [countryCode, setCountryCode] = useState<string>(() => getLocalItem('country_code', '+20'));
+  const [phoneNumber, setPhoneNumber] = useState<string>(() => getLocalItem('phone_number', ''));
   const [isPhoneFocused, setIsPhoneFocused] = useState(false);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState<string>(() => getLocalItem('email', ''));
   const [isEmailFocused, setIsEmailFocused] = useState(false);
-  const [landlineAreaCode, setLandlineAreaCode] = useState('');
-  const [landlineNumber, setLandlineNumber] = useState('');
-  const [socials, setSocials] = useState<Record<SocialPlatform, { url: string }>>({
-    facebook: { url: '' },
-    instagram: { url: '' },
-    tiktok: { url: '' },
-    snapchat: { url: '' },
-    threads: { url: '' },
-    x: { url: '' },
-    github: { url: '' },
-    linkedin: { url: '' },
-  });
+  const [landlineAreaCode, setLandlineAreaCode] = useState<string>(() => getLocalItem('landline_area_code', ''));
+  const [landlineNumber, setLandlineNumber] = useState<string>(() => getLocalItem('landline_number', ''));
+  const [socials, setSocials] = useState<Record<SocialPlatform, { url: string }>>(() =>
+    getLocalJson('socials', {
+      facebook: { url: '' },
+      instagram: { url: '' },
+      tiktok: { url: '' },
+      snapchat: { url: '' },
+      threads: { url: '' },
+      x: { url: '' },
+      github: { url: '' },
+      linkedin: { url: '' },
+    })
+  );
 
   // Milestone 3: Relations
-  const [maritalStatus, setMaritalStatus] = useState('single');
-  const [guardianName, setGuardianName] = useState('');
-  const [guardianPhone, setGuardianPhone] = useState('');
-  const [familyRelationType, setFamilyRelationType] = useState('Parent');
+  const [maritalStatus, setMaritalStatus] = useState<string>(() => getLocalItem('marital_status', 'single'));
+  const [guardianName, setGuardianName] = useState<string>(() => getLocalItem('guardian_name', ''));
+  const [guardianPhone, setGuardianPhone] = useState<string>(() => getLocalItem('guardian_phone', ''));
+  const [familyRelationType, setFamilyRelationType] = useState<string>(() => getLocalItem('family_relation_type', 'Parent'));
 
   // Milestone 4: Education & Work
-  const [educationStage, setEducationStage] = useState('univ');
-  const [facultyOrSchool, setFacultyOrSchool] = useState('');
-  const [profession, setProfession] = useState('');
-  const [workplace, setWorkplace] = useState('');
+  const [educationStage, setEducationStage] = useState<string>(() => getLocalItem('education_stage', 'univ'));
+  const [facultyOrSchool, setFacultyOrSchool] = useState<string>(() => getLocalItem('faculty_or_school', ''));
+  const [profession, setProfession] = useState<string>(() => getLocalItem('profession', ''));
+  const [workplace, setWorkplace] = useState<string>(() => getLocalItem('workplace', ''));
 
   // Milestone 5: Locations
-  const [governorate, setGovernorate] = useState(isRtl ? 'القاهرة' : 'Cairo');
-  const [city, setCity] = useState('');
-  const [streetAddress, setStreetAddress] = useState('');
-  const [buildingNumber, setBuildingNumber] = useState('');
-  const [floorNumber, setFloorNumber] = useState('');
-  const [apartmentNumber, setApartmentNumber] = useState('');
-  const [secondaryAddress, setSecondaryAddress] = useState('');
+  const [governorate, setGovernorate] = useState<string>(() => getLocalItem('governorate', isRtl ? 'القاهرة' : 'Cairo'));
+  const [city, setCity] = useState<string>(() => getLocalItem('city', ''));
+  const [streetAddress, setStreetAddress] = useState<string>(() => getLocalItem('street_address', ''));
+  const [buildingNumber, setBuildingNumber] = useState<string>(() => getLocalItem('building_number', ''));
+  const [floorNumber, setFloorNumber] = useState<string>(() => getLocalItem('floor_number', ''));
+  const [apartmentNumber, setApartmentNumber] = useState<string>(() => getLocalItem('apartment_number', ''));
+  const [secondaryAddress, setSecondaryAddress] = useState<string>(() => getLocalItem('secondary_address', ''));
 
   // Milestone 6: Church Commitment
-  const [diocese, setDiocese] = useState('');
-  const [primaryChurch, setPrimaryChurch] = useState('');
-  const [secondaryChurch, setSecondaryChurch] = useState('');
-  const [priestName, setPriestName] = useState('');
+  const [diocese, setDiocese] = useState<string>(() => getLocalItem('diocese', ''));
+  const [primaryChurch, setPrimaryChurch] = useState<string>(() => getLocalItem('primary_church', ''));
+  const [secondaryChurch, setSecondaryChurch] = useState<string>(() => getLocalItem('secondary_church', ''));
+  const [priestName, setPriestName] = useState<string>(() => getLocalItem('priest_name', ''));
 
   // Milestone 7: Additional Info
-  const [selectedHobbies, setSelectedHobbies] = useState<string[]>(['hymns']);
-  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(['ar', 'en']);
+  const [selectedHobbies, setSelectedHobbies] = useState<string[]>(() => getLocalJson('hobbies', ['hymns']));
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(() => getLocalJson('languages', ['ar', 'en']));
 
   // Password Setup
   const [password, setPassword] = useState('');
@@ -202,146 +301,43 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [langSearch, setLangSearch] = useState('');
 
-  // Draft persistence across language switches
-  const [isRestored, setIsRestored] = useState(false);
-
-  useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem('politia_registration_draft');
-      if (saved) {
-        const d = JSON.parse(saved);
-        if (d.mainStepIndex) setMainStepIndex(d.mainStepIndex);
-        if (d.subStepIndex) setSubStepIndex(d.subStepIndex);
-        if (d.englishFullName !== undefined) setEnglishFullName(d.englishFullName);
-        if (d.arabicFullName !== undefined) setArabicFullName(d.arabicFullName);
-        if (d.gender !== undefined) setGender(d.gender);
-        if (d.dob !== undefined) setDob(d.dob);
-        if (d.nationalId !== undefined) setNationalId(d.nationalId);
-        if (d.avatarPreview !== undefined) setAvatarPreview(d.avatarPreview);
-        if (d.photoSkippedGracePeriod !== undefined) setPhotoSkippedGracePeriod(d.photoSkippedGracePeriod);
-        if (d.countryCode !== undefined) setCountryCode(d.countryCode);
-        if (d.phoneNumber !== undefined) setPhoneNumber(d.phoneNumber);
-        if (d.email !== undefined) setEmail(d.email);
-        if (d.landlineAreaCode !== undefined) setLandlineAreaCode(d.landlineAreaCode);
-        if (d.landlineNumber !== undefined) setLandlineNumber(d.landlineNumber);
-        if (d.socials !== undefined) setSocials(d.socials);
-        if (d.maritalStatus !== undefined) setMaritalStatus(d.maritalStatus);
-        if (d.guardianName !== undefined) setGuardianName(d.guardianName);
-        if (d.guardianPhone !== undefined) setGuardianPhone(d.guardianPhone);
-        if (d.familyRelationType !== undefined) setFamilyRelationType(d.familyRelationType);
-        if (d.educationStage !== undefined) setEducationStage(d.educationStage);
-        if (d.facultyOrSchool !== undefined) setFacultyOrSchool(d.facultyOrSchool);
-        if (d.profession !== undefined) setProfession(d.profession);
-        if (d.workplace !== undefined) setWorkplace(d.workplace);
-        if (d.governorate !== undefined) setGovernorate(d.governorate);
-        if (d.city !== undefined) setCity(d.city);
-        if (d.streetAddress !== undefined) setStreetAddress(d.streetAddress);
-        if (d.buildingNumber !== undefined) setBuildingNumber(d.buildingNumber);
-        if (d.floorNumber !== undefined) setFloorNumber(d.floorNumber);
-        if (d.apartmentNumber !== undefined) setApartmentNumber(d.apartmentNumber);
-        if (d.secondaryAddress !== undefined) setSecondaryAddress(d.secondaryAddress);
-        if (d.diocese !== undefined) setDiocese(d.diocese);
-        if (d.primaryChurch !== undefined) setPrimaryChurch(d.primaryChurch);
-        if (d.secondaryChurch !== undefined) setSecondaryChurch(d.secondaryChurch);
-        if (d.priestName !== undefined) setPriestName(d.priestName);
-        if (d.selectedHobbies !== undefined) setSelectedHobbies(d.selectedHobbies);
-        if (d.selectedLanguages !== undefined) setSelectedLanguages(d.selectedLanguages);
-      }
-    } catch (e) {
-      console.warn('Failed to restore registration draft', e);
-    } finally {
-      setIsRestored(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!isRestored) return;
-    try {
-      if (mainStepIndex === 9) {
-        sessionStorage.removeItem('politia_registration_draft');
-        return;
-      }
-      const draft = {
-        mainStepIndex,
-        subStepIndex,
-        englishFullName,
-        arabicFullName,
-        gender,
-        dob,
-        nationalId,
-        avatarPreview,
-        photoSkippedGracePeriod,
-        countryCode,
-        phoneNumber,
-        email,
-        landlineAreaCode,
-        landlineNumber,
-        socials,
-        maritalStatus,
-        guardianName,
-        guardianPhone,
-        familyRelationType,
-        educationStage,
-        facultyOrSchool,
-        profession,
-        workplace,
-        governorate,
-        city,
-        streetAddress,
-        buildingNumber,
-        floorNumber,
-        apartmentNumber,
-        secondaryAddress,
-        diocese,
-        primaryChurch,
-        secondaryChurch,
-        priestName,
-        selectedHobbies,
-        selectedLanguages,
-      };
-      sessionStorage.setItem('politia_registration_draft', JSON.stringify(draft));
-    } catch (e) {
-      console.warn('Failed to save registration draft', e);
-    }
-  }, [
-    isRestored,
-    mainStepIndex,
-    subStepIndex,
-    englishFullName,
-    arabicFullName,
-    gender,
-    dob,
-    nationalId,
-    avatarPreview,
-    photoSkippedGracePeriod,
-    countryCode,
-    phoneNumber,
-    email,
-    landlineAreaCode,
-    landlineNumber,
-    socials,
-    maritalStatus,
-    guardianName,
-    guardianPhone,
-    familyRelationType,
-    educationStage,
-    facultyOrSchool,
-    profession,
-    workplace,
-    governorate,
-    city,
-    streetAddress,
-    buildingNumber,
-    floorNumber,
-    apartmentNumber,
-    secondaryAddress,
-    diocese,
-    primaryChurch,
-    secondaryChurch,
-    priestName,
-    selectedHobbies,
-    selectedLanguages,
-  ]);
+  // Sync state one by one into localStorage
+  useEffect(() => { setLocalItem('main_step', mainStepIndex); }, [mainStepIndex]);
+  useEffect(() => { setLocalItem('sub_step', subStepIndex); }, [subStepIndex]);
+  useEffect(() => { setLocalItem('full_name_en', englishFullName); }, [englishFullName]);
+  useEffect(() => { setLocalItem('full_name_ar', arabicFullName); }, [arabicFullName]);
+  useEffect(() => { setLocalItem('gender', gender); }, [gender]);
+  useEffect(() => { setLocalItem('dob', dob); }, [dob]);
+  useEffect(() => { setLocalItem('national_id', nationalId); }, [nationalId]);
+  useEffect(() => { setLocalItem('avatar_preview', avatarPreview); }, [avatarPreview]);
+  useEffect(() => { setLocalItem('photo_skipped', photoSkippedGracePeriod); }, [photoSkippedGracePeriod]);
+  useEffect(() => { setLocalItem('country_code', countryCode); }, [countryCode]);
+  useEffect(() => { setLocalItem('phone_number', phoneNumber); }, [phoneNumber]);
+  useEffect(() => { setLocalItem('email', email); }, [email]);
+  useEffect(() => { setLocalItem('landline_area_code', landlineAreaCode); }, [landlineAreaCode]);
+  useEffect(() => { setLocalItem('landline_number', landlineNumber); }, [landlineNumber]);
+  useEffect(() => { setLocalItem('socials', socials); }, [socials]);
+  useEffect(() => { setLocalItem('marital_status', maritalStatus); }, [maritalStatus]);
+  useEffect(() => { setLocalItem('guardian_name', guardianName); }, [guardianName]);
+  useEffect(() => { setLocalItem('guardian_phone', guardianPhone); }, [guardianPhone]);
+  useEffect(() => { setLocalItem('family_relation_type', familyRelationType); }, [familyRelationType]);
+  useEffect(() => { setLocalItem('education_stage', educationStage); }, [educationStage]);
+  useEffect(() => { setLocalItem('faculty_or_school', facultyOrSchool); }, [facultyOrSchool]);
+  useEffect(() => { setLocalItem('profession', profession); }, [profession]);
+  useEffect(() => { setLocalItem('workplace', workplace); }, [workplace]);
+  useEffect(() => { setLocalItem('governorate', governorate); }, [governorate]);
+  useEffect(() => { setLocalItem('city', city); }, [city]);
+  useEffect(() => { setLocalItem('street_address', streetAddress); }, [streetAddress]);
+  useEffect(() => { setLocalItem('building_number', buildingNumber); }, [buildingNumber]);
+  useEffect(() => { setLocalItem('floor_number', floorNumber); }, [floorNumber]);
+  useEffect(() => { setLocalItem('apartment_number', apartmentNumber); }, [apartmentNumber]);
+  useEffect(() => { setLocalItem('secondary_address', secondaryAddress); }, [secondaryAddress]);
+  useEffect(() => { setLocalItem('diocese', diocese); }, [diocese]);
+  useEffect(() => { setLocalItem('primary_church', primaryChurch); }, [primaryChurch]);
+  useEffect(() => { setLocalItem('secondary_church', secondaryChurch); }, [secondaryChurch]);
+  useEffect(() => { setLocalItem('priest_name', priestName); }, [priestName]);
+  useEffect(() => { setLocalItem('hobbies', selectedHobbies); }, [selectedHobbies]);
+  useEffect(() => { setLocalItem('languages', selectedLanguages); }, [selectedLanguages]);
 
   // Names cleanup & derived values
   const fullEnglishName = englishFullName.trim().replace(/\s+/g, ' ');
@@ -830,6 +826,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
         return;
       }
 
+      clearAllRegistrationDrafts();
       setMainStepIndex(9); // Success
       setLoading(false);
 
