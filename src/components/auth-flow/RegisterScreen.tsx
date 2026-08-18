@@ -10,6 +10,10 @@ import {
   User,
   Trash2,
   Pencil,
+  CheckCircle2,
+  ShieldCheck,
+  KeyRound,
+  RotateCw,
 } from 'lucide-react';
 import { CameraCaptureModal, PhotoEditorModal } from '@/components/media';
 import { useRouter, Link } from '@/i18n/routing';
@@ -28,6 +32,7 @@ import {
   checkArabicNameCollision,
   checkNationalIdCollision,
 } from '@/app/actions/auth-check';
+import { sendPhoneOtp, verifyPhoneOtp } from '@/app/actions/phone-otp';
 import { GenderType, SocialPlatform } from '@/types/database.types';
 import {
   REGISTRATION_SCHEMA,
@@ -161,6 +166,7 @@ function clearAllRegistrationDrafts() {
     'country_iso',
     'country_code',
     'phone_number',
+    'phone_verified',
     'email',
     'landline_area_code',
     'landline_number',
@@ -229,6 +235,15 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const [countryCode, setCountryCode] = useState<string>('+20');
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [isPhoneFocused, setIsPhoneFocused] = useState(false);
+  const [isPhoneVerified, setIsPhoneVerified] = useState<boolean>(false);
+  const [isPhoneOtpActive, setIsPhoneOtpActive] = useState<boolean>(false);
+  const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
+  const [otpResendTimer, setOtpResendTimer] = useState<number>(0);
+  const [demoOtpNotice, setDemoOtpNotice] = useState<string | null>(null);
+  const [isSendingOtp, setIsSendingOtp] = useState<boolean>(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState<boolean>(false);
+  const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
   const [email, setEmail] = useState<string>('');
   const [isEmailFocused, setIsEmailFocused] = useState(false);
   const [landlineAreaCode, setLandlineAreaCode] = useState<string>('');
@@ -317,6 +332,8 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
       if (cCode) setCountryCode(cCode);
       const ph = getLocalItem('phone_number', '');
       if (ph) setPhoneNumber(ph);
+      const pv = getLocalItem('phone_verified', '');
+      if (pv === 'true') setIsPhoneVerified(true);
       const em = getLocalItem('email', '');
       if (em) setEmail(em);
       const lAc = getLocalItem('landline_area_code', '');
@@ -370,6 +387,17 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
     } catch {}
   }, []);
 
+  // OTP Countdown timer
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (otpResendTimer > 0) {
+      interval = setInterval(() => {
+        setOtpResendTimer((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [otpResendTimer]);
+
   // Sync state one by one into localStorage
   useEffect(() => { if (isMounted) setLocalItem('main_step', mainStepIndex); }, [mainStepIndex, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('sub_step', subStepIndex); }, [subStepIndex, isMounted]);
@@ -383,6 +411,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   useEffect(() => { if (isMounted) setLocalItem('country_iso', countryIso); }, [countryIso, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('country_code', countryCode); }, [countryCode, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('phone_number', phoneNumber); }, [phoneNumber, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('phone_verified', isPhoneVerified); }, [isPhoneVerified, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('email', email); }, [email, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('landline_area_code', landlineAreaCode); }, [landlineAreaCode, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('landline_number', landlineNumber); }, [landlineNumber, isMounted]);
@@ -665,6 +694,119 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
     });
   };
 
+  // Phone OTP Handlers
+  const handleSendPhoneOtp = async () => {
+    const cleanPhone = phoneNumber.trim().replace(/\D/g, '');
+    if (!cleanPhone) {
+      setErrorMessage(isRtl ? 'يرجى إدخال رقم الهاتف المحمول' : 'Please enter your mobile phone number');
+      return;
+    }
+    if (countryCode === '+20') {
+      const isValidEgy = /^(010|011|012|015)\d{8}$/.test(cleanPhone) || /^1[0125]\d{8}$/.test(cleanPhone);
+      if (!isValidEgy) {
+        setErrorMessage(
+          isRtl
+            ? 'يرجى إدخال رقم محمول مصري صحيح (11 رقماً يبدأ بـ 010، 011، 012، أو 015)'
+            : 'Please enter a valid Egyptian mobile number (11 digits starting with 010, 011, 012, or 015)'
+        );
+        return;
+      }
+    } else if (cleanPhone.length < 7 || cleanPhone.length > 15) {
+      setErrorMessage(isRtl ? 'يرجى إدخال رقم هاتف صحيح' : 'Please enter a valid phone number');
+      return;
+    }
+
+    setErrorMessage(null);
+    setIsSendingOtp(true);
+    try {
+      const res = await sendPhoneOtp(countryCode, phoneNumber);
+      if (res.success) {
+        setIsPhoneOtpActive(true);
+        setOtpResendTimer(30);
+        setOtpDigits(['', '', '', '', '', '']);
+        if (res.demoOtp) {
+          setDemoOtpNotice(res.demoOtp);
+        }
+        setTimeout(() => {
+          otpInputRefs.current[0]?.focus();
+        }, 120);
+      } else {
+        setErrorMessage(res.error || (isRtl ? 'فشل إرسال رمز التحقق' : 'Failed to send verification code.'));
+      }
+    } catch {
+      setErrorMessage(isRtl ? 'حدث خطأ في الشبكة' : 'Network error sending OTP.');
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const handleVerifyOtp = async (codeToVerify?: string) => {
+    const code = codeToVerify || otpDigits.join('');
+    if (code.length !== 6) {
+      setErrorMessage(isRtl ? 'يرجى إدخال رمز التحقق المكون من 6 أرقام' : 'Please enter the complete 6-digit code');
+      return;
+    }
+
+    setErrorMessage(null);
+    setIsVerifyingOtp(true);
+    try {
+      const res = await verifyPhoneOtp(countryCode, phoneNumber, code);
+      if (res.success) {
+        setIsPhoneVerified(true);
+        setIsPhoneOtpActive(false);
+        setErrorMessage(null);
+        // Automatically advance to sub-step 2 (Email)
+        setSlideDirection('forward');
+        setSubStepIndex(2);
+      } else {
+        setErrorMessage(res.error || (isRtl ? 'رمز التحقق غير صحيح أو منتهي الصلاحية' : 'Invalid or expired verification code.'));
+      }
+    } catch {
+      setErrorMessage(isRtl ? 'حدث خطأ أثناء التحقق' : 'Error verifying OTP code.');
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
+
+  const handleOtpDigitChange = (index: number, val: string) => {
+    const sanitized = val.replace(/\D/g, '');
+    if (sanitized.length > 1) {
+      const pasted = sanitized.slice(0, 6).split('');
+      const newDigits = [...otpDigits];
+      pasted.forEach((d, idx) => {
+        if (index + idx < 6) newDigits[index + idx] = d;
+      });
+      setOtpDigits(newDigits);
+      const nextFocus = Math.min(index + pasted.length, 5);
+      otpInputRefs.current[nextFocus]?.focus();
+      if (newDigits.every((d) => d.length === 1)) {
+        handleVerifyOtp(newDigits.join(''));
+      }
+      return;
+    }
+
+    const singleDigit = sanitized.slice(-1);
+    const newDigits = [...otpDigits];
+    newDigits[index] = singleDigit;
+    setOtpDigits(newDigits);
+
+    if (errorMessage) setErrorMessage(null);
+
+    if (singleDigit && index < 5) {
+      otpInputRefs.current[index + 1]?.focus();
+    }
+
+    if (singleDigit && newDigits.every((d) => d.length === 1)) {
+      handleVerifyOtp(newDigits.join(''));
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !otpDigits[index] && index > 0) {
+      otpInputRefs.current[index - 1]?.focus();
+    }
+  };
+
   // Navigation Logic
   const handleAdvance = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -738,6 +880,16 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
           setErrorMessage(isRtl ? 'يرجى إدخال رقم هاتف صحيح' : 'Please enter a valid phone number');
           return;
         }
+
+        // Phone OTP Verification Gate
+        if (!isPhoneVerified) {
+          if (isPhoneOtpActive) {
+            handleVerifyOtp();
+          } else {
+            handleSendPhoneOtp();
+          }
+          return;
+        }
       } else if (subStepIndex === 2) {
         const trimmedEmail = email.trim();
         if (trimmedEmail) {
@@ -791,6 +943,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const handleBack = () => {
     setErrorMessage(null);
     setSlideDirection('backward');
+    if (mainStepIndex === 2 && subStepIndex === 1 && isPhoneOtpActive) {
+      setIsPhoneOtpActive(false);
+      return;
+    }
     if (mainStepIndex === 8) {
       // Back from Password to Step 7 last sub-step
       setMainStepIndex(7);
@@ -913,6 +1069,14 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
   // Header texts
   const getHeader = () => {
+    if (mainStepIndex === 2 && subStepIndex === 1 && isPhoneOtpActive) {
+      return {
+        title: isRtl ? 'تأكيد رقم الهاتف' : 'Verify your phone number',
+        subtitle: isRtl
+          ? `أدخل رمز التحقق المكون من 6 أرقام المرسل إلى ${countryCode} ${phoneNumber}`
+          : `Enter the 6-digit verification code sent to ${countryCode} ${phoneNumber}`,
+      };
+    }
     if (mainStepIndex === 8) {
       return {
         title: isRtl ? 'تعيين كلمة المرور' : 'Create a Password',
@@ -1356,92 +1520,202 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 key={`2-${subStepIndex}`}
                 className={`w-full flex-1 flex flex-col justify-center py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
               >
-                {/* 2.1: Phone Number */}
+                {/* 2.1: Phone Number & OTP Verification */}
               {subStepIndex === 1 && (
                 <div className="space-y-4 py-2">
-                  {/* Country Selector */}
-                  <div className="relative">
-                    <select
-                      id="reg-country"
-                      value={countryIso}
-                      onChange={(e) => {
-                        const iso = e.target.value;
-                        setCountryIso(iso);
-                        const found = getCountryByIso(iso);
-                        if (found) setCountryCode(found.dialCode);
-                      }}
-                      className="w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] border border-[#747775] dark:border-[#8E918F] focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] focus:outline-none transition-all box-border cursor-pointer appearance-none"
-                    >
-                      {ALL_COUNTRIES.map((c) => (
-                        <option
-                          key={c.iso}
-                          value={c.iso}
-                          className="bg-white dark:bg-[#1B212D] text-[#1F1F1F] dark:text-[#E3E3E3]"
+                  {isPhoneOtpActive ? (
+                    /* 6-Digit OTP Verification View */
+                    <div className="space-y-5 animate-fadeIn">
+                      {/* Active Phone Chip */}
+                      <div className="flex items-center justify-between p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+                        <div className="flex items-center gap-2 text-xs font-mono font-semibold text-slate-800 dark:text-slate-200">
+                          <span className="text-base">{getCountryByIso(countryIso)?.flag || '🌐'}</span>
+                          <span>{countryCode} {phoneNumber}</span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setIsPhoneOtpActive(false);
+                            if (errorMessage) setErrorMessage(null);
+                          }}
+                          className="text-xs font-semibold text-[#0B57D0] dark:text-[#93C5FD] hover:underline cursor-pointer flex items-center gap-1"
                         >
-                          {c.flag} {getLocalizedCountryName(c.iso, locale)} ({c.dialCode})
-                        </option>
-                      ))}
-                    </select>
-                    <label
-                      htmlFor="reg-country"
-                      className="absolute -top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D] text-[#0B57D0] dark:text-[#A8C7FA] start-3 pointer-events-none"
-                    >
-                      <bdi>{isRtl ? 'الدولة' : 'Country'}</bdi>
-                    </label>
-                    <div className="absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 dark:text-slate-400">
-                      <ChevronDown className="w-4 h-4" />
-                    </div>
-                  </div>
+                          <Pencil className="w-3 h-3" />
+                          <span><bdi>{isRtl ? 'تعديل الرقم' : 'Edit Number'}</bdi></span>
+                        </button>
+                      </div>
 
-                  {/* Phone Number Input with Dial Code Badge */}
-                  <div className="flex gap-2.5 items-center">
-                    <div className="h-[56px] px-3.5 flex items-center justify-center rounded-[4px] border border-[#747775] dark:border-[#8E918F] bg-slate-50 dark:bg-slate-800/50 text-[#1F1F1F] dark:text-[#E3E3E3] font-mono text-sm font-semibold shrink-0">
-                      {countryCode}
-                    </div>
+                      {/* 6-Box Segmented OTP Inputs */}
+                      <div className="space-y-2">
+                        <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 text-center">
+                          <bdi>{isRtl ? 'أدخل رمز التحقق (6 أرقام)' : 'Enter 6-digit verification code'}</bdi>
+                        </label>
+                        <div className="flex items-center justify-center gap-2 sm:gap-2.5" dir="ltr">
+                          {otpDigits.map((digit, index) => (
+                            <input
+                              key={index}
+                              ref={(el) => { otpInputRefs.current[index] = el; }}
+                              type="text"
+                              inputMode="numeric"
+                              pattern="\d*"
+                              maxLength={1}
+                              value={digit}
+                              autoFocus={index === 0}
+                              onChange={(e) => handleOtpDigitChange(index, e.target.value)}
+                              onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                              className={`w-11 sm:w-12 h-13 sm:h-14 text-center font-mono text-xl sm:text-2xl font-bold rounded-lg border bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3] focus:outline-none transition-all box-border ${
+                                digit
+                                  ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/20 dark:bg-blue-900/10'
+                                  : 'border-[#747775] dark:border-[#8E918F]'
+                              } focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] shadow-sm`}
+                            />
+                          ))}
+                        </div>
+                      </div>
 
-                    <div className="flex-1 relative">
-                      <input
-                        id="reg-phone"
-                        type="tel"
-                        dir="ltr"
-                        autoFocus
-                        placeholder={
-                          getCountryByIso(countryIso)?.placeholder ||
-                          '010 1234 5678'
-                        }
-                        value={phoneNumber}
-                        onFocus={() => setIsPhoneFocused(true)}
-                        onBlur={() => setIsPhoneFocused(false)}
-                        onChange={(e) => {
-                          setPhoneNumber(e.target.value);
-                          if (errorMessage) setErrorMessage(null);
-                        }}
-                        className={`w-full h-[56px] px-4 text-[15px] font-mono text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
-                          errorMessage
-                            ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                            : isPhoneFocused
-                            ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                            : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
-                        }`}
-                      />
-                      <label
-                        htmlFor="reg-phone"
-                        className={`absolute pointer-events-none transition-all duration-150 start-3 ${
-                          isPhoneFloating
-                            ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
-                            : 'top-4 text-[15px]'
-                        } ${
-                          errorMessage
-                            ? 'text-[#B3261E] dark:text-[#F2B8B5]'
-                            : isPhoneFocused
-                            ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                            : 'text-[#444746] dark:text-[#8E918F]'
-                        }`}
-                      >
-                        <bdi>{isRtl ? 'رقم الهاتف المحمول' : 'Mobile Phone Number'}</bdi>
-                      </label>
+                      {/* Resend Timer & Demo Code Badge */}
+                      <div className="flex flex-col items-center gap-2 pt-1">
+                        <div className="flex items-center justify-center gap-2 text-xs">
+                          {otpResendTimer > 0 ? (
+                            <span className="text-slate-500 dark:text-slate-400">
+                              <bdi>
+                                {isRtl
+                                  ? `إعادة إرسال الرمز خلال 0:${otpResendTimer < 10 ? '0' : ''}${otpResendTimer}`
+                                  : `Resend code in 0:${otpResendTimer < 10 ? '0' : ''}${otpResendTimer}`}
+                              </bdi>
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={handleSendPhoneOtp}
+                              disabled={isSendingOtp}
+                              className="text-[#0B57D0] dark:text-[#93C5FD] font-semibold hover:underline cursor-pointer flex items-center gap-1.5"
+                            >
+                              <RotateCw className={`w-3 h-3 ${isSendingOtp ? 'animate-spin' : ''}`} />
+                              <span><bdi>{isRtl ? 'إعادة إرسال الرمز' : 'Resend Code'}</bdi></span>
+                            </button>
+                          )}
+                        </div>
+
+                        {demoOtpNotice && (
+                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-mono">
+                            <span>💡</span>
+                            <span><bdi>{isRtl ? `رمز التجربة: ${demoOtpNotice}` : `Test code: ${demoOtpNotice}`}</bdi></span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    /* Phone Number & Country Code View */
+                    <div className="space-y-4">
+                      {/* Country Selector */}
+                      <div className="relative">
+                        <select
+                          id="reg-country"
+                          value={countryIso}
+                          onChange={(e) => {
+                            const iso = e.target.value;
+                            setCountryIso(iso);
+                            const found = getCountryByIso(iso);
+                            if (found) setCountryCode(found.dialCode);
+                            setIsPhoneVerified(false);
+                          }}
+                          className="w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] border border-[#747775] dark:border-[#8E918F] focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] focus:outline-none transition-all box-border cursor-pointer appearance-none"
+                        >
+                          {ALL_COUNTRIES.map((c) => (
+                            <option
+                              key={c.iso}
+                              value={c.iso}
+                              className="bg-white dark:bg-[#1B212D] text-[#1F1F1F] dark:text-[#E3E3E3]"
+                            >
+                              {c.flag} {getLocalizedCountryName(c.iso, locale)} ({c.dialCode})
+                            </option>
+                          ))}
+                        </select>
+                        <label
+                          htmlFor="reg-country"
+                          className="absolute -top-2.5 px-1.5 text-xs bg-white dark:bg-[#1B212D] text-[#0B57D0] dark:text-[#A8C7FA] start-3 pointer-events-none z-10"
+                        >
+                          <bdi>{isRtl ? 'الدولة' : 'Country'}</bdi>
+                        </label>
+                        <div className="absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 dark:text-slate-400">
+                          <ChevronDown className="w-4 h-4" />
+                        </div>
+                      </div>
+
+                      {/* Phone Number Input with Dial Code Badge */}
+                      <div className="flex gap-2.5 items-center">
+                        <div className="h-[56px] px-3.5 flex items-center justify-center rounded-[4px] border border-[#747775] dark:border-[#8E918F] bg-slate-50 dark:bg-slate-800/50 text-[#1F1F1F] dark:text-[#E3E3E3] font-mono text-sm font-semibold shrink-0">
+                          {countryCode}
+                        </div>
+
+                        <div className="flex-1 relative">
+                          <input
+                            id="reg-phone"
+                            type="tel"
+                            dir="ltr"
+                            autoFocus
+                            placeholder={
+                              isPhoneFocused || isPhoneFloating
+                                ? getCountryByIso(countryIso)?.placeholder || '010 1234 5678'
+                                : ''
+                            }
+                            value={phoneNumber}
+                            onFocus={() => setIsPhoneFocused(true)}
+                            onBlur={() => setIsPhoneFocused(false)}
+                            onChange={(e) => {
+                              setPhoneNumber(e.target.value);
+                              setIsPhoneVerified(false);
+                              if (errorMessage) setErrorMessage(null);
+                            }}
+                            className={`w-full h-[56px] px-4 text-[15px] font-mono text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
+                              errorMessage
+                                ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                                : isPhoneFocused
+                                ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                                : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                            }`}
+                          />
+                          <label
+                            htmlFor="reg-phone"
+                            className={`absolute pointer-events-none transition-all duration-150 start-3 z-10 ${
+                              isPhoneFloating
+                                ? '-top-2.5 px-1.5 text-xs bg-white dark:bg-[#1B212D]'
+                                : 'top-4 text-[15px]'
+                            } ${
+                              errorMessage
+                                ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                                : isPhoneFocused
+                                ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                                : 'text-[#444746] dark:text-[#8E918F]'
+                            }`}
+                          >
+                            <bdi>{isRtl ? 'رقم الهاتف المحمول' : 'Mobile Phone Number'}</bdi>
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Verified Badge */}
+                      {isPhoneVerified && (
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 animate-fadeIn">
+                          <div className="flex items-center gap-2 text-xs font-semibold">
+                            <CheckCircle2 className="w-4 h-4" />
+                            <span><bdi>{isRtl ? 'تم تأكيد رقم الهاتف بنجاح ✓' : 'Phone Number Verified ✓'}</bdi></span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsPhoneVerified(false);
+                              setIsPhoneOtpActive(false);
+                            }}
+                            className="text-xs text-slate-500 dark:text-slate-400 hover:underline cursor-pointer"
+                          >
+                            <bdi>{isRtl ? 'تغيير' : 'Change'}</bdi>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -1600,9 +1874,27 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
                   <button
                     type="submit"
-                    className="bg-[#0B57D0] hover:bg-[#0842A0] active:bg-[#06337E] text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                    disabled={isSendingOtp || isVerifyingOtp}
+                    className="bg-[#0B57D0] hover:bg-[#0842A0] active:bg-[#06337E] text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-sm disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    <bdi>{isRtl ? 'التالي' : 'Next'}</bdi>
+                    {(isSendingOtp || isVerifyingOtp) && <Loader2 className="w-4 h-4 animate-spin" />}
+                    <bdi>
+                      {subStepIndex === 1
+                        ? isPhoneOtpActive
+                          ? isRtl
+                            ? 'تحقق ومتابعة'
+                            : 'Verify & Continue'
+                          : !isPhoneVerified
+                          ? isRtl
+                            ? 'إرسال رمز التحقق'
+                            : 'Send Verification Code'
+                          : isRtl
+                          ? 'التالي'
+                          : 'Next'
+                        : isRtl
+                        ? 'التالي'
+                        : 'Next'}
+                    </bdi>
                   </button>
                 </div>
               </div>
