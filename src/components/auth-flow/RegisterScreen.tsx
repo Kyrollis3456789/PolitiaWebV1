@@ -929,17 +929,17 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   </div>
                 </div>
               )}
-            </div>
 
               {/* Error Alert */}
               {errorMessage && (
-                <div id="register-error-alert" className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5] mt-1.5">
+                <div id="register-error-alert" className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5] mt-3">
                   <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#B3261E] dark:bg-[#F2B8B5] text-white dark:text-[#601410] text-[11px] font-bold select-none leading-none pb-[1px]">
                     !
                   </span>
                   <bdi id="error-message-text">{errorMessage}</bdi>
                 </div>
               )}
+            </div>
 
               {/* Navigation Action Buttons */}
               <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
@@ -1160,17 +1160,17 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   </div>
                 </div>
               )}
-            </div>
 
               {/* Error Alert */}
               {errorMessage && (
-                <div id="register-error-alert" className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5] mt-1.5">
+                <div id="register-error-alert" className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5] mt-3">
                   <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#B3261E] dark:bg-[#F2B8B5] text-white dark:text-[#601410] text-[11px] font-bold select-none leading-none pb-[1px]">
                     !
                   </span>
                   <bdi id="error-message-text">{errorMessage}</bdi>
                 </div>
               )}
+            </div>
 
               {/* Navigation Action Buttons */}
               <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">

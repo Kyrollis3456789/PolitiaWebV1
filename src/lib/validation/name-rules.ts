@@ -59,23 +59,29 @@ export function validateEnglishName(
     };
   }
 
-  if (words < 4) {
-    return {
-      isValid: false,
-      wordCount: words,
-      requiredWordCount: 4,
-      error: 'Please enter your full four-part name (First, Middle, Grandfather, Family name)',
-      errorAr: 'يرجى إدخال الاسم الرباعي بالكامل (الاسم الأول، الأب، الجد، العائلة)',
-    };
-  }
+  if (words < requiredCount) {
+    const remaining = requiredCount - words;
+    const nameLabel = words === 1 ? 'name' : 'names';
+    const remLabel = remaining === 1 ? 'name' : 'names';
+    const errorMsg = `You entered ${words} ${nameLabel}. Please enter ${remaining} more ${remLabel} to make it a ${requiredCount}-part name.`;
 
-  if (hasCollision && words < 5) {
+    let errorArMsg = '';
+    if (words === 1) {
+      errorArMsg = `لقد أدخلت اسماً واحداً. يرجى إدخال ${remaining} أسماء أخرى ليكون الاسم ${requiredCount === 5 ? 'خماسياً' : 'رباعياً'}.`;
+    } else if (words === 2) {
+      errorArMsg = `لقد أدخلت اسمين. يرجى إدخال ${remaining} ${remaining === 2 ? 'اسمين آخرين' : 'أسماء أخرى'} ليكون الاسم ${requiredCount === 5 ? 'خماسياً' : 'رباعياً'}.`;
+    } else if (words === 3) {
+      errorArMsg = `لقد أدخلت 3 أسماء. يرجى إدخال ${remaining} ${remaining === 1 ? 'اسم واحد آخر' : 'اسمين آخرين'} ليكون الاسم ${requiredCount === 5 ? 'خماسياً' : 'رباعياً'}.`;
+    } else if (words === 4 && requiredCount === 5) {
+      errorArMsg = `لقد أدخلت 4 أسماء. يرجى إدخال اسم واحد آخر ليكون الاسم خماسياً.`;
+    }
+
     return {
       isValid: false,
       wordCount: words,
-      requiredWordCount: 5,
-      error: 'Name collision detected. Please provide a 5th name.',
-      errorAr: 'تم اكتشاف تطابق في الاسم. يرجى إدخال اسم خامس لفض التشابه.',
+      requiredWordCount: requiredCount,
+      error: errorMsg,
+      errorAr: errorArMsg || `يرجى إدخال الاسم الرباعي بالكامل`,
     };
   }
 
@@ -117,13 +123,29 @@ export function validateArabicName(
     };
   }
 
-  if (words < 4) {
+  if (words < minRequired) {
+    const remaining = minRequired - words;
+    const nameLabel = words === 1 ? 'name' : 'names';
+    const remLabel = remaining === 1 ? 'name' : 'names';
+    const errorMsg = `You entered ${words} ${nameLabel}. Please enter ${remaining} more ${remLabel} to make it a ${minRequired}-part name in Arabic.`;
+
+    let errorArMsg = '';
+    if (words === 1) {
+      errorArMsg = `لقد أدخلت اسماً واحداً. يرجى إدخال ${remaining} أسماء أخرى باللغة العربية ليكون الاسم ${minRequired === 5 ? 'خماسياً' : 'رباعياً'}.`;
+    } else if (words === 2) {
+      errorArMsg = `لقد أدخلت اسمين. يرجى إدخال ${remaining} ${remaining === 2 ? 'اسمين آخرين' : 'أسماء أخرى'} باللغة العربية ليكون الاسم ${minRequired === 5 ? 'خماسياً' : 'رباعياً'}.`;
+    } else if (words === 3) {
+      errorArMsg = `لقد أدخلت 3 أسماء. يرجى إدخال ${remaining} ${remaining === 1 ? 'اسم واحد آخر' : 'اسمين آخرين'} باللغة العربية ليكون الاسم ${minRequired === 5 ? 'خماسياً' : 'رباعياً'}.`;
+    } else if (words === 4 && minRequired === 5) {
+      errorArMsg = `لقد أدخلت 4 أسماء. يرجى إدخال اسم واحد آخر باللغة العربية ليكون الاسم خماسياً.`;
+    }
+
     return {
       isValid: false,
       wordCount: words,
-      requiredWordCount: 4,
-      error: 'Please enter your full four-part name in Arabic',
-      errorAr: 'يرجى إدخال الاسم الرباعي بالكامل باللغة العربية',
+      requiredWordCount: minRequired,
+      error: errorMsg,
+      errorAr: errorArMsg || `يرجى إدخال الاسم الرباعي بالكامل باللغة العربية`,
     };
   }
 
