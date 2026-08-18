@@ -899,11 +899,13 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                     />
                     <label
                       htmlFor="reg-dob"
-                      className={`absolute pointer-events-none transition-all duration-150 start-3 ${
-                        isDobFloating
-                          ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
-                          : 'top-4 text-[15px]'
-                      } text-[#0B57D0] dark:text-[#A8C7FA]`}
+                      className={`absolute pointer-events-none transition-all duration-150 start-3 -top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D] ${
+                        errorMessage
+                          ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                          : isDobFocused
+                          ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                          : 'text-[#444746] dark:text-[#8E918F]'
+                      }`}
                     >
                       <bdi>{isRtl ? 'تاريخ الميلاد' : 'Date of Birth'}</bdi>
                     </label>
