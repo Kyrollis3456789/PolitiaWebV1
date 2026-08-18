@@ -26,6 +26,7 @@ import {
 } from '@/lib/validation/name-rules';
 import { validateEgyptianNationalId } from '@/lib/validation/national-id';
 import { validateBirthday } from '@/lib/validation/date-rules';
+import { validatePhoneNumber, normalizeDigits, COUNTRY_PHONE_RULES } from '@/lib/validation/phone-rules';
 import { createAccountAction, CreateAccountPayload } from '@/app/actions/create-account';
 import {
   checkEnglishNameCollision,
@@ -696,23 +697,9 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
   // Phone OTP Handlers
   const handleSendPhoneOtp = async () => {
-    const cleanPhone = phoneNumber.trim().replace(/\D/g, '');
-    if (!cleanPhone) {
-      setErrorMessage(isRtl ? 'يرجى إدخال رقم الهاتف المحمول' : 'Please enter your mobile phone number');
-      return;
-    }
-    if (countryCode === '+20') {
-      const isValidEgy = /^(010|011|012|015)\d{8}$/.test(cleanPhone) || /^1[0125]\d{8}$/.test(cleanPhone);
-      if (!isValidEgy) {
-        setErrorMessage(
-          isRtl
-            ? 'يرجى إدخال رقم محمول مصري صحيح (11 رقماً يبدأ بـ 010، 011، 012، أو 015)'
-            : 'Please enter a valid Egyptian mobile number (11 digits starting with 010, 011, 012, or 015)'
-        );
-        return;
-      }
-    } else if (cleanPhone.length < 7 || cleanPhone.length > 15) {
-      setErrorMessage(isRtl ? 'يرجى إدخال رقم هاتف صحيح' : 'Please enter a valid phone number');
+    const val = validatePhoneNumber(phoneNumber, countryIso, countryCode, isRtl);
+    if (!val.isValid) {
+      setErrorMessage(val.error || (isRtl ? 'يرجى إدخال رقم هاتف صحيح' : 'Please enter a valid phone number'));
       return;
     }
 
@@ -860,24 +847,9 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
       }
     } else if (mainStepIndex === 2) {
       if (subStepIndex === 1) {
-        const cleanPhone = phoneNumber.trim().replace(/\D/g, '');
-        if (!cleanPhone) {
-          setErrorMessage(isRtl ? 'يرجى إدخال رقم الهاتف المحمول' : 'Please enter your mobile phone number');
-          return;
-        }
-        if (countryCode === '+20') {
-          // Egyptian mobile: 11 digits starting with 010, 011, 012, or 015 (or 10 digits without leading 0)
-          const isValidEgy = /^(010|011|012|015)\d{8}$/.test(cleanPhone) || /^1[0125]\d{8}$/.test(cleanPhone);
-          if (!isValidEgy) {
-            setErrorMessage(
-              isRtl
-                ? 'يرجى إدخال رقم محمول مصري صحيح (11 رقماً يبدأ بـ 010، 011، 012، أو 015)'
-                : 'Please enter a valid Egyptian mobile number (11 digits starting with 010, 011, 012, or 015)'
-            );
-            return;
-          }
-        } else if (cleanPhone.length < 7 || cleanPhone.length > 15) {
-          setErrorMessage(isRtl ? 'يرجى إدخال رقم هاتف صحيح' : 'Please enter a valid phone number');
+        const val = validatePhoneNumber(phoneNumber, countryIso, countryCode, isRtl);
+        if (!val.isValid) {
+          setErrorMessage(val.error || (isRtl ? 'يرجى إدخال رقم هاتف صحيح' : 'Please enter a valid phone number'));
           return;
         }
 
@@ -1359,7 +1331,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       onFocus={() => setIsNationalIdFocused(true)}
                       onBlur={() => setIsNationalIdFocused(false)}
                       onChange={(e) => {
-                        setNationalId(e.target.value.replace(/\D/g, ''));
+                        setNationalId(normalizeDigits(e.target.value).replace(/\D/g, ''));
                         if (errorMessage) setErrorMessage(null);
                       }}
                       className={`w-full h-[56px] px-4 text-[16px] font-mono tracking-widest text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
@@ -1664,7 +1636,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                             onFocus={() => setIsPhoneFocused(true)}
                             onBlur={() => setIsPhoneFocused(false)}
                             onChange={(e) => {
-                              setPhoneNumber(e.target.value);
+                              setPhoneNumber(normalizeDigits(e.target.value));
                               setIsPhoneVerified(false);
                               if (errorMessage) setErrorMessage(null);
                             }}
