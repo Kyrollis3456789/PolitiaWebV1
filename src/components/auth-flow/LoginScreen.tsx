@@ -147,14 +147,6 @@ export function LoginScreen({
     else router.push('/register');
   };
 
-  const handleForgotEmail = () => {
-    if (onNavigateForgot) {
-      onNavigateForgot();
-      return;
-    }
-    router.push('/forgot');
-  };
-
   const handleForgotPassword = () => {
     if (onNavigateForgot) {
       onNavigateForgot();
@@ -249,16 +241,6 @@ export function LoginScreen({
                     <bdi>{errorMessage}</bdi>
                   </div>
                 )}
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={handleForgotEmail}
-                  className="text-sm font-medium text-[#0B57D0] dark:text-[#A8C7FA] hover:underline cursor-pointer p-0 bg-transparent border-0"
-                >
-                  <bdi>{t('forgotUsername')}</bdi>
-                </button>
               </div>
 
               <div className="mt-4">
