@@ -1,13 +1,16 @@
 import { createServerClient } from '@supabase/ssr';
 import { type NextRequest, type NextResponse } from 'next/server';
 
-export async function updateSession(request: NextRequest, response: NextResponse) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const DEFAULT_SUPABASE_URL = 'https://cqmkxrftxhgyixwtkuyf.supabase.co';
+const DEFAULT_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_IDlAxsDd43ysd71hzYp71g_L6oE1vBi';
 
-  if (!supabaseUrl || !supabaseKey) {
-    return { response, user: null };
-  }
+export async function updateSession(request: NextRequest, response: NextResponse) {
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL || DEFAULT_SUPABASE_URL;
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    DEFAULT_SUPABASE_PUBLISHABLE_KEY;
 
   // If the i18n middleware produced a redirect (3xx), return immediately
   if (response.status >= 300 && response.status < 400) {
