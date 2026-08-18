@@ -67,14 +67,17 @@ export async function sendPhoneOtp(countryCode: string, phoneNumber: string): Pr
     });
 
     if (!sbError) {
+      console.log('✅ Supabase Twilio Verify success for:', e164Phone);
       return {
         success: true,
         message: `Real SMS verification code sent via Supabase Twilio Verify to ${e164Phone}`,
         provider: 'supabase_twilio_verify',
       };
+    } else {
+      console.warn('⚠️ Supabase Phone SMS Error:', sbError.message, sbError);
     }
   } catch (err) {
-    console.info('Supabase Twilio Verify attempt:', err);
+    console.warn('⚠️ Supabase Phone SMS exception:', err);
   }
 
   // 2. Second priority: Direct Twilio Verify Service (v2 API)
@@ -90,6 +93,7 @@ export async function sendPhoneOtp(countryCode: string, phoneNumber: string): Pr
         Channel: 'sms',
       });
 
+      console.log(`📡 Dispatching Twilio Verify to ${e164Phone} with Service ${twilioVerifySid}...`);
       const res = await fetch(`https://verify.twilio.com/v2/Services/${twilioVerifySid}/Verifications`, {
         method: 'POST',
         headers: {
@@ -99,15 +103,20 @@ export async function sendPhoneOtp(countryCode: string, phoneNumber: string): Pr
         body: body.toString(),
       });
 
-      if (res.ok) {
+      const resJson = await res.json();
+      console.log('📡 Twilio Verify Response:', res.status, resJson);
+
+      if (res.ok && resJson.status === 'pending') {
         return {
           success: true,
           message: `Real SMS verification code sent via Twilio Verify to ${e164Phone}`,
           provider: 'twilio_verify_v2',
         };
+      } else if (resJson?.message) {
+        console.warn('⚠️ Twilio Verify Error Details:', resJson.code, resJson.message);
       }
     } catch (err) {
-      console.warn('Twilio Verify API attempt:', err);
+      console.warn('⚠️ Twilio Verify API attempt exception:', err);
     }
   }
 
@@ -181,11 +190,16 @@ export async function verifyPhoneOtp(
       type: 'sms',
     });
 
-    if (!sbError && sbData?.session) {
+    if (!sbError && (sbData?.session || sbData?.user)) {
+      console.log('✅ Supabase Twilio Verify succeeded for:', e164Phone);
       secureOtpStore.delete(e164Phone);
       return { success: true };
+    } else if (sbError) {
+      console.warn('⚠️ Supabase verifyOtp response:', sbError.message);
     }
-  } catch {}
+  } catch (err) {
+    console.warn('⚠️ Supabase verifyOtp exception:', err);
+  }
 
   // 2. Second priority: Direct Twilio Verify Service (v2 VerificationCheck)
   const twilioSid = process.env.TWILIO_ACCOUNT_SID;
