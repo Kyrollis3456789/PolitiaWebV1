@@ -194,7 +194,7 @@ export function LoginScreen({
         <div className="w-full md:w-1/2 flex flex-col justify-between min-h-auto md:min-h-[320px] overflow-hidden transition-all duration-300 ease-in-out">
           {step === 1 ? (
             <form onSubmit={handleEmailNext} className="w-full flex-1 flex flex-col justify-between">
-              <div className="space-y-4">
+              <div className="my-auto space-y-4 w-full">
                 <div className="relative">
                   <input
                     id="email-input"
@@ -255,7 +255,7 @@ export function LoginScreen({
                 </div>
               </div>
 
-              <div className="flex justify-between md:justify-end items-center gap-4 pt-8 mt-auto">
+              <div className="flex justify-between md:justify-end items-center gap-4 pt-6 mt-auto">
                 {onNavigateRegister ? (
                   <button
                     type="button"
@@ -290,8 +290,8 @@ export function LoginScreen({
               </div>
             </form>
           ) : (
-            <form onSubmit={handlePasswordSubmit} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4 md:space-y-5">
-              <div className="space-y-4 md:space-y-5">
+            <form onSubmit={handlePasswordSubmit} className="w-full flex-1 flex flex-col justify-between">
+              <div className="my-auto space-y-4 w-full">
                 <div className="flex items-center justify-between gap-3">
                   <button
                     type="button"
