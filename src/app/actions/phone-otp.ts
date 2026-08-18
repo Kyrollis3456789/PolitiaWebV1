@@ -9,8 +9,7 @@ const secureOtpStore = new Map<string, { code: string; expiresAt: number; attemp
 export interface SendOtpResult {
   success: boolean;
   message?: string;
-  demoOtp?: string;
-  provider?: 'supabase_twilio_verify' | 'twilio_verify_v2' | 'twilio_sms' | 'fallback_otp';
+  provider?: 'supabase_twilio_verify' | 'twilio_verify_v2' | 'twilio_sms';
   error?: string;
 }
 
@@ -50,11 +49,7 @@ export async function sendPhoneOtp(countryCode: string, phoneNumber: string): Pr
   }
 
   const e164Phone = formatE164Phone(countryCode, phoneNumber);
-  const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
-  const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes expiry
-
-  // Store in server memory cache for verification fallback
-  secureOtpStore.set(e164Phone, { code: generatedOtp, expiresAt, attempts: 0 });
+  let lastErrorMessage = '';
 
   // 1. First priority: Real Supabase Auth Phone OTP (configured with Twilio Verify in Supabase Dashboard)
   try {
@@ -74,9 +69,11 @@ export async function sendPhoneOtp(countryCode: string, phoneNumber: string): Pr
         provider: 'supabase_twilio_verify',
       };
     } else {
+      lastErrorMessage = sbError.message;
       console.warn('⚠️ Supabase Phone SMS Error:', sbError.message, sbError);
     }
-  } catch (err) {
+  } catch (err: any) {
+    lastErrorMessage = err?.message || 'Supabase SMS exception';
     console.warn('⚠️ Supabase Phone SMS exception:', err);
   }
 
@@ -113,51 +110,18 @@ export async function sendPhoneOtp(countryCode: string, phoneNumber: string): Pr
           provider: 'twilio_verify_v2',
         };
       } else if (resJson?.message) {
+        lastErrorMessage = resJson.message;
         console.warn('⚠️ Twilio Verify Error Details:', resJson.code, resJson.message);
       }
-    } catch (err) {
+    } catch (err: any) {
+      lastErrorMessage = err?.message || 'Twilio Verify exception';
       console.warn('⚠️ Twilio Verify API attempt exception:', err);
     }
   }
 
-  // 3. Third priority: Direct Twilio SMS Messages API
-  const twilioFrom = process.env.TWILIO_PHONE_NUMBER;
-  if (twilioSid && twilioToken && twilioFrom) {
-    try {
-      const basicAuth = Buffer.from(`${twilioSid}:${twilioToken}`).toString('base64');
-      const body = new URLSearchParams({
-        To: e164Phone,
-        From: twilioFrom,
-        Body: `Your Politia verification code is: ${generatedOtp}. Valid for 10 minutes.`,
-      });
-
-      const res = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSid}/Messages.json`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Basic ${basicAuth}`,
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: body.toString(),
-      });
-
-      if (res.ok) {
-        return {
-          success: true,
-          message: `Real SMS verification code sent via Twilio SMS to ${e164Phone}`,
-          provider: 'twilio_sms',
-        };
-      }
-    } catch (err) {
-      console.warn('Twilio SMS Messages attempt:', err);
-    }
-  }
-
-  // 4. Robust Fallback: Server-side OTP active
   return {
-    success: true,
-    message: `Verification code generated for ${e164Phone}`,
-    demoOtp: generatedOtp,
-    provider: 'fallback_otp',
+    success: false,
+    error: lastErrorMessage || 'Failed to send SMS verification code. Please ensure your number is verified in Twilio.',
   };
 }
 

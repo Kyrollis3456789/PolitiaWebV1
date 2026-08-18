@@ -240,7 +240,6 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const [isPhoneOtpActive, setIsPhoneOtpActive] = useState<boolean>(false);
   const [otpDigits, setOtpDigits] = useState<string[]>(['', '', '', '', '', '']);
   const [otpResendTimer, setOtpResendTimer] = useState<number>(0);
-  const [demoOtpNotice, setDemoOtpNotice] = useState<string | null>(null);
   const [isSendingOtp, setIsSendingOtp] = useState<boolean>(false);
   const [isVerifyingOtp, setIsVerifyingOtp] = useState<boolean>(false);
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -711,9 +710,6 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
         setIsPhoneOtpActive(true);
         setOtpResendTimer(30);
         setOtpDigits(['', '', '', '', '', '']);
-        if (res.demoOtp) {
-          setDemoOtpNotice(res.demoOtp);
-        }
         setTimeout(() => {
           otpInputRefs.current[0]?.focus();
         }, 120);
@@ -1568,13 +1564,6 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                             </button>
                           )}
                         </div>
-
-                        {demoOtpNotice && (
-                          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-mono">
-                            <span>💡</span>
-                            <span><bdi>{isRtl ? `رمز التجربة: ${demoOtpNotice}` : `Test code: ${demoOtpNotice}`}</bdi></span>
-                          </div>
-                        )}
                       </div>
                     </div>
                   ) : (
