@@ -34,27 +34,13 @@ import {
   TOTAL_REGISTRATION_MAIN_STEPS,
   TOTAL_REGISTRATION_SUBSTEPS,
 } from '@/lib/constants/registrationSteps';
+import { ALL_COUNTRIES, getCountryByIso } from '@/lib/data/countries';
 
 interface RegisterScreenProps {
   onNavigateLogin?: () => void;
   onSubmit?: (e: React.FormEvent) => void;
   isStandaloneMobile?: boolean;
 }
-
-const COUNTRY_CODES = [
-  { code: '+20', nameEn: 'Egypt', nameAr: 'مصر', flag: '🇪🇬', placeholder: '010 1234 5678' },
-  { code: '+966', nameEn: 'Saudi Arabia', nameAr: 'المملكة العربية السعودية', flag: '🇸🇦', placeholder: '050 123 4567' },
-  { code: '+971', nameEn: 'United Arab Emirates', nameAr: 'الإمارات', flag: '🇦🇪', placeholder: '050 123 4567' },
-  { code: '+1', nameEn: 'United States', nameAr: 'الولايات المتحدة', flag: '🇺🇸', placeholder: '(555) 000-0000' },
-  { code: '+44', nameEn: 'United Kingdom', nameAr: 'المملكة المتحدة', flag: '🇬🇧', placeholder: '07123 456789' },
-  { code: '+49', nameEn: 'Germany', nameAr: 'ألمانيا', flag: '🇩🇪', placeholder: '0151 12345678' },
-  { code: '+33', nameEn: 'France', nameAr: 'فرنسا', flag: '🇫🇷', placeholder: '06 12 34 56 78' },
-  { code: '+61', nameEn: 'Australia', nameAr: 'أستراليا', flag: '🇦🇺', placeholder: '0412 345 678' },
-  { code: '+1-CA', nameEn: 'Canada', nameAr: 'كندا', flag: '🇨🇦', placeholder: '(555) 000-0000' },
-  { code: '+965', nameEn: 'Kuwait', nameAr: 'الكويت', flag: '🇰🇼', placeholder: '9012 3456' },
-  { code: '+974', nameEn: 'Qatar', nameAr: 'قطر', flag: '🇶🇦', placeholder: '3312 3456' },
-  { code: '+962', nameEn: 'Jordan', nameAr: 'الأردن', flag: '🇯🇴', placeholder: '07 9123 4567' },
-];
 
 const EGYPTIAN_GOVERNORATES = [
   'Cairo', 'Giza', 'Alexandria', 'Qalyubia', 'Sharqia', 'Dakahlia',
@@ -172,6 +158,7 @@ function clearAllRegistrationDrafts() {
     'national_id',
     'avatar_preview',
     'photo_skipped',
+    'country_iso',
     'country_code',
     'phone_number',
     'email',
@@ -237,6 +224,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Milestone 2: Contact & Social
+  const [countryIso, setCountryIso] = useState<string>(() => getLocalItem('country_iso', 'EG'));
   const [countryCode, setCountryCode] = useState<string>(() => getLocalItem('country_code', '+20'));
   const [phoneNumber, setPhoneNumber] = useState<string>(() => getLocalItem('phone_number', ''));
   const [isPhoneFocused, setIsPhoneFocused] = useState(false);
@@ -311,6 +299,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   useEffect(() => { setLocalItem('national_id', nationalId); }, [nationalId]);
   useEffect(() => { setLocalItem('avatar_preview', avatarPreview); }, [avatarPreview]);
   useEffect(() => { setLocalItem('photo_skipped', photoSkippedGracePeriod); }, [photoSkippedGracePeriod]);
+  useEffect(() => { setLocalItem('country_iso', countryIso); }, [countryIso]);
   useEffect(() => { setLocalItem('country_code', countryCode); }, [countryCode]);
   useEffect(() => { setLocalItem('phone_number', phoneNumber); }, [phoneNumber]);
   useEffect(() => { setLocalItem('email', email); }, [email]);
@@ -1293,17 +1282,22 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   <div className="relative">
                     <select
                       id="reg-country"
-                      value={countryCode}
-                      onChange={(e) => setCountryCode(e.target.value)}
+                      value={countryIso}
+                      onChange={(e) => {
+                        const iso = e.target.value;
+                        setCountryIso(iso);
+                        const found = getCountryByIso(iso);
+                        if (found) setCountryCode(found.dialCode);
+                      }}
                       className="w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] border border-[#747775] dark:border-[#8E918F] focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] focus:outline-none transition-all box-border cursor-pointer appearance-none"
                     >
-                      {COUNTRY_CODES.map((c) => (
+                      {ALL_COUNTRIES.map((c) => (
                         <option
-                          key={c.code}
-                          value={c.code}
+                          key={c.iso}
+                          value={c.iso}
                           className="bg-white dark:bg-[#1B212D] text-[#1F1F1F] dark:text-[#E3E3E3]"
                         >
-                          {c.flag} {isRtl ? c.nameAr : c.nameEn} ({c.code})
+                          {c.flag} {isRtl ? c.nameAr : c.nameEn} ({c.dialCode})
                         </option>
                       ))}
                     </select>
@@ -1331,7 +1325,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                         dir="ltr"
                         autoFocus
                         placeholder={
-                          COUNTRY_CODES.find((c) => c.code === countryCode)?.placeholder ||
+                          getCountryByIso(countryIso)?.placeholder ||
                           '010 1234 5678'
                         }
                         value={phoneNumber}
