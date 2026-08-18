@@ -201,80 +201,79 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const t = useTranslations('register');
 
   // Dynamic Navigation state:
-  const [mainStepIndex, setMainStepIndex] = useState<number>(() => getLocalNumber('main_step', 1));
-  const [subStepIndex, setSubStepIndex] = useState<number>(() => getLocalNumber('sub_step', 1));
+  const [isMounted, setIsMounted] = useState(false);
+  const [mainStepIndex, setMainStepIndex] = useState<number>(1);
+  const [subStepIndex, setSubStepIndex] = useState<number>(1);
   const [slideDirection, setSlideDirection] = useState<'forward' | 'backward'>('forward');
 
   // Milestone 1: Personal Info
-  const [englishFullName, setEnglishFullName] = useState<string>(() => getLocalItem('full_name_en', ''));
+  const [englishFullName, setEnglishFullName] = useState<string>('');
   const [isEnglishFullNameFocused, setIsEnglishFullNameFocused] = useState(false);
-  const [arabicFullName, setArabicFullName] = useState<string>(() => getLocalItem('full_name_ar', ''));
+  const [arabicFullName, setArabicFullName] = useState<string>('');
   const [isArabicFullNameFocused, setIsArabicFullNameFocused] = useState(false);
-  const [gender, setGender] = useState<GenderType>(() => (getLocalItem('gender', 'Male') as GenderType));
-  const [dob, setDob] = useState<string>(() => getLocalItem('dob', ''));
+  const [gender, setGender] = useState<GenderType>('Male');
+  const [dob, setDob] = useState<string>('');
   const [isDobFocused, setIsDobFocused] = useState(false);
-  const [nationalId, setNationalId] = useState<string>(() => getLocalItem('national_id', ''));
+  const [nationalId, setNationalId] = useState<string>('');
   const [isNationalIdFocused, setIsNationalIdFocused] = useState(false);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(() => getLocalItem('avatar_preview', ''));
-  const [photoSkippedGracePeriod, setPhotoSkippedGracePeriod] = useState<boolean>(() => getLocalItem('photo_skipped', 'false') === 'true');
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [photoSkippedGracePeriod, setPhotoSkippedGracePeriod] = useState<boolean>(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [rawImageToEdit, setRawImageToEdit] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Milestone 2: Contact & Social
-  const [countryIso, setCountryIso] = useState<string>(() => getLocalItem('country_iso', 'EG'));
-  const [countryCode, setCountryCode] = useState<string>(() => getLocalItem('country_code', '+20'));
-  const [phoneNumber, setPhoneNumber] = useState<string>(() => getLocalItem('phone_number', ''));
+  const [countryIso, setCountryIso] = useState<string>('EG');
+  const [countryCode, setCountryCode] = useState<string>('+20');
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [isPhoneFocused, setIsPhoneFocused] = useState(false);
-  const [email, setEmail] = useState<string>(() => getLocalItem('email', ''));
+  const [email, setEmail] = useState<string>('');
   const [isEmailFocused, setIsEmailFocused] = useState(false);
-  const [landlineAreaCode, setLandlineAreaCode] = useState<string>(() => getLocalItem('landline_area_code', ''));
-  const [landlineNumber, setLandlineNumber] = useState<string>(() => getLocalItem('landline_number', ''));
-  const [socials, setSocials] = useState<Record<SocialPlatform, { url: string }>>(() =>
-    getLocalJson('socials', {
-      facebook: { url: '' },
-      instagram: { url: '' },
-      tiktok: { url: '' },
-      snapchat: { url: '' },
-      threads: { url: '' },
-      x: { url: '' },
-      github: { url: '' },
-      linkedin: { url: '' },
-    })
-  );
+  const [landlineAreaCode, setLandlineAreaCode] = useState<string>('');
+  const [landlineNumber, setLandlineNumber] = useState<string>('');
+  const [socials, setSocials] = useState<Record<SocialPlatform, { url: string }>>({
+    facebook: { url: '' },
+    instagram: { url: '' },
+    tiktok: { url: '' },
+    snapchat: { url: '' },
+    threads: { url: '' },
+    x: { url: '' },
+    github: { url: '' },
+    linkedin: { url: '' },
+  });
 
   // Milestone 3: Relations
-  const [maritalStatus, setMaritalStatus] = useState<string>(() => getLocalItem('marital_status', 'single'));
-  const [guardianName, setGuardianName] = useState<string>(() => getLocalItem('guardian_name', ''));
-  const [guardianPhone, setGuardianPhone] = useState<string>(() => getLocalItem('guardian_phone', ''));
-  const [familyRelationType, setFamilyRelationType] = useState<string>(() => getLocalItem('family_relation_type', 'Parent'));
+  const [maritalStatus, setMaritalStatus] = useState<string>('single');
+  const [guardianName, setGuardianName] = useState<string>('');
+  const [guardianPhone, setGuardianPhone] = useState<string>('');
+  const [familyRelationType, setFamilyRelationType] = useState<string>('Parent');
 
   // Milestone 4: Education & Work
-  const [educationStage, setEducationStage] = useState<string>(() => getLocalItem('education_stage', 'univ'));
-  const [facultyOrSchool, setFacultyOrSchool] = useState<string>(() => getLocalItem('faculty_or_school', ''));
-  const [profession, setProfession] = useState<string>(() => getLocalItem('profession', ''));
-  const [workplace, setWorkplace] = useState<string>(() => getLocalItem('workplace', ''));
+  const [educationStage, setEducationStage] = useState<string>('univ');
+  const [facultyOrSchool, setFacultyOrSchool] = useState<string>('');
+  const [profession, setProfession] = useState<string>('');
+  const [workplace, setWorkplace] = useState<string>('');
 
   // Milestone 5: Locations
-  const [governorate, setGovernorate] = useState<string>(() => getLocalItem('governorate', isRtl ? 'القاهرة' : 'Cairo'));
-  const [city, setCity] = useState<string>(() => getLocalItem('city', ''));
-  const [streetAddress, setStreetAddress] = useState<string>(() => getLocalItem('street_address', ''));
-  const [buildingNumber, setBuildingNumber] = useState<string>(() => getLocalItem('building_number', ''));
-  const [floorNumber, setFloorNumber] = useState<string>(() => getLocalItem('floor_number', ''));
-  const [apartmentNumber, setApartmentNumber] = useState<string>(() => getLocalItem('apartment_number', ''));
-  const [secondaryAddress, setSecondaryAddress] = useState<string>(() => getLocalItem('secondary_address', ''));
+  const [governorate, setGovernorate] = useState<string>(isRtl ? 'القاهرة' : 'Cairo');
+  const [city, setCity] = useState<string>('');
+  const [streetAddress, setStreetAddress] = useState<string>('');
+  const [buildingNumber, setBuildingNumber] = useState<string>('');
+  const [floorNumber, setFloorNumber] = useState<string>('');
+  const [apartmentNumber, setApartmentNumber] = useState<string>('');
+  const [secondaryAddress, setSecondaryAddress] = useState<string>('');
 
   // Milestone 6: Church Commitment
-  const [diocese, setDiocese] = useState<string>(() => getLocalItem('diocese', ''));
-  const [primaryChurch, setPrimaryChurch] = useState<string>(() => getLocalItem('primary_church', ''));
-  const [secondaryChurch, setSecondaryChurch] = useState<string>(() => getLocalItem('secondary_church', ''));
-  const [priestName, setPriestName] = useState<string>(() => getLocalItem('priest_name', ''));
+  const [diocese, setDiocese] = useState<string>('');
+  const [primaryChurch, setPrimaryChurch] = useState<string>('');
+  const [secondaryChurch, setSecondaryChurch] = useState<string>('');
+  const [priestName, setPriestName] = useState<string>('');
 
   // Milestone 7: Additional Info
-  const [selectedHobbies, setSelectedHobbies] = useState<string[]>(() => getLocalJson('hobbies', ['hymns']));
-  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(() => getLocalJson('languages', ['ar', 'en']));
+  const [selectedHobbies, setSelectedHobbies] = useState<string[]>(['hymns']);
+  const [selectedLanguages, setSelectedLanguages] = useState<string[]>(['ar', 'en']);
 
   // Password Setup
   const [password, setPassword] = useState('');
@@ -289,44 +288,126 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [langSearch, setLangSearch] = useState('');
 
+  // Client-side Draft Hydration
+  useEffect(() => {
+    setIsMounted(true);
+    try {
+      const savedMain = getLocalNumber('main_step', 1);
+      const savedSub = getLocalNumber('sub_step', 1);
+      if (savedMain > 1) setMainStepIndex(savedMain);
+      if (savedSub > 1) setSubStepIndex(savedSub);
+
+      const fnEn = getLocalItem('full_name_en', '');
+      if (fnEn) setEnglishFullName(fnEn);
+      const fnAr = getLocalItem('full_name_ar', '');
+      if (fnAr) setArabicFullName(fnAr);
+      const g = getLocalItem('gender', '');
+      if (g) setGender(g as GenderType);
+      const d = getLocalItem('dob', '');
+      if (d) setDob(d);
+      const nid = getLocalItem('national_id', '');
+      if (nid) setNationalId(nid);
+      const av = getLocalItem('avatar_preview', '');
+      if (av) setAvatarPreview(av);
+      const pskip = getLocalItem('photo_skipped', '');
+      if (pskip === 'true') setPhotoSkippedGracePeriod(true);
+      const cIso = getLocalItem('country_iso', '');
+      if (cIso) setCountryIso(cIso);
+      const cCode = getLocalItem('country_code', '');
+      if (cCode) setCountryCode(cCode);
+      const ph = getLocalItem('phone_number', '');
+      if (ph) setPhoneNumber(ph);
+      const em = getLocalItem('email', '');
+      if (em) setEmail(em);
+      const lAc = getLocalItem('landline_area_code', '');
+      if (lAc) setLandlineAreaCode(lAc);
+      const lNum = getLocalItem('landline_number', '');
+      if (lNum) setLandlineNumber(lNum);
+      const soc = getLocalJson('socials', null);
+      if (soc) setSocials(soc);
+      const ms = getLocalItem('marital_status', '');
+      if (ms) setMaritalStatus(ms);
+      const gn = getLocalItem('guardian_name', '');
+      if (gn) setGuardianName(gn);
+      const gp = getLocalItem('guardian_phone', '');
+      if (gp) setGuardianPhone(gp);
+      const frt = getLocalItem('family_relation_type', '');
+      if (frt) setFamilyRelationType(frt);
+      const es = getLocalItem('education_stage', '');
+      if (es) setEducationStage(es);
+      const fos = getLocalItem('faculty_or_school', '');
+      if (fos) setFacultyOrSchool(fos);
+      const prof = getLocalItem('profession', '');
+      if (prof) setProfession(prof);
+      const wp = getLocalItem('workplace', '');
+      if (wp) setWorkplace(wp);
+      const gov = getLocalItem('governorate', '');
+      if (gov) setGovernorate(gov);
+      const cit = getLocalItem('city', '');
+      if (cit) setCity(cit);
+      const sa = getLocalItem('street_address', '');
+      if (sa) setStreetAddress(sa);
+      const bn = getLocalItem('building_number', '');
+      if (bn) setBuildingNumber(bn);
+      const fln = getLocalItem('floor_number', '');
+      if (fln) setFloorNumber(fln);
+      const an = getLocalItem('apartment_number', '');
+      if (an) setApartmentNumber(an);
+      const secAddr = getLocalItem('secondary_address', '');
+      if (secAddr) setSecondaryAddress(secAddr);
+      const dio = getLocalItem('diocese', '');
+      if (dio) setDiocese(dio);
+      const pc = getLocalItem('primary_church', '');
+      if (pc) setPrimaryChurch(pc);
+      const sc = getLocalItem('secondary_church', '');
+      if (sc) setSecondaryChurch(sc);
+      const pn = getLocalItem('priest_name', '');
+      if (pn) setPriestName(pn);
+      const hob = getLocalJson('hobbies', null);
+      if (hob) setSelectedHobbies(hob);
+      const langList = getLocalJson('languages', null);
+      if (langList) setSelectedLanguages(langList);
+    } catch {}
+  }, []);
+
   // Sync state one by one into localStorage
-  useEffect(() => { setLocalItem('main_step', mainStepIndex); }, [mainStepIndex]);
-  useEffect(() => { setLocalItem('sub_step', subStepIndex); }, [subStepIndex]);
-  useEffect(() => { setLocalItem('full_name_en', englishFullName); }, [englishFullName]);
-  useEffect(() => { setLocalItem('full_name_ar', arabicFullName); }, [arabicFullName]);
-  useEffect(() => { setLocalItem('gender', gender); }, [gender]);
-  useEffect(() => { setLocalItem('dob', dob); }, [dob]);
-  useEffect(() => { setLocalItem('national_id', nationalId); }, [nationalId]);
-  useEffect(() => { setLocalItem('avatar_preview', avatarPreview); }, [avatarPreview]);
-  useEffect(() => { setLocalItem('photo_skipped', photoSkippedGracePeriod); }, [photoSkippedGracePeriod]);
-  useEffect(() => { setLocalItem('country_iso', countryIso); }, [countryIso]);
-  useEffect(() => { setLocalItem('country_code', countryCode); }, [countryCode]);
-  useEffect(() => { setLocalItem('phone_number', phoneNumber); }, [phoneNumber]);
-  useEffect(() => { setLocalItem('email', email); }, [email]);
-  useEffect(() => { setLocalItem('landline_area_code', landlineAreaCode); }, [landlineAreaCode]);
-  useEffect(() => { setLocalItem('landline_number', landlineNumber); }, [landlineNumber]);
-  useEffect(() => { setLocalItem('socials', socials); }, [socials]);
-  useEffect(() => { setLocalItem('marital_status', maritalStatus); }, [maritalStatus]);
-  useEffect(() => { setLocalItem('guardian_name', guardianName); }, [guardianName]);
-  useEffect(() => { setLocalItem('guardian_phone', guardianPhone); }, [guardianPhone]);
-  useEffect(() => { setLocalItem('family_relation_type', familyRelationType); }, [familyRelationType]);
-  useEffect(() => { setLocalItem('education_stage', educationStage); }, [educationStage]);
-  useEffect(() => { setLocalItem('faculty_or_school', facultyOrSchool); }, [facultyOrSchool]);
-  useEffect(() => { setLocalItem('profession', profession); }, [profession]);
-  useEffect(() => { setLocalItem('workplace', workplace); }, [workplace]);
-  useEffect(() => { setLocalItem('governorate', governorate); }, [governorate]);
-  useEffect(() => { setLocalItem('city', city); }, [city]);
-  useEffect(() => { setLocalItem('street_address', streetAddress); }, [streetAddress]);
-  useEffect(() => { setLocalItem('building_number', buildingNumber); }, [buildingNumber]);
-  useEffect(() => { setLocalItem('floor_number', floorNumber); }, [floorNumber]);
-  useEffect(() => { setLocalItem('apartment_number', apartmentNumber); }, [apartmentNumber]);
-  useEffect(() => { setLocalItem('secondary_address', secondaryAddress); }, [secondaryAddress]);
-  useEffect(() => { setLocalItem('diocese', diocese); }, [diocese]);
-  useEffect(() => { setLocalItem('primary_church', primaryChurch); }, [primaryChurch]);
-  useEffect(() => { setLocalItem('secondary_church', secondaryChurch); }, [secondaryChurch]);
-  useEffect(() => { setLocalItem('priest_name', priestName); }, [priestName]);
-  useEffect(() => { setLocalItem('hobbies', selectedHobbies); }, [selectedHobbies]);
-  useEffect(() => { setLocalItem('languages', selectedLanguages); }, [selectedLanguages]);
+  useEffect(() => { if (isMounted) setLocalItem('main_step', mainStepIndex); }, [mainStepIndex, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('sub_step', subStepIndex); }, [subStepIndex, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('full_name_en', englishFullName); }, [englishFullName, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('full_name_ar', arabicFullName); }, [arabicFullName, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('gender', gender); }, [gender, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('dob', dob); }, [dob, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('national_id', nationalId); }, [nationalId, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('avatar_preview', avatarPreview); }, [avatarPreview, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('photo_skipped', photoSkippedGracePeriod); }, [photoSkippedGracePeriod, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('country_iso', countryIso); }, [countryIso, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('country_code', countryCode); }, [countryCode, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('phone_number', phoneNumber); }, [phoneNumber, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('email', email); }, [email, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('landline_area_code', landlineAreaCode); }, [landlineAreaCode, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('landline_number', landlineNumber); }, [landlineNumber, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('socials', socials); }, [socials, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('marital_status', maritalStatus); }, [maritalStatus, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('guardian_name', guardianName); }, [guardianName, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('guardian_phone', guardianPhone); }, [guardianPhone, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('family_relation_type', familyRelationType); }, [familyRelationType, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('education_stage', educationStage); }, [educationStage, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('faculty_or_school', facultyOrSchool); }, [facultyOrSchool, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('profession', profession); }, [profession, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('workplace', workplace); }, [workplace, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('governorate', governorate); }, [governorate, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('city', city); }, [city, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('street_address', streetAddress); }, [streetAddress, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('building_number', buildingNumber); }, [buildingNumber, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('floor_number', floorNumber); }, [floorNumber, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('apartment_number', apartmentNumber); }, [apartmentNumber, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('secondary_address', secondaryAddress); }, [secondaryAddress, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('diocese', diocese); }, [diocese, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('primary_church', primaryChurch); }, [primaryChurch, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('secondary_church', secondaryChurch); }, [secondaryChurch, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('priest_name', priestName); }, [priestName, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('hobbies', selectedHobbies); }, [selectedHobbies, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('languages', selectedLanguages); }, [selectedLanguages, isMounted]);
 
   // Names cleanup & derived values
   const fullEnglishName = englishFullName.trim().replace(/\s+/g, ' ');
@@ -889,7 +970,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/50 text-[#0B57D0] dark:text-[#93C5FD] border border-blue-200 dark:border-blue-700/50 text-xs font-semibold">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#0B57D0] dark:bg-[#60A5FA] animate-pulse" />
                     <span>
-                      <bdi>
+                      <bdi suppressHydrationWarning>
                         {mainStepIndex === 8
                           ? isRtl ? 'الخطوة الأخيرة: كلمة المرور' : 'Final Step: Password'
                           : isRtl
@@ -901,7 +982,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
                   {mainStepIndex <= 7 && (
                     <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/50">
-                      <bdi>
+                      <bdi suppressHydrationWarning>
                         {isRtl
                           ? `القسم ${subStepIndex}/${currentMainConfig?.subSteps.length}`
                           : `Part ${subStepIndex}/${currentMainConfig?.subSteps.length}`}
@@ -922,10 +1003,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
             {/* Dynamic Step Title & Subtitle */}
             <h1 className="text-[30px] sm:text-[34px] font-normal text-[#1F1F1F] dark:text-[#E3E3E3] tracking-tight leading-[1.15] pt-1">
-              <bdi>{header.title}</bdi>
+              <bdi suppressHydrationWarning>{header.title}</bdi>
             </h1>
             <p className="text-[15px] sm:text-[16px] text-[#1F1F1F] dark:text-[#C4C7C5] font-normal leading-relaxed">
-              <bdi>{header.subtitle}</bdi>
+              <bdi suppressHydrationWarning>{header.subtitle}</bdi>
             </p>
           </div>
         </div>
