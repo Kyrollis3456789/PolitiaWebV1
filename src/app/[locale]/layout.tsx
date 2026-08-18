@@ -7,6 +7,7 @@ import { routing } from "@/i18n/routing";
 import { isSupportedLocale, getLocaleDirection } from "@/i18n/locales";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { LanguageSyncProvider } from "@/components/providers/LanguageSyncProvider";
+import { DevStreamErrorHandler } from "@/components/DevStreamErrorHandler";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -59,6 +60,7 @@ export default async function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <DevStreamErrorHandler />
           <NextIntlClientProvider messages={messages} locale={locale}>
             <LanguageSyncProvider>
               {children}
