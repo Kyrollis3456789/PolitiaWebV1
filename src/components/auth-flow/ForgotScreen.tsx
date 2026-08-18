@@ -358,7 +358,7 @@ export function ForgotScreen() {
       {/* Main Authentication Card */}
       <div className="relative z-20 w-full max-w-[1040px] bg-white/95 dark:bg-[#1B212D]/95 rounded-[28px] sm:rounded-[36px] p-6 sm:p-8 md:p-12 shadow-2xl border border-white/60 dark:border-slate-800/80 flex flex-col md:flex-row gap-8 md:gap-14 min-h-fit h-auto items-start transition-all duration-300 ease-in-out">
         {/* Left Column: Branding & Title */}
-        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start min-h-[420px]">
+        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start min-h-auto md:min-h-[320px]">
           <div className="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800/90 p-2 shadow-sm border border-slate-200/60 dark:border-slate-700/80 flex items-center justify-center transition-all">
             <Image
               src="/logo.png"
@@ -376,11 +376,11 @@ export function ForgotScreen() {
         </div>
 
         {/* Right Column: Step Forms */}
-        <div className="w-full md:w-1/2 flex flex-col justify-between min-h-[420px] overflow-hidden transition-all duration-300 ease-in-out">
+        <div className="w-full md:w-1/2 flex flex-col justify-between min-h-auto md:min-h-[320px] overflow-hidden transition-all duration-300 ease-in-out">
           {step === 1 ? (
             /* STEP 1: Phone number or email */
-            <form onSubmit={handleStep1Submit} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4 md:space-y-5">
-              <div className="space-y-4 md:space-y-5">
+            <form onSubmit={handleStep1Submit} className="w-full flex-1 flex flex-col justify-between">
+              <div className="my-auto space-y-4 w-full">
                 <div className="relative">
                   <input
                     id="recovery-input"
@@ -429,7 +429,7 @@ export function ForgotScreen() {
                 )}
               </div>
 
-              <div className="flex justify-between md:justify-end items-center gap-4 pt-4">
+              <div className="flex justify-between md:justify-end items-center gap-4 pt-6 mt-auto">
                 <Link
                   href="/login"
                   className="text-sm font-medium text-[#0B57D0] dark:text-[#A8C7FA] hover:bg-[#F2F6FC] dark:hover:bg-[#1E2738] px-4 py-2 rounded-full transition-colors cursor-pointer"
@@ -455,8 +455,8 @@ export function ForgotScreen() {
             </form>
           ) : step === 2 ? (
             /* STEP 2: What's your name? (Single English 4-part name input, vertically centered) */
-            <form onSubmit={handleStep2Submit} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
-              <div className="flex-1 flex flex-col justify-center">
+            <form onSubmit={handleStep2Submit} className="w-full flex-1 flex flex-col justify-between">
+              <div className="my-auto space-y-4 w-full">
                 <div className="relative">
                   <input
                     id="full-name-input"
@@ -504,7 +504,7 @@ export function ForgotScreen() {
                 )}
               </div>
 
-              <div className="flex justify-between md:justify-end items-center gap-4 pt-6">
+              <div className="flex justify-between md:justify-end items-center gap-4 pt-6 mt-auto">
                 <button
                   type="button"
                   onClick={() => {
@@ -534,47 +534,49 @@ export function ForgotScreen() {
             </form>
           ) : step === 3 ? (
             /* STEP 3: Get a verification code (Device illustration & Send to Email) */
-            <form onSubmit={handleStep3SendOtp} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
-              {/* Phone Graphic Backdrop */}
-              <div className="w-full h-44 sm:h-48 rounded-2xl bg-gradient-to-b from-[#EAEFF7] to-[#DFE7F2] dark:from-[#1E2532] dark:to-[#161C26] flex items-end justify-center overflow-hidden relative shadow-inner">
-                <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/5 to-transparent dark:from-white/5 pointer-events-none" />
+            <form onSubmit={handleStep3SendOtp} className="w-full flex-1 flex flex-col justify-between">
+              <div className="my-auto space-y-4 w-full">
+                {/* Phone Graphic Backdrop */}
+                <div className="w-full h-40 sm:h-44 rounded-2xl bg-gradient-to-b from-[#EAEFF7] to-[#DFE7F2] dark:from-[#1E2532] dark:to-[#161C26] flex items-end justify-center overflow-hidden relative shadow-inner">
+                  <div className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/5 to-transparent dark:from-white/5 pointer-events-none" />
 
-                {/* Styled Phone Mockup */}
-                <div className="w-24 sm:w-28 h-36 sm:h-40 bg-[#1F1F1F] dark:bg-[#0A0D14] rounded-t-[20px] p-2 border-[3px] border-b-0 border-[#2D3139] dark:border-[#38404E] shadow-2xl relative flex flex-col items-center">
-                  <div className="w-8 h-1 bg-[#3E4552] rounded-full mb-1.5 shrink-0" />
-                  <div className="w-full flex-1 bg-white dark:bg-[#121620] rounded-t-md flex flex-col items-center justify-center p-2 text-center">
-                    <div className="w-8 h-8 rounded-full bg-[#E8F0FE] dark:bg-[#1E293B] flex items-center justify-center mb-1">
-                      <Smartphone className="w-4 h-4 text-[#0B57D0] dark:text-[#A8C7FA]" />
+                  {/* Styled Phone Mockup */}
+                  <div className="w-24 sm:w-28 h-32 sm:h-36 bg-[#1F1F1F] dark:bg-[#0A0D14] rounded-t-[20px] p-2 border-[3px] border-b-0 border-[#2D3139] dark:border-[#38404E] shadow-2xl relative flex flex-col items-center">
+                    <div className="w-8 h-1 bg-[#3E4552] rounded-full mb-1.5 shrink-0" />
+                    <div className="w-full flex-1 bg-white dark:bg-[#121620] rounded-t-md flex flex-col items-center justify-center p-2 text-center">
+                      <div className="w-8 h-8 rounded-full bg-[#E8F0FE] dark:bg-[#1E293B] flex items-center justify-center mb-1">
+                        <Smartphone className="w-4 h-4 text-[#0B57D0] dark:text-[#A8C7FA]" />
+                      </div>
+                      <div className="w-10 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full mb-1" />
+                      <div className="w-6 h-1 bg-gray-100 dark:bg-slate-800 rounded-full" />
                     </div>
-                    <div className="w-10 h-1.5 bg-gray-200 dark:bg-slate-700 rounded-full mb-1" />
-                    <div className="w-6 h-1 bg-gray-100 dark:bg-slate-800 rounded-full" />
                   </div>
                 </div>
-              </div>
 
-              {/* Text Info */}
-              <div className="space-y-1.5 text-start">
-                <h2 className="text-[17px] sm:text-[18px] font-medium text-[#1F1F1F] dark:text-[#E3E3E3]">
-                  <bdi>{t('getVerificationCode')}</bdi>
-                </h2>
-                <p className="text-sm text-[#444746] dark:text-[#C4C7C5] leading-relaxed">
-                  <bdi>
-                    {t('sendCodeDescription', { identifier: targetEmail || identifier })}
-                  </bdi>
-                </p>
-              </div>
-
-              {errorMessage && (
-                <div className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5]">
-                  <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#B3261E] dark:bg-[#F2B8B5] text-white dark:text-[#601410] text-[11px] font-bold select-none leading-none pb-[1px]">
-                    !
-                  </span>
-                  <bdi>{errorMessage}</bdi>
+                {/* Text Info */}
+                <div className="space-y-1.5 text-start">
+                  <h2 className="text-[17px] sm:text-[18px] font-medium text-[#1F1F1F] dark:text-[#E3E3E3]">
+                    <bdi>{t('getVerificationCode')}</bdi>
+                  </h2>
+                  <p className="text-sm text-[#444746] dark:text-[#C4C7C5] leading-relaxed">
+                    <bdi>
+                      {t('sendCodeDescription', { identifier: targetEmail || identifier })}
+                    </bdi>
+                  </p>
                 </div>
-              )}
+
+                {errorMessage && (
+                  <div className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5]">
+                    <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#B3261E] dark:bg-[#F2B8B5] text-white dark:text-[#601410] text-[11px] font-bold select-none leading-none pb-[1px]">
+                      !
+                    </span>
+                    <bdi>{errorMessage}</bdi>
+                  </div>
+                )}
+              </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-between md:justify-end items-center gap-4 pt-2">
+              <div className="flex justify-between md:justify-end items-center gap-4 pt-6 mt-auto">
                 <button
                   type="button"
                   onClick={() => {
@@ -605,8 +607,8 @@ export function ForgotScreen() {
             </form>
           ) : step === 4 ? (
             /* STEP 4: Enter 6-digit OTP Code sent to email */
-            <form onSubmit={handleStep4VerifyOtp} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
-              <div className="flex-1 flex flex-col justify-center">
+            <form onSubmit={handleStep4VerifyOtp} className="w-full flex-1 flex flex-col justify-between">
+              <div className="my-auto space-y-4 w-full">
                 <div className="relative">
                   <input
                     id="otp-input"
@@ -663,7 +665,7 @@ export function ForgotScreen() {
                 )}
               </div>
 
-              <div className="flex justify-between md:justify-end items-center gap-4 pt-6">
+              <div className="flex justify-between md:justify-end items-center gap-4 pt-6 mt-auto">
                 <button
                   type="button"
                   onClick={() => {
@@ -693,119 +695,121 @@ export function ForgotScreen() {
             </form>
           ) : (
             /* STEP 5: Reset Password (New password & Confirm password) */
-            <form onSubmit={handleStep5ResetPassword} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4 md:space-y-5">
-              {/* New Password */}
-              <div>
-                <div className="relative">
-                  <input
-                    id="new-password-input"
-                    type={showPassword ? 'text' : 'password'}
-                    autoFocus
-                    value={newPassword}
-                    onFocus={() => setIsNewPasswordFocused(true)}
-                    onBlur={() => setIsNewPasswordFocused(false)}
-                    onChange={(e) => {
-                      setNewPassword(e.target.value);
-                      if (errorMessage) setErrorMessage(null);
-                    }}
-                    className={`w-full h-[56px] px-4 text-[16px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
-                      errorMessage
-                        ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                        : isNewPasswordFocused
-                        ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                        : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
-                    }`}
-                  />
-                  <label
-                    htmlFor="new-password-input"
-                    className={`absolute pointer-events-none transition-all duration-150 start-3 ${
-                      isNewPasswordFloating
-                        ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
-                        : 'top-4 text-[16px]'
-                    } ${
-                      errorMessage
-                        ? 'text-[#B3261E] dark:text-[#F2B8B5]'
-                        : isNewPasswordFocused
-                        ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                        : 'text-[#444746] dark:text-[#8E918F]'
-                    }`}
-                  >
-                    <bdi>{t('newPasswordLabel')}</bdi>
-                  </label>
-                </div>
-              </div>
-
-              {/* Confirm Password */}
-              <div>
-                <div className="relative">
-                  <input
-                    id="confirm-password-input"
-                    type={showPassword ? 'text' : 'password'}
-                    value={confirmPassword}
-                    onFocus={() => setIsConfirmPasswordFocused(true)}
-                    onBlur={() => setIsConfirmPasswordFocused(false)}
-                    onChange={(e) => {
-                      setConfirmPassword(e.target.value);
-                      if (errorMessage) setErrorMessage(null);
-                    }}
-                    className={`w-full h-[56px] px-4 text-[16px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
-                      errorMessage
-                        ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                        : isConfirmPasswordFocused
-                        ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                        : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
-                    }`}
-                  />
-                  <label
-                    htmlFor="confirm-password-input"
-                    className={`absolute pointer-events-none transition-all duration-150 start-3 ${
-                      isConfirmPasswordFloating
-                        ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
-                        : 'top-4 text-[16px]'
-                    } ${
-                      errorMessage
-                        ? 'text-[#B3261E] dark:text-[#F2B8B5]'
-                        : isConfirmPasswordFocused
-                        ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                        : 'text-[#444746] dark:text-[#8E918F]'
-                    }`}
-                  >
-                    <bdi>{t('confirmPasswordLabel')}</bdi>
-                  </label>
+            <form onSubmit={handleStep5ResetPassword} className="w-full flex-1 flex flex-col justify-between">
+              <div className="my-auto space-y-4 w-full">
+                {/* New Password */}
+                <div>
+                  <div className="relative">
+                    <input
+                      id="new-password-input"
+                      type={showPassword ? 'text' : 'password'}
+                      autoFocus
+                      value={newPassword}
+                      onFocus={() => setIsNewPasswordFocused(true)}
+                      onBlur={() => setIsNewPasswordFocused(false)}
+                      onChange={(e) => {
+                        setNewPassword(e.target.value);
+                        if (errorMessage) setErrorMessage(null);
+                      }}
+                      className={`w-full h-[56px] px-4 text-[16px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
+                        errorMessage
+                          ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                          : isNewPasswordFocused
+                          ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                          : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                      }`}
+                    />
+                    <label
+                      htmlFor="new-password-input"
+                      className={`absolute pointer-events-none transition-all duration-150 start-3 ${
+                        isNewPasswordFloating
+                          ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
+                          : 'top-4 text-[16px]'
+                      } ${
+                        errorMessage
+                          ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                          : isNewPasswordFocused
+                          ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                          : 'text-[#444746] dark:text-[#8E918F]'
+                      }`}
+                    >
+                      <bdi>{t('newPasswordLabel')}</bdi>
+                    </label>
+                  </div>
                 </div>
 
-                {errorMessage && (
-                  <div className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5] mt-1.5">
-                    <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#B3261E] dark:bg-[#F2B8B5] text-white dark:text-[#601410] text-[11px] font-bold select-none leading-none pb-[1px]">
-                      !
-                    </span>
-                    <bdi>{errorMessage}</bdi>
+                {/* Confirm Password */}
+                <div>
+                  <div className="relative">
+                    <input
+                      id="confirm-password-input"
+                      type={showPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                      onFocus={() => setIsConfirmPasswordFocused(true)}
+                      onBlur={() => setIsConfirmPasswordFocused(false)}
+                      onChange={(e) => {
+                        setConfirmPassword(e.target.value);
+                        if (errorMessage) setErrorMessage(null);
+                      }}
+                      className={`w-full h-[56px] px-4 text-[16px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
+                        errorMessage
+                          ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                          : isConfirmPasswordFocused
+                          ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                          : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                      }`}
+                    />
+                    <label
+                      htmlFor="confirm-password-input"
+                      className={`absolute pointer-events-none transition-all duration-150 start-3 ${
+                        isConfirmPasswordFloating
+                          ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
+                          : 'top-4 text-[16px]'
+                      } ${
+                        errorMessage
+                          ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                          : isConfirmPasswordFocused
+                          ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                          : 'text-[#444746] dark:text-[#8E918F]'
+                      }`}
+                    >
+                      <bdi>{t('confirmPasswordLabel')}</bdi>
+                    </label>
                   </div>
-                )}
 
-                {successMessage && !errorMessage && (
-                  <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 mt-1.5">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                    <bdi>{successMessage}</bdi>
-                  </div>
-                )}
-              </div>
+                  {errorMessage && (
+                    <div className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5] mt-1.5">
+                      <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#B3261E] dark:bg-[#F2B8B5] text-white dark:text-[#601410] text-[11px] font-bold select-none leading-none pb-[1px]">
+                        !
+                      </span>
+                      <bdi>{errorMessage}</bdi>
+                    </div>
+                  )}
 
-              {/* Show Password Toggle */}
-              <div className="flex items-center gap-2 text-sm pt-1">
-                <label className="flex items-center gap-2 cursor-pointer text-[#444746] dark:text-[#C4C7C5]">
-                  <input
-                    type="checkbox"
-                    checked={showPassword}
-                    onChange={(e) => setShowPassword(e.target.checked)}
-                    className="w-4 h-4 rounded-[2px] border-[#747775] text-[#0B57D0] focus:ring-[#0B57D0] cursor-pointer"
-                  />
-                  <span><bdi>{t('showPassword')}</bdi></span>
-                </label>
+                  {successMessage && !errorMessage && (
+                    <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 mt-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <bdi>{successMessage}</bdi>
+                    </div>
+                  )}
+                </div>
+
+                {/* Show Password Toggle */}
+                <div className="flex items-center gap-2 text-sm pt-1">
+                  <label className="flex items-center gap-2 cursor-pointer text-[#444746] dark:text-[#C4C7C5]">
+                    <input
+                      type="checkbox"
+                      checked={showPassword}
+                      onChange={(e) => setShowPassword(e.target.checked)}
+                      className="w-4 h-4 rounded-[2px] border-[#747775] text-[#0B57D0] focus:ring-[#0B57D0] cursor-pointer"
+                    />
+                    <span><bdi>{t('showPassword')}</bdi></span>
+                  </label>
+                </div>
               </div>
 
               {/* Actions */}
-              <div className="flex justify-between md:justify-end items-center gap-4 pt-4">
+              <div className="flex justify-between md:justify-end items-center gap-4 pt-6 mt-auto">
                 <Link
                   href="/login"
                   className="text-sm font-medium text-[#0B57D0] dark:text-[#A8C7FA] hover:bg-[#F2F6FC] dark:hover:bg-[#1E2738] px-4 py-2 rounded-full transition-colors cursor-pointer"
