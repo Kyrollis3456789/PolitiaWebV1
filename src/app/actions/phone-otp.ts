@@ -3,14 +3,14 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 
-// Server-side secure OTP memory cache for fallback verification
+// In-memory cryptographic OTP store for fallback verification
 const secureOtpStore = new Map<string, { code: string; expiresAt: number; attempts: number }>();
 
 export interface SendOtpResult {
   success: boolean;
   message?: string;
   demoOtp?: string;
-  provider?: 'supabase_sms' | 'twilio' | 'fallback_otp';
+  provider?: 'supabase_twilio_verify' | 'twilio_verify_v2' | 'twilio_sms' | 'fallback_otp';
   error?: string;
 }
 
@@ -41,7 +41,7 @@ function formatE164Phone(countryCode: string, phoneNumber: string): string {
 }
 
 /**
- * Sends a real 6-digit OTP code to the user's phone via Supabase SMS / Twilio / Gateway.
+ * Sends a real 6-digit OTP code to the user's phone via Supabase (Twilio Verify) or direct Twilio Verify API.
  */
 export async function sendPhoneOtp(countryCode: string, phoneNumber: string): Promise<SendOtpResult> {
   const cleanPhone = phoneNumber.trim().replace(/\D/g, '');
@@ -56,7 +56,7 @@ export async function sendPhoneOtp(countryCode: string, phoneNumber: string): Pr
   // Store in server memory cache for verification fallback
   secureOtpStore.set(e164Phone, { code: generatedOtp, expiresAt, attempts: 0 });
 
-  // 1. Try sending via Supabase Auth Phone OTP (if configured in Supabase Dashboard)
+  // 1. First priority: Real Supabase Auth Phone OTP (configured with Twilio Verify in Supabase Dashboard)
   try {
     const supabase = await createClient();
     const { error: sbError } = await supabase.auth.signInWithOtp({
@@ -69,19 +69,50 @@ export async function sendPhoneOtp(countryCode: string, phoneNumber: string): Pr
     if (!sbError) {
       return {
         success: true,
-        message: `Real SMS verification code sent via Supabase to ${e164Phone}`,
-        provider: 'supabase_sms',
+        message: `Real SMS verification code sent via Supabase Twilio Verify to ${e164Phone}`,
+        provider: 'supabase_twilio_verify',
       };
     }
   } catch (err) {
-    console.info('Supabase Phone SMS attempt:', err);
+    console.info('Supabase Twilio Verify attempt:', err);
   }
 
-  // 2. Try Twilio if environment variables are provided
+  // 2. Second priority: Direct Twilio Verify Service (v2 API)
   const twilioSid = process.env.TWILIO_ACCOUNT_SID;
   const twilioToken = process.env.TWILIO_AUTH_TOKEN;
-  const twilioFrom = process.env.TWILIO_PHONE_NUMBER;
+  const twilioVerifySid = process.env.TWILIO_VERIFY_SERVICE_SID || process.env.TWILIO_SERVICE_SID;
 
+  if (twilioSid && twilioToken && twilioVerifySid) {
+    try {
+      const basicAuth = Buffer.from(`${twilioSid}:${twilioToken}`).toString('base64');
+      const body = new URLSearchParams({
+        To: e164Phone,
+        Channel: 'sms',
+      });
+
+      const res = await fetch(`https://verify.twilio.com/v2/Services/${twilioVerifySid}/Verifications`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${basicAuth}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: body.toString(),
+      });
+
+      if (res.ok) {
+        return {
+          success: true,
+          message: `Real SMS verification code sent via Twilio Verify to ${e164Phone}`,
+          provider: 'twilio_verify_v2',
+        };
+      }
+    } catch (err) {
+      console.warn('Twilio Verify API attempt:', err);
+    }
+  }
+
+  // 3. Third priority: Direct Twilio SMS Messages API
+  const twilioFrom = process.env.TWILIO_PHONE_NUMBER;
   if (twilioSid && twilioToken && twilioFrom) {
     try {
       const basicAuth = Buffer.from(`${twilioSid}:${twilioToken}`).toString('base64');
@@ -103,16 +134,16 @@ export async function sendPhoneOtp(countryCode: string, phoneNumber: string): Pr
       if (res.ok) {
         return {
           success: true,
-          message: `Real SMS verification code sent via Twilio to ${e164Phone}`,
-          provider: 'twilio',
+          message: `Real SMS verification code sent via Twilio SMS to ${e164Phone}`,
+          provider: 'twilio_sms',
         };
       }
     } catch (err) {
-      console.warn('Twilio SMS delivery attempt:', err);
+      console.warn('Twilio SMS Messages attempt:', err);
     }
   }
 
-  // 3. Fallback: Return success with active server-generated OTP
+  // 4. Robust Fallback: Server-side OTP active
   return {
     success: true,
     message: `Verification code generated for ${e164Phone}`,
@@ -122,7 +153,7 @@ export async function sendPhoneOtp(countryCode: string, phoneNumber: string): Pr
 }
 
 /**
- * Verifies the 6-digit OTP code against Supabase / Server store.
+ * Verifies the 6-digit OTP code against Supabase Twilio Verify / Direct Twilio Verify / Server store.
  */
 export async function verifyPhoneOtp(
   countryCode: string,
@@ -141,7 +172,7 @@ export async function verifyPhoneOtp(
 
   const e164Phone = formatE164Phone(countryCode, phoneNumber);
 
-  // 1. Try Supabase Auth OTP verification
+  // 1. First priority: Supabase Twilio Verify
   try {
     const supabase = await createClient();
     const { data: sbData, error: sbError } = await supabase.auth.verifyOtp({
@@ -156,7 +187,41 @@ export async function verifyPhoneOtp(
     }
   } catch {}
 
-  // 2. Check Server-side secure OTP store
+  // 2. Second priority: Direct Twilio Verify Service (v2 VerificationCheck)
+  const twilioSid = process.env.TWILIO_ACCOUNT_SID;
+  const twilioToken = process.env.TWILIO_AUTH_TOKEN;
+  const twilioVerifySid = process.env.TWILIO_VERIFY_SERVICE_SID || process.env.TWILIO_SERVICE_SID;
+
+  if (twilioSid && twilioToken && twilioVerifySid) {
+    try {
+      const basicAuth = Buffer.from(`${twilioSid}:${twilioToken}`).toString('base64');
+      const body = new URLSearchParams({
+        To: e164Phone,
+        Code: trimmedCode,
+      });
+
+      const res = await fetch(`https://verify.twilio.com/v2/Services/${twilioVerifySid}/VerificationCheck`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${basicAuth}`,
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: body.toString(),
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json.status === 'approved') {
+          secureOtpStore.delete(e164Phone);
+          return { success: true };
+        }
+      }
+    } catch (err) {
+      console.warn('Twilio VerificationCheck attempt:', err);
+    }
+  }
+
+  // 3. Third priority: Server-side secure OTP store
   const stored = secureOtpStore.get(e164Phone);
 
   if (!stored) {
