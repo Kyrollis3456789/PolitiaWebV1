@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import {
   Loader2,
@@ -195,6 +195,35 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [langSearch, setLangSearch] = useState('');
+
+  // Real-time name validation while writing
+  useEffect(() => {
+    if (mainStepIndex === 1) {
+      if (subStepIndex === 1) {
+        if (!englishFullName.trim()) {
+          setErrorMessage(null);
+          return;
+        }
+        const val = validateEnglishName(englishFullName, false);
+        if (!val.isValid) {
+          setErrorMessage(isRtl ? (val.errorAr || val.error || '') : (val.error || val.errorAr || ''));
+        } else {
+          setErrorMessage(null);
+        }
+      } else if (subStepIndex === 2) {
+        if (!arabicFullName.trim()) {
+          setErrorMessage(null);
+          return;
+        }
+        const val = validateArabicName(arabicFullName, 4);
+        if (!val.isValid) {
+          setErrorMessage(isRtl ? (val.errorAr || val.error || '') : (val.error || val.errorAr || ''));
+        } else {
+          setErrorMessage(null);
+        }
+      }
+    }
+  }, [englishFullName, arabicFullName, mainStepIndex, subStepIndex, isRtl]);
 
   // Names cleanup
   const fullEnglishName = englishFullName.trim().replace(/\s+/g, ' ');
@@ -658,7 +687,6 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       onBlur={() => setIsEnglishFullNameFocused(false)}
                       onChange={(e) => {
                         setEnglishFullName(autoCapitalizeEnglishName(e.target.value));
-                        if (errorMessage) setErrorMessage(null);
                       }}
                       className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
                         errorMessage
@@ -702,7 +730,6 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       onBlur={() => setIsArabicFullNameFocused(false)}
                       onChange={(e) => {
                         setArabicFullName(e.target.value);
-                        if (errorMessage) setErrorMessage(null);
                       }}
                       className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border text-right ${
                         errorMessage
