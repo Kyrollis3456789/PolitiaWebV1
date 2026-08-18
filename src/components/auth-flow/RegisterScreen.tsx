@@ -588,6 +588,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                     width={32}
                     height={32}
                     priority
+                    style={{ height: 'auto' }}
                     className="object-contain shrink-0"
                   />
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/50 text-[#0B57D0] dark:text-[#93C5FD] border border-blue-200 dark:border-blue-700/50 text-xs font-semibold">

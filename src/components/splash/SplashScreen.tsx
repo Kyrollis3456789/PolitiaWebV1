@@ -68,6 +68,7 @@ export function SplashScreen() {
           width={192}
           height={192}
           priority
+          style={{ height: 'auto' }}
           className="logo-icon h-48 w-48 object-contain mb-6 drop-shadow-2xl"
         />
         <h1 className="font-serif text-3xl sm:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight text-center">

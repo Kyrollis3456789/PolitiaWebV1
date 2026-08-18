@@ -176,6 +176,7 @@ export function LoginScreen({
               width={48}
               height={48}
               priority
+              style={{ height: 'auto' }}
               className="object-contain w-full h-full"
             />
           </div>
