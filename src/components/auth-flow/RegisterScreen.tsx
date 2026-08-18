@@ -581,7 +581,15 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
             {mainStepIndex <= 8 && (
               <div className="space-y-2.5 w-full">
                 {/* Milestone & Sub-step Pill */}
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex flex-wrap items-center gap-3">
+                  <Image
+                    src="/logo.png"
+                    alt="Politia logo"
+                    width={32}
+                    height={32}
+                    priority
+                    className="object-contain shrink-0"
+                  />
                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/50 text-[#0B57D0] dark:text-[#93C5FD] border border-blue-200 dark:border-blue-700/50 text-xs font-semibold">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#0B57D0] dark:bg-[#60A5FA] animate-pulse" />
                     <span>
