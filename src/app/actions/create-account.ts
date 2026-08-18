@@ -214,58 +214,6 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
       console.warn('Profile insertion note:', profileErr);
     }
 
-    // 7. Batch-Insert Phone Numbers
-    const phoneRecords = validPhones.map((p, idx) => ({
-      user_id: userId,
-      phone_number: `${p.countryCode}${p.number.trim()}`,
-      is_primary: idx === 0 || p.isPrimary,
-      is_verified: false,
-    }));
-
-    if (phoneRecords.length > 0) {
-      try {
-        await supabase.from('user_phones').insert(phoneRecords);
-      } catch (phoneErr) {
-        console.warn('Phones insertion note:', phoneErr);
-      }
-    }
-
-    // 8. Batch-Insert Emails
-    const validEmails = payload.emails
-      .filter((e) => e.email && e.email.trim().includes('@'))
-      .map((e, idx) => ({
-        user_id: userId,
-        email: e.email.trim(),
-        is_primary: idx === 0 || e.isPrimary,
-        is_verified: false,
-      }));
-
-    if (validEmails.length > 0) {
-      try {
-        await supabase.from('user_emails').insert(validEmails);
-      } catch (emailErr) {
-        console.warn('Emails insertion note:', emailErr);
-      }
-    }
-
-    // 9. Batch-Insert Social Links
-    const socialRecords = Object.entries(payload.socials)
-      .filter(([, data]) => data?.url && data.url.trim().length > 0)
-      .map(([platform, data]) => ({
-        user_id: userId,
-        platform: platform as SocialPlatform,
-        profile_url: data.url.trim(),
-        display_name: data.displayName || null,
-        avatar_url: data.avatarUrl || null,
-      }));
-
-    if (socialRecords.length > 0) {
-      try {
-        await supabase.from('user_social_links').insert(socialRecords);
-      } catch (socialErr) {
-        console.warn('Socials insertion note:', socialErr);
-      }
-    }
 
     return {
       success: true,

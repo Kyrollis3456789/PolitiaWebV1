@@ -79,23 +79,6 @@ export async function checkUserAccountExists(identifier: string): Promise<Accoun
         console.warn('profiles primary_email lookup warning:', e);
       }
 
-      // 1.2 Check user_emails table
-      try {
-        const { data: emailData, error: emailError } = await supabase
-          .from('user_emails')
-          .select('user_id, email')
-          .ilike('email', trimmed)
-          .limit(1);
-
-        if (!emailError && emailData && emailData.length > 0) {
-          return {
-            exists: true,
-            resolvedEmail: emailData[0].email,
-          };
-        }
-      } catch (e) {
-        console.warn('user_emails lookup warning:', e);
-      }
 
       // 1.3 Check auth.admin users if admin client is available
       if (admin) {
@@ -152,31 +135,6 @@ export async function checkUserAccountExists(identifier: string): Promise<Accoun
         console.warn('profiles primary_phone lookup warning:', e);
       }
 
-      // 2.1 Check user_phones table
-      try {
-        const { data: phoneData } = await supabase
-          .from('user_phones')
-          .select('user_id, phone_number')
-          .or(`phone_number.eq.${cleanPhone},phone_number.ilike.%${cleanPhone}%`)
-          .limit(1);
-
-        if (phoneData && phoneData.length > 0) {
-          const userId = phoneData[0].user_id;
-          const { data: userEmailData } = await supabase
-            .from('user_emails')
-            .select('email')
-            .eq('user_id', userId)
-            .order('is_primary', { ascending: false })
-            .limit(1);
-
-          return {
-            exists: true,
-            resolvedEmail: userEmailData?.[0]?.email || trimmed,
-          };
-        }
-      } catch (e) {
-        console.warn('user_phones lookup warning:', e);
-      }
 
       // 2.2 Check in profiles by national_id
       try {
