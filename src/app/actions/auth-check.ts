@@ -45,6 +45,32 @@ export async function checkEnglishNameCollision(name: string): Promise<boolean> 
 }
 
 /**
+ * Checks whether an Arabic full name already exists in the profiles database (case-insensitive).
+ */
+export async function checkArabicNameCollision(name: string): Promise<boolean> {
+  const trimmed = name.trim();
+  if (!trimmed) return false;
+
+  try {
+    const admin = getSupabaseClient();
+    const supabase = admin || (await createClient());
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id')
+      .ilike('full_name_ar', trimmed)
+      .limit(1);
+
+    if (error) {
+      return false;
+    }
+
+    return (data && data.length > 0) || false;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Checks on the server whether an account exists with the given email, phone, username, or national ID before proceeding to password.
  * Returns exists: false and triggers an error if no account matches.
  */

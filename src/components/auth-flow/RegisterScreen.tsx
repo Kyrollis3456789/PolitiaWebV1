@@ -22,7 +22,7 @@ import {
 } from '@/lib/validation/name-rules';
 import { validateEgyptianNationalId } from '@/lib/validation/national-id';
 import { createAccountAction, CreateAccountPayload } from '@/app/actions/create-account';
-import { checkEnglishNameCollision } from '@/app/actions/auth-check';
+import { checkEnglishNameCollision, checkArabicNameCollision } from '@/app/actions/auth-check';
 import { GenderType, SocialPlatform } from '@/types/database.types';
 import {
   REGISTRATION_SCHEMA,
@@ -200,8 +200,9 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   // Name collision detection states
   const [checkingCollision, setCheckingCollision] = useState(false);
   const [hasNameCollision, setHasNameCollision] = useState(false);
+  const [hasArabicNameCollision, setHasArabicNameCollision] = useState(false);
 
-  // Debounced Name Collision Check
+  // Debounced English Name Collision Check
   useEffect(() => {
     if (mainStepIndex !== 1 || subStepIndex !== 1 || !englishFullName.trim()) {
       setHasNameCollision(false);
@@ -240,6 +241,45 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
     return () => clearTimeout(delayDebounceFn);
   }, [englishFullName, mainStepIndex, subStepIndex, isRtl]);
 
+  // Debounced Arabic Name Collision Check
+  useEffect(() => {
+    if (mainStepIndex !== 1 || subStepIndex !== 2 || !arabicFullName.trim()) {
+      setHasArabicNameCollision(false);
+      return;
+    }
+
+    const val = validateArabicName(arabicFullName, 4);
+    if (!val.isValid) {
+      setHasArabicNameCollision(false);
+      return;
+    }
+
+    setCheckingCollision(true);
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const isCollision = await checkArabicNameCollision(arabicFullName);
+        setHasArabicNameCollision(isCollision);
+        if (isCollision) {
+          setErrorMessage(
+            isRtl
+              ? 'هذا الاسم العربي مسجل بالفعل. يرجى تعديله أو كتابة اسم خماسي لتجنب التكرار.'
+              : 'This Arabic name is already registered. Please add a 5th name to avoid conflict.'
+          );
+        } else {
+          setErrorMessage((prev) =>
+            prev?.includes('registered') || prev?.includes('مسجل بالفعل') ? null : prev
+          );
+        }
+      } catch (err) {
+        console.warn('Arabic collision check error:', err);
+      } finally {
+        setCheckingCollision(false);
+      }
+    }, 600);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [arabicFullName, mainStepIndex, subStepIndex, isRtl]);
+
   // Real-time name validation while writing
   useEffect(() => {
     if (mainStepIndex === 1) {
@@ -259,15 +299,15 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
           setErrorMessage(null);
           return;
         }
-        const val = validateArabicName(arabicFullName, hasNameCollision ? 5 : 4);
+        const val = validateArabicName(arabicFullName, hasArabicNameCollision ? 5 : 4);
         if (!val.isValid) {
           setErrorMessage(isRtl ? (val.errorAr || val.error || '') : (val.error || val.errorAr || ''));
-        } else {
+        } else if (!hasArabicNameCollision) {
           setErrorMessage(null);
         }
       }
     }
-  }, [englishFullName, arabicFullName, mainStepIndex, subStepIndex, isRtl, hasNameCollision]);
+  }, [englishFullName, arabicFullName, mainStepIndex, subStepIndex, isRtl, hasNameCollision, hasArabicNameCollision]);
 
   // Names cleanup
   const fullEnglishName = englishFullName.trim().replace(/\s+/g, ' ');
@@ -386,7 +426,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
           return;
         }
       } else if (subStepIndex === 2) {
-        const val = validateArabicName(arabicFullName, hasNameCollision ? 5 : 4);
+        const val = validateArabicName(arabicFullName, hasArabicNameCollision ? 5 : 4);
         if (!val.isValid) {
           setErrorMessage(isRtl ? (val.errorAr || val.error || '') : (val.error || val.errorAr || ''));
           return;
