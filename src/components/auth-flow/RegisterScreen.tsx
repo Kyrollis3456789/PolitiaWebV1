@@ -23,7 +23,11 @@ import {
 import { validateEgyptianNationalId } from '@/lib/validation/national-id';
 import { validateBirthday } from '@/lib/validation/date-rules';
 import { createAccountAction, CreateAccountPayload } from '@/app/actions/create-account';
-import { checkEnglishNameCollision, checkArabicNameCollision } from '@/app/actions/auth-check';
+import {
+  checkEnglishNameCollision,
+  checkArabicNameCollision,
+  checkNationalIdCollision,
+} from '@/app/actions/auth-check';
 import { GenderType, SocialPlatform } from '@/types/database.types';
 import {
   REGISTRATION_SCHEMA,
@@ -198,10 +202,36 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [langSearch, setLangSearch] = useState('');
 
-  // Name collision detection states
+  // Names cleanup & derived values
+  const fullEnglishName = englishFullName.trim().replace(/\s+/g, ' ');
+  const fullArabicName = arabicFullName.trim().replace(/\s+/g, ' ');
+  const formattedDob = dob;
+
+  const calculateAge = (): number | null => {
+    if (!formattedDob) return null;
+    const birthDate = new Date(formattedDob + 'T00:00:00');
+    if (isNaN(birthDate.getTime())) return null;
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age >= 0 ? age : null;
+  };
+  const currentAge = calculateAge();
+
+  const nationalIdValidation = validateEgyptianNationalId(
+    nationalId,
+    formattedDob || undefined,
+    gender || undefined
+  );
+
+  // Name and ID collision detection states
   const [checkingCollision, setCheckingCollision] = useState(false);
   const [hasNameCollision, setHasNameCollision] = useState(false);
   const [hasArabicNameCollision, setHasArabicNameCollision] = useState(false);
+  const [hasNationalIdCollision, setHasNationalIdCollision] = useState(false);
 
   // Debounced English Name Collision Check
   useEffect(() => {
@@ -281,6 +311,44 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
     return () => clearTimeout(delayDebounceFn);
   }, [arabicFullName, mainStepIndex, subStepIndex, isRtl]);
 
+  // Debounced National ID Collision Check
+  useEffect(() => {
+    if (mainStepIndex !== 1 || subStepIndex !== 5 || !nationalId.trim()) {
+      setHasNationalIdCollision(false);
+      return;
+    }
+
+    if (nationalId.length !== 14 || !nationalIdValidation.isValid) {
+      setHasNationalIdCollision(false);
+      return;
+    }
+
+    setCheckingCollision(true);
+    const delayDebounceFn = setTimeout(async () => {
+      try {
+        const isCollision = await checkNationalIdCollision(nationalId);
+        setHasNationalIdCollision(isCollision);
+        if (isCollision) {
+          setErrorMessage(
+            isRtl
+              ? 'الرقم القومي مسجل بالفعل لحساب آخر.'
+              : 'This National ID is already registered to another account.'
+          );
+        } else {
+          setErrorMessage((prev) =>
+            prev?.includes('National ID') || prev?.includes('الرقم القومي مسجل') ? null : prev
+          );
+        }
+      } catch (err) {
+        console.warn('National ID collision check error:', err);
+      } finally {
+        setCheckingCollision(false);
+      }
+    }, 600);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [nationalId, nationalIdValidation.isValid, mainStepIndex, subStepIndex, isRtl]);
+
   // Real-time name validation while writing
   useEffect(() => {
     if (mainStepIndex === 1) {
@@ -310,30 +378,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
     }
   }, [englishFullName, arabicFullName, mainStepIndex, subStepIndex, isRtl, hasNameCollision, hasArabicNameCollision]);
 
-  // Names cleanup
-  const fullEnglishName = englishFullName.trim().replace(/\s+/g, ' ');
-  const fullArabicName = arabicFullName.trim().replace(/\s+/g, ' ');
-  const formattedDob = dob;
 
-  const calculateAge = (): number | null => {
-    if (!formattedDob) return null;
-    const birthDate = new Date(formattedDob + 'T00:00:00');
-    if (isNaN(birthDate.getTime())) return null;
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age >= 0 ? age : null;
-  };
-  const currentAge = calculateAge();
-
-  const nationalIdValidation = validateEgyptianNationalId(
-    nationalId,
-    formattedDob || undefined,
-    gender || undefined
-  );
 
   // Active Schema Configuration
   const currentMainConfig = REGISTRATION_SCHEMA[mainStepIndex - 1];
@@ -447,6 +492,14 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
           setErrorMessage(
             nationalIdValidation.error ||
               (isRtl ? 'الرقم القومي غير صحيح (14 رقماً)' : 'Invalid National ID number (must be 14 digits).')
+          );
+          return;
+        }
+        if (hasNationalIdCollision) {
+          setErrorMessage(
+            isRtl
+              ? 'الرقم القومي مسجل بالفعل لحساب آخر.'
+              : 'This National ID is already registered to another account.'
           );
           return;
         }

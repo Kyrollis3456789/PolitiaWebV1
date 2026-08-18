@@ -71,6 +71,32 @@ export async function checkArabicNameCollision(name: string): Promise<boolean> {
 }
 
 /**
+ * Checks whether an Egyptian National ID already exists in the profiles database.
+ */
+export async function checkNationalIdCollision(nationalId: string): Promise<boolean> {
+  const trimmed = nationalId.trim();
+  if (!trimmed || trimmed.length !== 14) return false;
+
+  try {
+    const admin = getSupabaseClient();
+    const supabase = admin || (await createClient());
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('national_id', trimmed)
+      .limit(1);
+
+    if (error) {
+      return false;
+    }
+
+    return (data && data.length > 0) || false;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Checks on the server whether an account exists with the given email, phone, username, or national ID before proceeding to password.
  * Returns exists: false and triggers an error if no account matches.
  */
