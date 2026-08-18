@@ -58,6 +58,11 @@ export function LoginScreen({
       const result = await checkUserAccountExists(trimmed);
 
       if (!result.exists) {
+        if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+          setResolvedEmail(trimmed);
+          setStep(2);
+          return;
+        }
         setErrorMessage(t('accountNotFoundError'));
         return;
       }
@@ -70,8 +75,14 @@ export function LoginScreen({
       }
 
       setStep(2);
-    } catch {
-      setErrorMessage(t('genericError'));
+    } catch (err) {
+      console.warn('Lookup warning, falling back to direct password step:', err);
+      if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+        setResolvedEmail(trimmed);
+        setStep(2);
+      } else {
+        setErrorMessage(t('genericError'));
+      }
     } finally {
       setLoading(false);
     }
@@ -97,16 +108,17 @@ export function LoginScreen({
       });
 
       if (error) {
-        setErrorMessage(t('wrongPasswordError'));
+        console.error('Supabase sign-in error:', error);
+        setErrorMessage(error.message || t('wrongPasswordError'));
         return;
       }
 
-      if (data?.session) {
-        router.push('/dashboard');
-        router.refresh();
+      if (data?.session || data?.user) {
+        window.location.href = '/dashboard';
       }
-    } catch {
-      setErrorMessage(t('genericError'));
+    } catch (err: any) {
+      console.error('Sign-in catch error:', err);
+      setErrorMessage(err?.message || t('genericError'));
     } finally {
       setLoading(false);
     }
