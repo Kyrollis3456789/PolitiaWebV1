@@ -202,6 +202,147 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [langSearch, setLangSearch] = useState('');
 
+  // Draft persistence across language switches
+  const [isRestored, setIsRestored] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('politia_registration_draft');
+      if (saved) {
+        const d = JSON.parse(saved);
+        if (d.mainStepIndex) setMainStepIndex(d.mainStepIndex);
+        if (d.subStepIndex) setSubStepIndex(d.subStepIndex);
+        if (d.englishFullName !== undefined) setEnglishFullName(d.englishFullName);
+        if (d.arabicFullName !== undefined) setArabicFullName(d.arabicFullName);
+        if (d.gender !== undefined) setGender(d.gender);
+        if (d.dob !== undefined) setDob(d.dob);
+        if (d.nationalId !== undefined) setNationalId(d.nationalId);
+        if (d.avatarPreview !== undefined) setAvatarPreview(d.avatarPreview);
+        if (d.photoSkippedGracePeriod !== undefined) setPhotoSkippedGracePeriod(d.photoSkippedGracePeriod);
+        if (d.countryCode !== undefined) setCountryCode(d.countryCode);
+        if (d.phoneNumber !== undefined) setPhoneNumber(d.phoneNumber);
+        if (d.email !== undefined) setEmail(d.email);
+        if (d.landlineAreaCode !== undefined) setLandlineAreaCode(d.landlineAreaCode);
+        if (d.landlineNumber !== undefined) setLandlineNumber(d.landlineNumber);
+        if (d.socials !== undefined) setSocials(d.socials);
+        if (d.maritalStatus !== undefined) setMaritalStatus(d.maritalStatus);
+        if (d.guardianName !== undefined) setGuardianName(d.guardianName);
+        if (d.guardianPhone !== undefined) setGuardianPhone(d.guardianPhone);
+        if (d.familyRelationType !== undefined) setFamilyRelationType(d.familyRelationType);
+        if (d.educationStage !== undefined) setEducationStage(d.educationStage);
+        if (d.facultyOrSchool !== undefined) setFacultyOrSchool(d.facultyOrSchool);
+        if (d.profession !== undefined) setProfession(d.profession);
+        if (d.workplace !== undefined) setWorkplace(d.workplace);
+        if (d.governorate !== undefined) setGovernorate(d.governorate);
+        if (d.city !== undefined) setCity(d.city);
+        if (d.streetAddress !== undefined) setStreetAddress(d.streetAddress);
+        if (d.buildingNumber !== undefined) setBuildingNumber(d.buildingNumber);
+        if (d.floorNumber !== undefined) setFloorNumber(d.floorNumber);
+        if (d.apartmentNumber !== undefined) setApartmentNumber(d.apartmentNumber);
+        if (d.secondaryAddress !== undefined) setSecondaryAddress(d.secondaryAddress);
+        if (d.diocese !== undefined) setDiocese(d.diocese);
+        if (d.primaryChurch !== undefined) setPrimaryChurch(d.primaryChurch);
+        if (d.secondaryChurch !== undefined) setSecondaryChurch(d.secondaryChurch);
+        if (d.priestName !== undefined) setPriestName(d.priestName);
+        if (d.selectedHobbies !== undefined) setSelectedHobbies(d.selectedHobbies);
+        if (d.selectedLanguages !== undefined) setSelectedLanguages(d.selectedLanguages);
+      }
+    } catch (e) {
+      console.warn('Failed to restore registration draft', e);
+    } finally {
+      setIsRestored(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isRestored) return;
+    try {
+      if (mainStepIndex === 9) {
+        sessionStorage.removeItem('politia_registration_draft');
+        return;
+      }
+      const draft = {
+        mainStepIndex,
+        subStepIndex,
+        englishFullName,
+        arabicFullName,
+        gender,
+        dob,
+        nationalId,
+        avatarPreview,
+        photoSkippedGracePeriod,
+        countryCode,
+        phoneNumber,
+        email,
+        landlineAreaCode,
+        landlineNumber,
+        socials,
+        maritalStatus,
+        guardianName,
+        guardianPhone,
+        familyRelationType,
+        educationStage,
+        facultyOrSchool,
+        profession,
+        workplace,
+        governorate,
+        city,
+        streetAddress,
+        buildingNumber,
+        floorNumber,
+        apartmentNumber,
+        secondaryAddress,
+        diocese,
+        primaryChurch,
+        secondaryChurch,
+        priestName,
+        selectedHobbies,
+        selectedLanguages,
+      };
+      sessionStorage.setItem('politia_registration_draft', JSON.stringify(draft));
+    } catch (e) {
+      console.warn('Failed to save registration draft', e);
+    }
+  }, [
+    isRestored,
+    mainStepIndex,
+    subStepIndex,
+    englishFullName,
+    arabicFullName,
+    gender,
+    dob,
+    nationalId,
+    avatarPreview,
+    photoSkippedGracePeriod,
+    countryCode,
+    phoneNumber,
+    email,
+    landlineAreaCode,
+    landlineNumber,
+    socials,
+    maritalStatus,
+    guardianName,
+    guardianPhone,
+    familyRelationType,
+    educationStage,
+    facultyOrSchool,
+    profession,
+    workplace,
+    governorate,
+    city,
+    streetAddress,
+    buildingNumber,
+    floorNumber,
+    apartmentNumber,
+    secondaryAddress,
+    diocese,
+    primaryChurch,
+    secondaryChurch,
+    priestName,
+    selectedHobbies,
+    selectedLanguages,
+  ]);
+
   // Names cleanup & derived values
   const fullEnglishName = englishFullName.trim().replace(/\s+/g, ' ');
   const fullArabicName = arabicFullName.trim().replace(/\s+/g, ' ');
