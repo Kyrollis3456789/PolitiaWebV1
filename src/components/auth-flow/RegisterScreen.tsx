@@ -34,7 +34,7 @@ import {
   TOTAL_REGISTRATION_MAIN_STEPS,
   TOTAL_REGISTRATION_SUBSTEPS,
 } from '@/lib/constants/registrationSteps';
-import { ALL_COUNTRIES, getCountryByIso } from '@/lib/data/countries';
+import { ALL_COUNTRIES, getCountryByIso, getLocalizedCountryName } from '@/lib/data/countries';
 
 interface RegisterScreenProps {
   onNavigateLogin?: () => void;
@@ -1297,7 +1297,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                           value={c.iso}
                           className="bg-white dark:bg-[#1B212D] text-[#1F1F1F] dark:text-[#E3E3E3]"
                         >
-                          {c.flag} {isRtl ? c.nameAr : c.nameEn} ({c.dialCode})
+                          {c.flag} {getLocalizedCountryName(c.iso, locale)} ({c.dialCode})
                         </option>
                       ))}
                     </select>

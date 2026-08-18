@@ -100,3 +100,25 @@ export function getCountryByIso(iso: string): CountryInfo {
 export function getCountryByDialCode(dialCode: string): CountryInfo {
   return ALL_COUNTRIES.find((c) => c.dialCode === dialCode) || ALL_COUNTRIES[0];
 }
+
+/**
+ * Resolves the country name in ANY language / locale (e.g. 'ar-EG', 'fr-FR', 'de-DE', 'es-ES', 'el-GR', 'it-IT', 'ru-RU', 'zh-CN', etc.)
+ * Uses native standard Intl.DisplayNames with robust Arabic/English fallback.
+ */
+export function getLocalizedCountryName(iso: string, locale: string = 'en'): string {
+  try {
+    if (typeof Intl !== 'undefined' && Intl.DisplayNames) {
+      const regionNames = new Intl.DisplayNames([locale, locale.split('-')[0], 'en'], { type: 'region' });
+      const name = regionNames.of(iso.toUpperCase());
+      if (name) return name;
+    }
+  } catch {
+    // Fallback
+  }
+
+  const country = getCountryByIso(iso);
+  if (locale.startsWith('ar') || locale === 'ar') {
+    return country.nameAr || country.nameEn;
+  }
+  return country.nameEn;
+}
