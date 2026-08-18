@@ -1,6 +1,115 @@
 {
   "createAccountTitle": "Créer un compte Politia",
   "enterNameSubtitle": "Saisissez votre nom",
+  "milestones": {
+    "step_1": {
+      "title": "Informations personnelles",
+      "badge": "Étape 1 sur 7: Informations personnelles"
+    },
+    "step_2": {
+      "title": "Contact & Réseaux",
+      "badge": "Étape 2 sur 7: Contact & Réseaux"
+    },
+    "step_3": {
+      "title": "Relations familiales",
+      "badge": "Étape 3 sur 7: Relations familiales"
+    },
+    "step_4": {
+      "title": "Éducation & Travail",
+      "badge": "Étape 4 sur 7: Éducation & Travail"
+    },
+    "step_5": {
+      "title": "Adresses & Résidence",
+      "badge": "Étape 5 sur 7: Adresses & Résidence"
+    },
+    "step_6": {
+      "title": "Engagement ecclésial",
+      "badge": "Étape 6 sur 7: Engagement ecclésial"
+    },
+    "step_7": {
+      "title": "Informations complémentaires",
+      "badge": "Étape 7 sur 7: Informations complémentaires"
+    }
+  },
+  "fields": {
+    "fullNameEn": {
+      "label": "Nom complet (en anglais)",
+      "errorRequired": "Veuillez saisir votre nom complet",
+      "errorFourPart": "Veuillez saisir votre nom complet en 4 parties en anglais (Prénom, Père, Grand-père, Nom)",
+      "errorLatinOnly": "Veuillez utiliser uniquement des lettres anglaises/latines"
+    },
+    "fullNameAr": {
+      "label": "Nom complet (en arabe)",
+      "errorRequired": "Veuillez saisir votre nom en arabe",
+      "errorFourPart": "Veuillez saisir votre nom complet en 4 parties en arabe",
+      "errorArabicOnly": "Veuillez utiliser uniquement des caractères arabes"
+    },
+    "gender": {
+      "label": "Genre",
+      "male": "Homme",
+      "female": "Femme"
+    },
+    "dob": {
+      "label": "Date de naissance",
+      "ageText": "Âge: {age} ans"
+    },
+    "nationalId": {
+      "label": "Numéro national d'identité (14 chiffres)",
+      "governoratePrefix": "📍 Gouvernorat: ",
+      "errorInvalid": "Veuillez saisir un numéro national valide à 14 chiffres",
+      "errorDobMismatch": "La date de naissance du numéro national ne correspond pas à la date saisie",
+      "errorGenderMismatch": "Le genre du numéro national ne correspond pas au genre sélectionné"
+    },
+    "avatar": {
+      "label": "Photo de profil",
+      "subtitle": "Ajoutez une photo pour personnaliser votre profil",
+      "upload": "Téléverser",
+      "takePhoto": "Prendre une photo",
+      "editPhoto": "Modifier la photo",
+      "skip": "Ignorer pour l'instant"
+    },
+    "phone": {
+      "label": "Numéro de téléphone portable",
+      "countryCode": "+20",
+      "errorRequired": "Veuillez saisir votre numéro de portable",
+      "errorInvalid": "Veuillez saisir un numéro de portable valide (11 chiffres commençant par 010, 011, 012 ou 015)"
+    },
+    "email": {
+      "label": "Adresse e-mail (facultatif)",
+      "errorInvalid": "Veuillez saisir une adresse e-mail valide"
+    },
+    "landline": {
+      "label": "Téléphone fixe (facultatif)",
+      "areaCode": "Indicatif régional (ex. 02)",
+      "phoneNumber": "Numéro fixe (ex. 23456789)"
+    },
+    "socials": {
+      "label": "Comptes de réseaux sociaux",
+      "facebook": "URL du profil Facebook (facultatif)",
+      "instagram": "URL du profil Instagram (facultatif)",
+      "linkedin": "URL du profil LinkedIn (facultatif)"
+    },
+    "password": {
+      "label": "Mot de passe",
+      "confirmLabel": "Confirmer le mot de passe",
+      "errorLength": "Le mot de passe doit comporter au moins 8 caractères",
+      "errorMatch": "Les mots de passe ne correspondent pas"
+    }
+  },
+  "buttons": {
+    "next": "Suivant",
+    "back": "Retour",
+    "skip": "Ignorer pour l'instant",
+    "createAccount": "Créer un compte",
+    "signInInstead": "Se connecter plutôt"
+  },
+  "footer": {
+    "help": "Aide",
+    "privacy": "Confidentialité",
+    "terms": "Conditions",
+    "searchLanguages": "Rechercher des langues...",
+    "noLanguagesFound": "Aucune langue trouvée"
+  },
   "fullNameLabel": "Nom complet (en anglais)",
   "enterFullNameError": "Saisissez votre nom complet",
   "fourNamesRequiredError": "Saisissez votre nom complet en 4 parties en anglais",

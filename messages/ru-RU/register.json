@@ -1,6 +1,115 @@
 {
   "createAccountTitle": "Создать аккаунт Politia",
   "enterNameSubtitle": "Введите имя",
+  "milestones": {
+    "step_1": {
+      "title": "Personal Info",
+      "badge": "Step 1 of 7: Personal Info"
+    },
+    "step_2": {
+      "title": "Contact & Social",
+      "badge": "Step 2 of 7: Contact & Social"
+    },
+    "step_3": {
+      "title": "Family Relations",
+      "badge": "Step 3 of 7: Family Relations"
+    },
+    "step_4": {
+      "title": "Education & Work",
+      "badge": "Step 4 of 7: Education & Work"
+    },
+    "step_5": {
+      "title": "Locations & Residency",
+      "badge": "Step 5 of 7: Locations & Residency"
+    },
+    "step_6": {
+      "title": "Church Commitment",
+      "badge": "Step 6 of 7: Church Commitment"
+    },
+    "step_7": {
+      "title": "Additional Info",
+      "badge": "Step 7 of 7: Additional Info"
+    }
+  },
+  "fields": {
+    "fullNameEn": {
+      "label": "Full Name (English)",
+      "errorRequired": "Please enter your full name",
+      "errorFourPart": "Please enter your full four-part name (First, Middle, Grandfather, Family name)",
+      "errorLatinOnly": "Please use English/Latin letters only"
+    },
+    "fullNameAr": {
+      "label": "Full Name (Arabic)",
+      "errorRequired": "Please enter your Arabic full name",
+      "errorFourPart": "Please enter your full four-part name in Arabic",
+      "errorArabicOnly": "Please use Arabic characters only"
+    },
+    "gender": {
+      "label": "Gender",
+      "male": "Male",
+      "female": "Female"
+    },
+    "dob": {
+      "label": "Date of Birth",
+      "ageText": "Age: {age} years old"
+    },
+    "nationalId": {
+      "label": "Egyptian National ID",
+      "governoratePrefix": "📍 Governorate: ",
+      "errorInvalid": "Please enter a valid 14-digit Egyptian National ID",
+      "errorDobMismatch": "Date of birth in National ID does not match entered Date of Birth",
+      "errorGenderMismatch": "Gender digit in National ID does not match selected Gender"
+    },
+    "avatar": {
+      "label": "Profile Picture",
+      "subtitle": "Add a photo to personalize your profile",
+      "upload": "Upload",
+      "takePhoto": "Take Photo",
+      "editPhoto": "Edit Photo",
+      "skip": "Skip for now"
+    },
+    "phone": {
+      "label": "Mobile Phone Number",
+      "countryCode": "+20",
+      "errorRequired": "Please enter your mobile phone number",
+      "errorInvalid": "Please enter a valid Egyptian mobile number (11 digits starting with 010, 011, 012, or 015)"
+    },
+    "email": {
+      "label": "Email Address (Optional)",
+      "errorInvalid": "Please enter a valid email address"
+    },
+    "landline": {
+      "label": "Home Landline (Optional)",
+      "areaCode": "Area Code (e.g. 02)",
+      "phoneNumber": "Landline Number (e.g. 23456789)"
+    },
+    "socials": {
+      "label": "Social Media Accounts",
+      "facebook": "Facebook Profile URL (Optional)",
+      "instagram": "Instagram Profile URL (Optional)",
+      "linkedin": "LinkedIn Profile URL (Optional)"
+    },
+    "password": {
+      "label": "Password",
+      "confirmLabel": "Confirm Password",
+      "errorLength": "Password must be at least 8 characters long",
+      "errorMatch": "Passwords do not match"
+    }
+  },
+  "buttons": {
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip for now",
+    "createAccount": "Create account",
+    "signInInstead": "Sign in instead"
+  },
+  "footer": {
+    "help": "Help",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "searchLanguages": "Search languages...",
+    "noLanguagesFound": "No languages found"
+  },
   "fullNameLabel": "Полное имя (на английском)",
   "enterFullNameError": "Введите полное имя",
   "fourNamesRequiredError": "Введите полное имя из 4 частей на английском языке",

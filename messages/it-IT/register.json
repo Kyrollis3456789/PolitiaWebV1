@@ -1,6 +1,115 @@
 {
   "createAccountTitle": "Crea un account Politia",
   "enterNameSubtitle": "Inserisci il tuo nome",
+  "milestones": {
+    "step_1": {
+      "title": "Dati personali",
+      "badge": "Passo 1 di 7: Dati personali"
+    },
+    "step_2": {
+      "title": "Contatti e Social",
+      "badge": "Passo 2 di 7: Contatti e Social"
+    },
+    "step_3": {
+      "title": "Relazioni familiari",
+      "badge": "Passo 3 di 7: Relazioni familiari"
+    },
+    "step_4": {
+      "title": "Istruzione e Lavoro",
+      "badge": "Passo 4 di 7: Istruzione e Lavoro"
+    },
+    "step_5": {
+      "title": "Indirizzi e Residenza",
+      "badge": "Passo 5 di 7: Indirizzi e Residenza"
+    },
+    "step_6": {
+      "title": "Impegno ecclesiale",
+      "badge": "Passo 6 di 7: Impegno ecclesiale"
+    },
+    "step_7": {
+      "title": "Informazioni aggiuntive",
+      "badge": "Passo 7 di 7: Informazioni aggiuntive"
+    }
+  },
+  "fields": {
+    "fullNameEn": {
+      "label": "Nome completo (in inglese)",
+      "errorRequired": "Inserisci il tuo nome completo",
+      "errorFourPart": "Inserisci il nome completo in 4 parti in inglese (Nome, Padre, Nonno, Cognome)",
+      "errorLatinOnly": "Usa solo lettere inglesi/latine"
+    },
+    "fullNameAr": {
+      "label": "Nome completo (in arabo)",
+      "errorRequired": "Inserisci il tuo nome in arabo",
+      "errorFourPart": "Inserisci il nome completo in 4 parti in arabo",
+      "errorArabicOnly": "Usa solo caratteri arabi"
+    },
+    "gender": {
+      "label": "Genere",
+      "male": "Maschio",
+      "female": "Femmina"
+    },
+    "dob": {
+      "label": "Data di nascita",
+      "ageText": "Età: {age} anni"
+    },
+    "nationalId": {
+      "label": "Documento d'identità (14 cifre)",
+      "governoratePrefix": "📍 Governatorato: ",
+      "errorInvalid": "Inserisci un ID nazionale valido a 14 cifre",
+      "errorDobMismatch": "La data di nascita nell'ID non corrisponde alla data inserita",
+      "errorGenderMismatch": "Il genere nell'ID non corrisponde al genere selezionato"
+    },
+    "avatar": {
+      "label": "Foto del profilo",
+      "subtitle": "Aggiungi una foto per personalizzare il tuo profilo",
+      "upload": "Carica",
+      "takePhoto": "Scatta foto",
+      "editPhoto": "Modifica foto",
+      "skip": "Salta per ora"
+    },
+    "phone": {
+      "label": "Numero di cellulare",
+      "countryCode": "+20",
+      "errorRequired": "Inserisci il tuo numero di cellulare",
+      "errorInvalid": "Inserisci un numero valido (11 cifre che iniziano con 010, 011, 012 o 015)"
+    },
+    "email": {
+      "label": "Indirizzo e-mail (Facoltativo)",
+      "errorInvalid": "Inserisci un indirizzo e-mail valido"
+    },
+    "landline": {
+      "label": "Telefono fisso (Facoltativo)",
+      "areaCode": "Prefisso (es. 02)",
+      "phoneNumber": "Numero fisso (es. 23456789)"
+    },
+    "socials": {
+      "label": "Profili social",
+      "facebook": "URL Facebook (Facoltativo)",
+      "instagram": "URL Instagram (Facoltativo)",
+      "linkedin": "URL LinkedIn (Facoltativo)"
+    },
+    "password": {
+      "label": "Password",
+      "confirmLabel": "Conferma password",
+      "errorLength": "La password deve contenere almeno 8 caratteri",
+      "errorMatch": "Le password non corrispondono"
+    }
+  },
+  "buttons": {
+    "next": "Avanti",
+    "back": "Indietro",
+    "skip": "Salta per ora",
+    "createAccount": "Crea account",
+    "signInInstead": "Accedi invece"
+  },
+  "footer": {
+    "help": "Aiuto",
+    "privacy": "Privacy",
+    "terms": "Termini",
+    "searchLanguages": "Cerca lingue...",
+    "noLanguagesFound": "Nessuna lingua trovata"
+  },
   "fullNameLabel": "Nome completo (in inglese)",
   "enterFullNameError": "Inserisci il tuo nome completo",
   "fourNamesRequiredError": "Inserisci il tuo nome completo in 4 parti in inglese",

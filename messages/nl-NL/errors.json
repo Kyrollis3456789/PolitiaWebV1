@@ -1,0 +1,21 @@
+{
+  "nameRequired": "Please enter your name.",
+  "nameFourPart": "Please enter your full 4-part name.",
+  "nameInvalidChars": "Invalid characters in name.",
+  "nameCollision": "This name is already registered. Please add an additional name.",
+  "nationalIdRequired": "Please enter your 14-digit National ID.",
+  "nationalIdInvalid": "Please enter a valid 14-digit National ID.",
+  "nationalIdCollision": "This National ID is already registered to another account.",
+  "dobRequired": "Please enter your date of birth.",
+  "dobInvalid": "Invalid date of birth.",
+  "dobFuture": "Date of birth cannot be in the future.",
+  "dobOverMaxAge": "Date of birth cannot exceed 120 years in the past.",
+  "phoneRequired": "Please enter your mobile phone number.",
+  "phoneInvalid": "Please enter a valid mobile phone number.",
+  "emailInvalid": "Please enter a valid email address.",
+  "passwordRequired": "Password is required.",
+  "passwordTooShort": "Password must be at least 8 characters long.",
+  "passwordMismatch": "Passwords do not match.",
+  "cameraAccessError": "Live camera access is not supported or requires a secure HTTPS connection.",
+  "unknownError": "An unexpected error occurred. Please try again."
+}

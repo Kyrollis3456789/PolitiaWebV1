@@ -30,6 +30,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
   let defaultSignin = {};
   let defaultForgot = {};
   let defaultRegister = {};
+  let defaultErrors = {};
 
   try {
     defaultCommon = (await import(`../../messages/${DEFAULT_LOCALE}/common.json`)).default;
@@ -43,11 +44,15 @@ export default getRequestConfig(async ({ requestLocale }) => {
   try {
     defaultRegister = (await import(`../../messages/${DEFAULT_LOCALE}/register.json`)).default;
   } catch {}
+  try {
+    defaultErrors = (await import(`../../messages/${DEFAULT_LOCALE}/errors.json`)).default;
+  } catch {}
 
   let commonMessages = defaultCommon;
   let signinMessages = defaultSignin;
   let forgotMessages = defaultForgot;
   let registerMessages = defaultRegister;
+  let errorMessages = defaultErrors;
 
   if (locale !== DEFAULT_LOCALE) {
     try {
@@ -69,6 +74,11 @@ export default getRequestConfig(async ({ requestLocale }) => {
       const locRegister = (await import(`../../messages/${locale}/register.json`)).default;
       registerMessages = deepMerge(locRegister, defaultRegister);
     } catch {}
+
+    try {
+      const locErrors = (await import(`../../messages/${locale}/errors.json`)).default;
+      errorMessages = deepMerge(locErrors, defaultErrors);
+    } catch {}
   }
 
   return {
@@ -78,6 +88,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       signin: signinMessages,
       forgot: forgotMessages,
       register: registerMessages,
+      errors: errorMessages,
     },
   };
 });
