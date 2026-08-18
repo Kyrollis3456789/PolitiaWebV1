@@ -575,7 +575,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
       {/* Main Authentication Card */}
       <div className="relative z-20 w-full max-w-[1040px] bg-white/95 dark:bg-[#1B212D]/95 rounded-[28px] sm:rounded-[36px] p-6 sm:p-8 md:p-12 shadow-2xl border border-white/60 dark:border-slate-800/80 flex flex-col md:flex-row gap-8 md:gap-14 min-h-fit h-auto items-start transition-all duration-300 ease-in-out">
         {/* Left Column: Logo, Dynamic Progress Indicator & Step Headers */}
-        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start min-h-[420px]">
+        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start min-h-auto md:min-h-[320px]">
           {/* Logo with high-contrast badge in dark mode */}
           <div className="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800/90 p-2 shadow-sm border border-slate-200/60 dark:border-slate-700/80 flex items-center justify-center transition-all shrink-0">
             <Image
@@ -639,13 +639,13 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
         </div>
 
         {/* Right Column: Dynamic Form Area (Vertically Centered with lateral slide transition) */}
-        <div className="w-full md:w-1/2 flex flex-col justify-between min-h-[420px] overflow-hidden transition-all duration-300 ease-in-out">
+        <div className="w-full md:w-1/2 flex flex-col justify-between min-h-auto md:min-h-[320px] overflow-hidden transition-all duration-300 ease-in-out">
           {/* Milestone 1: Personal Info */}
           {mainStepIndex === 1 && (
-            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
+            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between">
               <div
                 key={`1-${subStepIndex}`}
-                className={`w-full flex-1 flex flex-col justify-center py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
+                className={`w-full my-auto py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
               >
                 {/* 1.1: English Full Name */}
               {subStepIndex === 1 && (
@@ -945,7 +945,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
               )}
 
               {/* Navigation Action Buttons */}
-              <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex items-center justify-between gap-3 pt-6 mt-auto border-t border-slate-100 dark:border-slate-800/80">
                 <button
                   type="button"
                   onClick={handleBack}
@@ -978,10 +978,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
           {/* Milestone 2: Contact & Social */}
           {mainStepIndex === 2 && (
-            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
+            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between">
               <div
                 key={`2-${subStepIndex}`}
-                className={`w-full flex-1 flex flex-col justify-center py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
+                className={`w-full my-auto py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
               >
                 {/* 2.1: Phone Number */}
               {subStepIndex === 1 && (
@@ -1176,7 +1176,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
               )}
 
               {/* Navigation Action Buttons */}
-              <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex items-center justify-between gap-3 pt-6 mt-auto border-t border-slate-100 dark:border-slate-800/80">
                 <button
                   type="button"
                   onClick={handleBack}
@@ -1209,10 +1209,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
           {/* Milestone 3: Family Relations */}
           {mainStepIndex === 3 && (
-            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
+            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between">
               <div
                 key={`3-${subStepIndex}`}
-                className={`w-full flex-1 flex flex-col justify-center py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
+                className={`w-full my-auto py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
               >
                 <div className="space-y-3">
                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -1271,7 +1271,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 </div>
               )}
 
-              <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex items-center justify-between gap-3 pt-6 mt-auto border-t border-slate-100 dark:border-slate-800/80">
                 <button
                   type="button"
                   onClick={handleBack}
@@ -1291,10 +1291,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
           {/* Milestone 4: Education & Work */}
           {mainStepIndex === 4 && (
-            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
+            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between">
               <div
                 key={`4-${subStepIndex}`}
-                className={`w-full flex-1 flex flex-col justify-center py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
+                className={`w-full my-auto py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
               >
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
@@ -1343,7 +1343,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 </div>
               )}
 
-              <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex items-center justify-between gap-3 pt-6 mt-auto border-t border-slate-100 dark:border-slate-800/80">
                 <button
                   type="button"
                   onClick={handleBack}
@@ -1363,10 +1363,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
           {/* Milestone 5: Locations & Addresses */}
           {mainStepIndex === 5 && (
-            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
+            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between">
               <div
                 key={`5-${subStepIndex}`}
-                className={`w-full flex-1 flex flex-col justify-center py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
+                className={`w-full my-auto py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
               >
                 {/* 5.1: Primary Address */}
                 {subStepIndex === 1 && (
@@ -1457,7 +1457,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 </div>
               )}
 
-              <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex items-center justify-between gap-3 pt-6 mt-auto border-t border-slate-100 dark:border-slate-800/80">
                 <button
                   type="button"
                   onClick={handleBack}
@@ -1488,10 +1488,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
           {/* Milestone 6: Church Commitment */}
           {mainStepIndex === 6 && (
-            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
+            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between">
               <div
                 key={`6-${subStepIndex}`}
-                className={`w-full flex-1 flex flex-col justify-center py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
+                className={`w-full my-auto py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
               >
                 {/* 6.1: Churches Selection */}
                 {subStepIndex === 1 && (
@@ -1548,7 +1548,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 </div>
               )}
 
-              <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex items-center justify-between gap-3 pt-6 mt-auto border-t border-slate-100 dark:border-slate-800/80">
                 <button
                   type="button"
                   onClick={handleBack}
@@ -1568,10 +1568,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
           {/* Milestone 7: Additional Info */}
           {mainStepIndex === 7 && (
-            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
+            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between">
               <div
                 key={`7-${subStepIndex}`}
-                className={`w-full flex-1 flex flex-col justify-center py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
+                className={`w-full my-auto py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
               >
                 {/* 7.1: Hobbies */}
                 {subStepIndex === 1 && (
@@ -1646,7 +1646,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 </div>
               )}
 
-              <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex items-center justify-between gap-3 pt-6 mt-auto border-t border-slate-100 dark:border-slate-800/80">
                 <button
                   type="button"
                   onClick={handleBack}
@@ -1666,10 +1666,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
           {/* Final Step 8: Password Setup */}
           {mainStepIndex === 8 && (
-            <form onSubmit={handleFinalSubmit} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
+            <form onSubmit={handleFinalSubmit} className="w-full flex-1 flex flex-col justify-between">
               <div
                 key="8-1"
-                className={`w-full flex-1 flex flex-col justify-center py-2 space-y-4 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
+                className={`w-full my-auto py-2 space-y-4 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
               >
                 <div className="relative">
                   <input
@@ -1764,7 +1764,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 </div>
               )}
 
-              <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
+              <div className="flex items-center justify-between gap-3 pt-6 mt-auto border-t border-slate-100 dark:border-slate-800/80">
                 <button
                   type="button"
                   onClick={handleBack}
@@ -1872,9 +1872,6 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
         </div>
 
         <div className="flex items-center gap-6 text-xs font-medium">
-          <Link href="/login" className="text-[#0B57D0] dark:text-[#93C5FD] hover:underline transition">
-            <bdi>{t('buttons.signInInstead')}</bdi>
-          </Link>
           <Link href="/help" className="hover:text-slate-900 dark:hover:text-white transition">
             <bdi>{t('footer.help')}</bdi>
           </Link>
