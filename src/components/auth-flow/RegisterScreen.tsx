@@ -21,6 +21,7 @@ import {
   validateArabicName,
 } from '@/lib/validation/name-rules';
 import { validateEgyptianNationalId } from '@/lib/validation/national-id';
+import { validateBirthday } from '@/lib/validation/date-rules';
 import { createAccountAction, CreateAccountPayload } from '@/app/actions/create-account';
 import { checkEnglishNameCollision, checkArabicNameCollision } from '@/app/actions/auth-check';
 import { GenderType, SocialPlatform } from '@/types/database.types';
@@ -432,8 +433,9 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
           return;
         }
       } else if (subStepIndex === 4) {
-        if (!dob) {
-          setErrorMessage(isRtl ? 'يرجى تحديد تاريخ الميلاد' : 'Please enter your date of birth');
+        const dateVal = validateBirthday(dob, 0, 120);
+        if (!dateVal.isValid) {
+          setErrorMessage(isRtl ? (dateVal.errorAr || dateVal.error || '') : (dateVal.error || dateVal.errorAr || ''));
           return;
         }
       } else if (subStepIndex === 5) {
