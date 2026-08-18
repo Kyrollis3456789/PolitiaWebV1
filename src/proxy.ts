@@ -5,7 +5,7 @@ import { updateSession } from './lib/supabase/middleware';
 
 const handleI18nRouting = createMiddleware(routing);
 
-export default async function middleware(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   // 1. Execute i18n routing and locale detection
   const i18nResponse = handleI18nRouting(request);
 
