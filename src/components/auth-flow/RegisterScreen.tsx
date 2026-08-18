@@ -1615,22 +1615,35 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                         </div>
                       </div>
 
-                      {/* Phone Number Input with Dial Code Badge */}
-                      <div className="flex gap-2.5 items-center">
-                        <div className="h-[56px] px-3.5 flex items-center justify-center rounded-[4px] border border-[#747775] dark:border-[#8E918F] bg-slate-50 dark:bg-slate-800/50 text-[#1F1F1F] dark:text-[#E3E3E3] font-mono text-sm font-semibold shrink-0">
-                          {countryCode}
-                        </div>
+                      {/* Unified Material 3 Outlined Phone Number Input */}
+                      <div className="relative">
+                        <div
+                          className={`w-full h-[56px] px-3.5 flex items-center bg-transparent rounded-[4px] border transition-all box-border ${
+                            errorMessage
+                              ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                              : isPhoneFocused
+                              ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                              : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                          }`}
+                        >
+                          {/* Dial Code Prefix */}
+                          <span
+                            className="font-mono text-sm font-semibold text-[#1F1F1F] dark:text-[#E3E3E3] shrink-0 select-none pe-3 border-e border-slate-300 dark:border-slate-700"
+                            dir="ltr"
+                          >
+                            {countryCode}
+                          </span>
 
-                        <div className="flex-1 relative">
+                          {/* Numeric Phone Input */}
                           <input
                             id="reg-phone"
                             type="tel"
                             dir="ltr"
                             autoFocus
                             placeholder={
-                              isPhoneFocused || isPhoneFloating
-                                ? getCountryByIso(countryIso)?.placeholder || '010 1234 5678'
-                                : ''
+                              getCountryByIso(countryIso)?.placeholder ||
+                              COUNTRY_PHONE_RULES[countryIso.toUpperCase()]?.example ||
+                              '010 1234 5678'
                             }
                             value={phoneNumber}
                             onFocus={() => setIsPhoneFocused(true)}
@@ -1640,31 +1653,23 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                               setIsPhoneVerified(false);
                               if (errorMessage) setErrorMessage(null);
                             }}
-                            className={`w-full h-[56px] px-4 text-[15px] font-mono text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
-                              errorMessage
-                                ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                                : isPhoneFocused
-                                ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                                : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
-                            }`}
+                            className="flex-1 h-full ps-3 text-[15px] font-mono text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
                           />
-                          <label
-                            htmlFor="reg-phone"
-                            className={`absolute pointer-events-none transition-all duration-150 start-3 z-10 ${
-                              isPhoneFloating
-                                ? '-top-2.5 px-1.5 text-xs bg-white dark:bg-[#1B212D]'
-                                : 'top-4 text-[15px]'
-                            } ${
-                              errorMessage
-                                ? 'text-[#B3261E] dark:text-[#F2B8B5]'
-                                : isPhoneFocused
-                                ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                                : 'text-[#444746] dark:text-[#8E918F]'
-                            }`}
-                          >
-                            <bdi>{isRtl ? 'رقم الهاتف المحمول' : 'Mobile Phone Number'}</bdi>
-                          </label>
                         </div>
+
+                        {/* Persistent Top Border Floating Label matching Country Selector */}
+                        <label
+                          htmlFor="reg-phone"
+                          className={`absolute -top-2.5 px-1.5 text-xs bg-white dark:bg-[#1B212D] start-3 pointer-events-none z-10 transition-colors ${
+                            errorMessage
+                              ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                              : isPhoneFocused
+                              ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                              : 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                          }`}
+                        >
+                          <bdi>{isRtl ? 'رقم الهاتف المحمول' : 'Mobile Phone Number'}</bdi>
+                        </label>
                       </div>
 
                       {/* Verified Badge */}
