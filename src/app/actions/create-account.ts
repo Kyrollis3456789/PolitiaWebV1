@@ -306,6 +306,14 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
               .filter(Boolean)
               .join(' - ')
           : payload.secondaryAddress || null,
+        secondary_country_id: payload.has_secondary_address ? payload.secondary_country_id || null : null,
+        secondary_governorate_id: payload.has_secondary_address ? payload.secondary_governorate_id || null : null,
+        secondary_city_id: payload.has_secondary_address ? payload.secondary_city_id || null : null,
+        secondary_street_address: payload.has_secondary_address ? payload.secondary_street_address || null : null,
+        secondary_building_no: payload.has_secondary_address ? payload.secondary_building_no || null : null,
+        secondary_floor_no: payload.has_secondary_address ? payload.secondary_floor_no || null : null,
+        secondary_apartment: payload.has_secondary_address ? payload.secondary_apartment || null : null,
+        secondary_address_type: payload.has_secondary_address ? payload.secondary_address_type || null : null,
         // Church Commitment
         diocese: payload.diocese || null,
         primary_church: payload.primaryChurch || null,
