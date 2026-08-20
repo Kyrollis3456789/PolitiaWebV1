@@ -23,6 +23,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { isRtlLocale, SUPPORTED_LOCALES, getLocaleDisplayName } from '@/i18n/locales';
 import {
   autoCapitalizeEnglishName,
+  countWords,
   validateEnglishName,
   validateArabicName,
 } from '@/lib/validation/name-rules';
@@ -2009,9 +2010,27 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
                   <button
                     type="submit"
-                    className="bg-[#0B57D0] hover:bg-[#0842A0] active:bg-[#06337E] text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full transition-colors cursor-pointer flex items-center justify-center gap-2 shadow-sm"
+                    disabled={
+                      checkingCollision ||
+                      (subStepIndex === 1 && hasNameCollision && countWords(englishFullName) < 5) ||
+                      (subStepIndex === 2 && hasArabicNameCollision && countWords(arabicFullName) < 5)
+                    }
+                    className={`text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full transition-colors flex items-center justify-center gap-2 shadow-sm ${
+                      checkingCollision ||
+                      (subStepIndex === 1 && hasNameCollision && countWords(englishFullName) < 5) ||
+                      (subStepIndex === 2 && hasArabicNameCollision && countWords(arabicFullName) < 5)
+                        ? 'bg-[#0B57D0]/50 cursor-not-allowed opacity-60'
+                        : 'bg-[#0B57D0] hover:bg-[#0842A0] active:bg-[#06337E] cursor-pointer'
+                    }`}
                   >
-                    <bdi>{isRtl ? 'التالي' : 'Next'}</bdi>
+                    {checkingCollision ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <bdi>{isRtl ? 'جارٍ التحقق...' : 'Checking...'}</bdi>
+                      </>
+                    ) : (
+                      <bdi>{isRtl ? 'التالي' : 'Next'}</bdi>
+                    )}
                   </button>
                 </div>
               </div>
