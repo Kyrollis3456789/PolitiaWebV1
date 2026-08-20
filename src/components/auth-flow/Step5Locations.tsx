@@ -2,9 +2,10 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { clsx } from 'clsx';
-import { MapPin, Building, Home, Crosshair, Loader2 } from 'lucide-react';
+import { MapPin, Building, Home, Crosshair, Loader2, Map as MapIcon, Search } from 'lucide-react';
 import { Country, Governorate, City, Step5LocationPayload } from '@/types/database.types';
 import GooglePlacesAutocomplete from '@/components/ui/GooglePlacesAutocomplete';
+import GoogleMapPlacePicker from '@/components/ui/GoogleMapPlacePicker';
 import { reverseGeocodeLocationAction } from '@/app/actions/places-search';
 import { fetchWorldLocationsAction } from '@/app/actions/location-data';
 
@@ -123,6 +124,7 @@ export default function Step5Locations({
   const [apartment, setApartment] = useState<string>(defaultValues?.apartment || '');
 
   const [locatingGps, setLocatingGps] = useState(false);
+  const [showMap, setShowMap] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   // --- Cascading Filtered Lists ---
@@ -357,33 +359,82 @@ export default function Step5Locations({
             </div>
           </div>
 
-          {/* Row 3: Street Address with Google Places Autocomplete */}
+          {/* Row 3: Street Address Header & Mode Switcher */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
-              <Building className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-              <span>{isRtl ? 'اسم الشارع / العنوان' : 'Street Address'}</span>
-              <span className="text-rose-500 font-bold">*</span>
-            </label>
-            <GooglePlacesAutocomplete
-              value={streetAddress}
-              onChange={(val) => {
-                setStreetAddress(val);
-                setErrors((prev) => ({ ...prev, streetAddress: '' }));
-              }}
-              onPlaceSelect={(details) => {
-                if (details.route || details.formattedAddress) {
-                  setStreetAddress(details.route || details.formattedAddress);
-                }
-                if (details.streetNumber && !buildingNo) {
-                  setBuildingNo(details.streetNumber);
-                }
-                setErrors((prev) => ({ ...prev, streetAddress: '' }));
-              }}
-              placeholder={isRtl ? 'ابحث في خرائط جوجل عن اسم الشارع أو العنوان...' : 'Search Google Maps for street or address...'}
-              isRtl={isRtl}
-              hasError={Boolean(errors.streetAddress)}
-              defaultSuggestions={streetSuggestions}
-            />
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+                <Building className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                <span>{isRtl ? 'اسم الشارع / العنوان' : 'Street Address'}</span>
+                <span className="text-rose-500 font-bold">*</span>
+              </label>
+
+              {/* Toggle between Autocomplete Search and Interactive Map */}
+              <div className="inline-flex rounded-lg p-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-medium">
+                <button
+                  type="button"
+                  onClick={() => setShowMap(false)}
+                  className={clsx(
+                    "flex items-center gap-1 px-2.5 py-1 rounded-md transition-all cursor-pointer",
+                    !showMap
+                      ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs font-semibold"
+                      : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                  )}
+                >
+                  <Search className="w-3 h-3" />
+                  <span>{isRtl ? 'بحث سريع' : 'Search'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowMap(true)}
+                  className={clsx(
+                    "flex items-center gap-1 px-2.5 py-1 rounded-md transition-all cursor-pointer",
+                    showMap
+                      ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-xs font-semibold"
+                      : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                  )}
+                >
+                  <MapIcon className="w-3 h-3" />
+                  <span>{isRtl ? 'خريطة تفاعلية' : 'Map Picker'}</span>
+                </button>
+              </div>
+            </div>
+
+            {showMap ? (
+              <div className="mt-2 animate-fadeIn">
+                <GoogleMapPlacePicker
+                  isRtl={isRtl}
+                  onPlaceSelect={(place) => {
+                    if (place.formattedAddress) {
+                      setStreetAddress(place.formattedAddress);
+                      setErrors((prev) => ({ ...prev, streetAddress: '' }));
+                    }
+                  }}
+                  placeholder={isRtl ? 'ابحث عن مكان أو حدده على الخريطة...' : 'Search or pick on map...'}
+                />
+              </div>
+            ) : (
+              <GooglePlacesAutocomplete
+                value={streetAddress}
+                onChange={(val) => {
+                  setStreetAddress(val);
+                  setErrors((prev) => ({ ...prev, streetAddress: '' }));
+                }}
+                onPlaceSelect={(details) => {
+                  if (details.route || details.formattedAddress) {
+                    setStreetAddress(details.route || details.formattedAddress);
+                  }
+                  if (details.streetNumber && !buildingNo) {
+                    setBuildingNo(details.streetNumber);
+                  }
+                  setErrors((prev) => ({ ...prev, streetAddress: '' }));
+                }}
+                placeholder={isRtl ? 'ابحث في خرائط جوجل عن اسم الشارع أو العنوان...' : 'Search Google Maps for street or address...'}
+                isRtl={isRtl}
+                hasError={Boolean(errors.streetAddress)}
+                defaultSuggestions={streetSuggestions}
+              />
+            )}
+
             {errors.streetAddress && (
               <p className="text-red-500 text-xs mt-1 font-medium">{errors.streetAddress}</p>
             )}
