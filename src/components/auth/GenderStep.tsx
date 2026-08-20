@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { tapScale } from '@/lib/animations/transitions';
 
-export type GenderOptionValue = 'male' | 'female' | 'prefer-not-to-say';
+type GenderValue = 'male' | 'female';
 
 interface GenderCardData {
   id: GenderOptionValue;
@@ -201,28 +201,25 @@ export function GenderStep({
                   tabIndex={0}
                   onClick={() => setSelected(card.id)}
                   onKeyDown={(e) => handleKeyDown(e, card.id)}
-                  className={`relative p-5 rounded-2xl border-2 flex flex-col items-center justify-center text-center gap-3 transition-all duration-200 cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
-                    isSelected
-                      ? 'border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20 shadow-sm'
-                      : 'border-slate-200 hover:border-blue-400 hover:bg-slate-50/70'
-                  }`}
+                  className={`relative p-5 rounded-2xl border-2 flex flex-col items-center justify-center text-center gap-3 transition-all duration-200 cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${isSelected
+                    ? 'border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20 shadow-sm'
+                    : 'border-slate-200 hover:border-blue-400 hover:bg-slate-50/70'
+                    }`}
                 >
                   {/* Icon Container */}
                   <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-200 ${
-                      isSelected
-                        ? 'bg-blue-100 text-blue-700'
-                        : 'bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600'
-                    }`}
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-200 ${isSelected
+                      ? 'bg-blue-100 text-blue-700'
+                      : 'bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600'
+                      }`}
                   >
                     {card.icon}
                   </div>
 
                   {/* Label */}
                   <span
-                    className={`text-sm font-semibold transition-colors duration-200 ${
-                      isSelected ? 'text-blue-700' : 'text-slate-800'
-                    }`}
+                    className={`text-sm font-semibold transition-colors duration-200 ${isSelected ? 'text-blue-700' : 'text-slate-800'
+                      }`}
                   >
                     <bdi>{isRtl ? card.labelAr : card.label}</bdi>
                   </span>
