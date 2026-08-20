@@ -29,6 +29,30 @@ export interface City {
   name_ar: string;
 }
 
+export interface Street {
+  id: string;
+  city_id?: string;
+  governorate_id?: string;
+  name_en: string;
+  name_ar: string;
+}
+
+export interface WorldLocationRecord {
+  country_id: string;
+  country_code: string;
+  country_name_en: string;
+  country_name_ar: string;
+  governorate_id?: string;
+  governorate_name_en?: string;
+  governorate_name_ar?: string;
+  city_id?: string;
+  city_name_en?: string;
+  city_name_ar?: string;
+  street_id?: string;
+  street_name_en?: string;
+  street_name_ar?: string;
+}
+
 export interface Step5LocationPayload {
   country_id: string;
   governorate_id: string;
