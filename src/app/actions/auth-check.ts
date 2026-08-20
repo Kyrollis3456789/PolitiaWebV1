@@ -202,14 +202,16 @@ export async function checkUserAccountExists(identifier: string): Promise<Accoun
         console.warn('profiles national_id lookup warning:', e);
       }
 
-      // 2.3 Check auth admin user metadata for primary_phone / national_id
+      // 2.3 Check auth admin user metadata or generated email for primary_phone / national_id
       if (admin) {
         try {
           const { data: authUsers } = await admin.auth.admin.listUsers();
           const matchedUser = authUsers?.users?.find(
             (u) =>
               u.user_metadata?.primary_phone === cleanPhone ||
-              u.user_metadata?.national_id === cleanPhone
+              u.user_metadata?.national_id === cleanPhone ||
+              u.email?.toLowerCase() === `${cleanPhone}@politia.internal`.toLowerCase() ||
+              (u.email?.startsWith(cleanPhone) && u.email?.endsWith('@politia.internal'))
           );
           if (matchedUser) {
             return {
@@ -217,7 +219,9 @@ export async function checkUserAccountExists(identifier: string): Promise<Accoun
               resolvedEmail: matchedUser.email,
               displayName:
                 matchedUser.user_metadata?.english_full_name ||
-                matchedUser.user_metadata?.arabic_full_name,
+                matchedUser.user_metadata?.full_name_en ||
+                matchedUser.user_metadata?.arabic_full_name ||
+                matchedUser.user_metadata?.full_name_ar,
             };
           }
         } catch (adminErr) {

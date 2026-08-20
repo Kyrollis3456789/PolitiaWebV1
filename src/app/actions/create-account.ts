@@ -167,6 +167,10 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
           user_metadata: {
             full_name_en: payload.englishName,
             full_name_ar: payload.arabicName,
+            english_full_name: payload.englishName,
+            arabic_full_name: payload.arabicName,
+            national_id: payload.nationalId || undefined,
+            primary_phone: validPhones.length > 0 ? `${validPhones[0].countryCode}${validPhones[0].number}` : undefined,
           },
         });
         authUser = adminAuthData?.user;
@@ -259,7 +263,6 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
         primary_email: userEnteredEmail,
         primary_phone: primaryPhoneStr,
         phone: primaryPhoneStr,
-        email: userEnteredEmail,
         facebook_url: payload.socials?.facebook?.url || null,
         instagram_url: payload.socials?.instagram?.url || null,
         linkedin_url: payload.socials?.linkedin?.url || null,
