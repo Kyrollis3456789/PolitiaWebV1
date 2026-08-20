@@ -2,7 +2,7 @@
 
 /**
  * Server Action for Google Maps Places & Street Search API
- * Specialized for searching street names, avenues, roads, and addresses in Arabic & English.
+ * Specialized for searching street names, avenues, roads, reverse-geocoding, and location suggestions.
  */
 
 export interface PlacePrediction {
@@ -27,12 +27,12 @@ export interface PlaceDetails {
 }
 
 // Built-in offline database of famous streets and roads in Egypt (Cairo, Giza, Alexandria, Assiut, etc.)
-const EGYPT_STREETS_DATABASE: PlacePrediction[] = [
+export const EGYPT_STREETS_DATABASE: PlacePrediction[] = [
   // Cairo Streets
   { placeId: 'st_cairo_1', description: 'شارع الجمهورية، وسط البلد، القاهرة', mainText: 'شارع الجمهورية', secondaryText: 'وسط البلد، القاهرة، مصر', types: ['route', 'street_address'] },
   { placeId: 'st_cairo_2', description: 'شارع طلعت حرب، وسط البلد، القاهرة', mainText: 'شارع طلعت حرب', secondaryText: 'وسط البلد، القاهرة، مصر', types: ['route', 'street_address'] },
   { placeId: 'st_cairo_3', description: 'شارع قصر العيني، السيدة زينب، القاهرة', mainText: 'شارع قصر العيني', secondaryText: 'القاهرة، مصر', types: ['route', 'street_address'] },
-  { placeId: 'st_cairo_4', description: 'شارع شبرا، شبرا مصر، القاهرة', mainText: 'شارع شبra', secondaryText: 'شبرا، القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_4', description: 'شارع شبرا، شبرا مصر، القاهرة', mainText: 'شارع شبرا', secondaryText: 'شبرا، القاهرة، مصر', types: ['route', 'street_address'] },
   { placeId: 'st_cairo_5', description: 'شارع عباس العقاد، مدينة نصر، القاهرة', mainText: 'شارع عباس العقاد', secondaryText: 'مدينة نصر، القاهرة، مصر', types: ['route', 'street_address'] },
   { placeId: 'st_cairo_6', description: 'شارع مكرم عبيد، مدينة نصر، القاهرة', mainText: 'شارع مكرم عبيد', secondaryText: 'مدينة نصر، القاهرة، مصر', types: ['route', 'street_address'] },
   { placeId: 'st_cairo_7', description: 'شارع النزهة، مصر الجديدة، القاهرة', mainText: 'شارع النزهة', secondaryText: 'مصر الجديدة، القاهرة، مصر', types: ['route', 'street_address'] },
@@ -49,7 +49,7 @@ const EGYPT_STREETS_DATABASE: PlacePrediction[] = [
 
   // Giza Streets
   { placeId: 'st_giza_1', description: 'شارع الهرم، الجيزة', mainText: 'شارع الهرم', secondaryText: 'الجيزة، مصر', types: ['route', 'street_address'] },
-  { placeId: 'st_giza_2', description: 'شارع فيصل، الجيزة', mainText: 'شارع الملك فيصل', secondaryText: 'الجيزة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_giza_2', description: 'شارع الملك فيصل، الجيزة', mainText: 'شارع الملك فيصل', secondaryText: 'الجيزة، مصر', types: ['route', 'street_address'] },
   { placeId: 'st_giza_3', description: 'شارع جامعة الدول العربية، المهندسين، الجيزة', mainText: 'شارع جامعة الدول العربية', secondaryText: 'المهندسين، الجيزة، مصر', types: ['route', 'street_address'] },
   { placeId: 'st_giza_4', description: 'شارع البطل أحمد عبد العزيز، المهندسين، الجيزة', mainText: 'شارع البطل أحمد عبد العزيز', secondaryText: 'المهندسين، الجيزة، مصر', types: ['route', 'street_address'] },
   { placeId: 'st_giza_5', description: 'شارع التحرير، الدقي، الجيزة', mainText: 'شارع التحرير الدقي', secondaryText: 'الدقي، الجيزة، مصر', types: ['route', 'street_address'] },
@@ -248,5 +248,87 @@ export async function getGooglePlaceDetailsAction(
     return {
       success: false,
     };
+  }
+}
+
+/**
+ * Reverse Geocodes Latitude and Longitude (GPS) to an Address & Governorate.
+ */
+export async function reverseGeocodeLocationAction(
+  lat: number,
+  lng: number,
+  language: 'ar' | 'en' = 'ar'
+): Promise<{ success: boolean; details?: PlaceDetails }> {
+  try {
+    const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+    if (apiKey) {
+      const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}&language=${language}`;
+      const res = await fetch(url, { method: 'GET' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.status === 'OK' && Array.isArray(data.results) && data.results.length > 0) {
+          const first = data.results[0];
+          let streetNumber = '';
+          let route = '';
+          let city = '';
+          let governorate = '';
+          let country = '';
+
+          for (const c of first.address_components || []) {
+            const types = c.types || [];
+            if (types.includes('street_number')) streetNumber = c.long_name;
+            if (types.includes('route')) route = c.long_name;
+            if (types.includes('locality') || types.includes('administrative_area_level_2')) city = c.long_name;
+            if (types.includes('administrative_area_level_1')) governorate = c.long_name;
+            if (types.includes('country')) country = c.long_name;
+          }
+
+          return {
+            success: true,
+            details: {
+              placeId: first.place_id,
+              formattedAddress: first.formatted_address,
+              streetNumber,
+              route: route || first.formatted_address,
+              city,
+              governorate,
+              country,
+              lat,
+              lng,
+            },
+          };
+        }
+      }
+    }
+
+    // Heuristic approximation for Egypt regions if offline
+    let guessedGov = 'Cairo';
+    let guessedGovAr = 'القاهرة';
+    let guessedStreet = 'شارع الجمهورية';
+
+    if (lat < 27.5) {
+      guessedGov = 'Assiut';
+      guessedGovAr = 'أسيوط';
+      guessedStreet = 'شارع الجمهورية، أسيوط';
+    } else if (lat > 31.0) {
+      guessedGov = 'Alexandria';
+      guessedGovAr = 'الإسكندرية';
+      guessedStreet = 'طريق الجيش، كورنيش الإسكندرية';
+    }
+
+    return {
+      success: true,
+      details: {
+        placeId: 'gps_approx',
+        formattedAddress: language === 'ar' ? `${guessedStreet}، ${guessedGovAr}` : `${guessedStreet}, ${guessedGov}`,
+        route: guessedStreet,
+        governorate: language === 'ar' ? guessedGovAr : guessedGov,
+        lat,
+        lng,
+      },
+    };
+  } catch (err: any) {
+    return { success: false };
   }
 }
