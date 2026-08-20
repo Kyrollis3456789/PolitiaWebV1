@@ -12,6 +12,7 @@ export interface Step4Props {
   universities?: { id: string; name_en: string; name_ar?: string }[];
   faculties?: { id: string; university_id: string; name_en: string; name_ar?: string }[];
   defaultValues?: any;
+  isRtl?: boolean;
   onNext: (payload: any) => void;
   onBack: () => void;
 }
@@ -21,6 +22,7 @@ export default function Step4EducationWork({
   universities = [],
   faculties = [],
   defaultValues,
+  isRtl = false,
   onNext,
   onBack,
 }: Step4Props) {
@@ -61,10 +63,11 @@ export default function Step4EducationWork({
   // --- Dynamic Total Parts Calculation ---
   const totalParts = useMemo(() => {
     if (isUnder17) return 3; // Basic only: 1 (Stage), 2 (System & Grade), 3 (School Name)
+    if (path === null) return 1; // Initial status choice
     if (path === 'BASIC') return 4; // 1 (Status), 2 (Stage), 3 (System & Grade), 4 (School Name)
     if (path === 'UNIVERSITY') return 4; // 1 (Status), 2 (Uni & Faculty), 3 (Year), 4 (Prev School)
     if (path === 'GRADUATED') return 3; // 1 (Status), 2 (Working?), 3 (Job/Uni details)
-    return 1; // Initial choice
+    return 1;
   }, [isUnder17, path]);
 
   const handlePathChange = (newPath: EducationPath) => {
@@ -270,7 +273,7 @@ export default function Step4EducationWork({
     <div className="space-y-4">
       <div>
         <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">School Stage</label>
-        <div className="flex gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           {['PRIMARY', 'PREPARATORY', 'SECONDARY'].map((stage) => (
             <button
               key={stage}
@@ -283,17 +286,17 @@ export default function Step4EducationWork({
                 setErrors((prev) => ({ ...prev, schoolStage: '' }));
               }}
               className={clsx(
-                "flex-1 p-3 rounded-xl border text-xs font-medium transition-colors cursor-pointer",
+                "p-3.5 rounded-2xl border text-xs font-semibold transition-all duration-200 text-center cursor-pointer shadow-xs",
                 schoolStage === stage
-                  ? "border-blue-600 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold shadow-xs"
-                  : "border-slate-300 dark:border-slate-700 bg-transparent text-slate-700 dark:text-slate-300 hover:border-slate-400"
+                  ? "bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-600 dark:border-blue-500 text-blue-700 dark:text-blue-300 shadow-sm"
+                  : "bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50/60"
               )}
             >
               {stage.charAt(0) + stage.slice(1).toLowerCase()}
             </button>
           ))}
         </div>
-        {errors.schoolStage && <p className="text-red-500 text-xs mt-1.5">{errors.schoolStage}</p>}
+        {errors.schoolStage && <p className="text-red-500 text-xs mt-2">{errors.schoolStage}</p>}
       </div>
     </div>
   );
@@ -310,7 +313,7 @@ export default function Step4EducationWork({
               setEducationSystem(e.target.value);
               setErrors((prev) => ({ ...prev, educationSystem: '' }));
             }}
-            className="w-full px-3 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-slate-900 dark:text-slate-100"
+            className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
           >
             {systemOptions.map((sys) => (
               <option key={sys} value={sys} className="bg-white dark:bg-slate-900">{sys}</option>
@@ -328,7 +331,7 @@ export default function Step4EducationWork({
                 setGrade(e.target.value);
                 setErrors((prev) => ({ ...prev, grade: '' }));
               }}
-              className="w-full px-3 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-slate-900 dark:text-slate-100"
+              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
             >
               <option value="" className="bg-white dark:bg-slate-900">Select Grade</option>
               {gradeOptions.map((g) => (
@@ -354,7 +357,7 @@ export default function Step4EducationWork({
               setFacultyId('');
               setErrors((prev) => ({ ...prev, universityId: '', facultyId: '' }));
             }}
-            className="w-full px-3 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-slate-900 dark:text-slate-100"
+            className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
           >
             <option value="" className="bg-white dark:bg-slate-900">Select</option>
             {universities.map((u) => (
@@ -373,7 +376,7 @@ export default function Step4EducationWork({
               setErrors((prev) => ({ ...prev, facultyId: '' }));
             }}
             disabled={!universityId}
-            className="w-full px-3 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-slate-900 dark:text-slate-100 disabled:opacity-50"
+            className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 disabled:opacity-50 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
           >
             <option value="" className="bg-white dark:bg-slate-900">Select</option>
             {availableFaculties.map((f) => (
@@ -388,15 +391,25 @@ export default function Step4EducationWork({
 
   return (
     <div className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
-      {/* Sub-step Card Container with React Key Reconciliation */}
+      {/* Header Progress / Part Pill */}
+      <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800/80">
+        <span className="text-[11px] font-semibold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+          Education & Career
+        </span>
+        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-2xs">
+          Part {currentPart}/{totalParts}
+        </span>
+      </div>
+
+      {/* Vertically Centered Sub-step Card Container */}
       <div
         key={`${path || 'ROOT'}-${currentPart}`}
-        className="w-full flex-1 flex flex-col py-2 animate-fadeIn"
+        className="flex-grow flex flex-col justify-center min-h-[300px] w-full py-4 animate-fadeIn"
       >
         {/* --- PART 1: Current Status Selection (when age >= 17) --- */}
         {!isUnder17 && currentPart === 1 && (
-          <div className="mb-6">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-3">
+          <div className="w-full">
+            <label className="block text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3 text-center sm:text-start">
               What is your current status?
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -413,23 +426,23 @@ export default function Step4EducationWork({
                     handlePathChange(opt.value as EducationPath);
                   }}
                   className={clsx(
-                    "p-4 rounded-xl border text-xs font-semibold transition-all duration-200 text-center cursor-pointer",
+                    "p-4 rounded-2xl border text-xs font-semibold transition-all duration-200 text-center cursor-pointer shadow-xs",
                     path === opt.value
-                      ? "border-blue-600 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 shadow-sm"
-                      : "border-slate-200 dark:border-slate-700 bg-transparent text-slate-600 dark:text-slate-400 hover:border-slate-300"
+                      ? "bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-600 dark:border-blue-500 text-blue-700 dark:text-blue-300 shadow-sm"
+                      : "bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-50/60"
                   )}
                 >
                   {opt.label}
                 </button>
               ))}
             </div>
-            {errors.path && <p className="text-red-500 text-xs mt-2">{errors.path}</p>}
+            {errors.path && <p className="text-red-500 text-xs mt-2 text-center sm:text-start">{errors.path}</p>}
           </div>
         )}
 
         {/* --- PATH A: BASIC EDUCATION --- */}
         {path === 'BASIC' && (
-          <>
+          <div className="w-full">
             {/* Card A: EXCLUSIVELY School Stage */}
             {currentPart === (isUnder17 ? 1 : 2) && (
               <div className="space-y-2">
@@ -460,10 +473,10 @@ export default function Step4EducationWork({
                     }}
                     disabled={skipSchoolName}
                     className={clsx(
-                      "flex-1 px-3 py-2.5 text-xs rounded-xl border transition-colors",
+                      "flex-1 px-3.5 py-2.5 text-xs rounded-xl border transition-all shadow-xs",
                       skipSchoolName
                         ? "bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700"
-                        : "bg-transparent text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700",
+                        : "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
                       errors.schoolName && "border-red-500"
                     )}
                   />
@@ -480,10 +493,10 @@ export default function Step4EducationWork({
                       setErrors((prev) => ({ ...prev, schoolName: '' }));
                     }}
                     className={clsx(
-                      "px-4 py-2 rounded-xl border text-xs font-medium transition-colors whitespace-nowrap cursor-pointer",
+                      "px-4 py-2.5 rounded-xl border text-xs font-medium transition-colors whitespace-nowrap cursor-pointer",
                       skipSchoolName
                         ? "bg-slate-800 text-white border-slate-800 font-semibold"
-                        : "bg-transparent text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                        : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750"
                     )}
                   >
                     {skipSchoolName ? 'Skipped' : 'Skip'}
@@ -492,16 +505,16 @@ export default function Step4EducationWork({
                 {errors.schoolName && <p className="text-red-500 text-xs mt-1">{errors.schoolName}</p>}
               </div>
             )}
-          </>
+          </div>
         )}
 
         {/* --- PATH B: UNIVERSITY --- */}
         {path === 'UNIVERSITY' && (
-          <>
+          <div className="w-full">
             {/* Part B.2: University & Faculty */}
             {currentPart === 2 && (
               <div className="space-y-4">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label className="block text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100">
                   Select your University and Faculty
                 </label>
                 {renderUniversityInputs()}
@@ -520,7 +533,7 @@ export default function Step4EducationWork({
                     setAcademicYear(e.target.value);
                     setErrors((prev) => ({ ...prev, academicYear: '' }));
                   }}
-                  className="w-full px-3 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-slate-900 dark:text-slate-100"
+                  className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                 >
                   <option value="" className="bg-white dark:bg-slate-900">Select Year</option>
                   {['1', '2', '3', '4', '5', '6', '7'].map((y) => (
@@ -545,10 +558,10 @@ export default function Step4EducationWork({
                       setAddPreviousSchool(true);
                     }}
                     className={clsx(
-                      "px-4 py-2 text-xs rounded-xl font-medium border transition-colors cursor-pointer",
+                      "px-5 py-2.5 text-xs rounded-xl font-semibold border transition-all cursor-pointer shadow-xs",
                       addPreviousSchool
-                        ? "bg-blue-600 text-white border-blue-600 font-semibold"
-                        : "bg-transparent text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700"
+                        ? "bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-600 dark:border-blue-500 text-blue-700 dark:text-blue-300 shadow-sm"
+                        : "bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300"
                     )}
                   >
                     Yes
@@ -563,10 +576,10 @@ export default function Step4EducationWork({
                       setErrors({});
                     }}
                     className={clsx(
-                      "px-4 py-2 text-xs rounded-xl font-medium border transition-colors cursor-pointer",
+                      "px-5 py-2.5 text-xs rounded-xl font-semibold border transition-all cursor-pointer shadow-xs",
                       !addPreviousSchool
-                        ? "bg-slate-800 text-white border-slate-800 font-semibold"
-                        : "bg-transparent text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700"
+                        ? "bg-slate-800 text-white border-slate-800"
+                        : "bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300"
                     )}
                   >
                     No
@@ -592,10 +605,10 @@ export default function Step4EducationWork({
                               }}
                               disabled={skipSchoolName}
                               className={clsx(
-                                "flex-1 px-3 py-2.5 text-xs rounded-xl border transition-colors",
+                                "flex-1 px-3.5 py-2.5 text-xs rounded-xl border transition-all shadow-xs",
                                 skipSchoolName
                                   ? "bg-slate-100 dark:bg-slate-800 text-slate-400 border-slate-200 dark:border-slate-700"
-                                  : "bg-transparent text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700",
+                                  : "bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500",
                                 errors.schoolName && "border-red-500"
                               )}
                             />
@@ -612,10 +625,10 @@ export default function Step4EducationWork({
                                 setErrors((prev) => ({ ...prev, schoolName: '' }));
                               }}
                               className={clsx(
-                                "px-4 py-2 rounded-xl border text-xs font-medium transition-colors whitespace-nowrap cursor-pointer",
+                                "px-4 py-2.5 rounded-xl border text-xs font-medium transition-colors whitespace-nowrap cursor-pointer",
                                 skipSchoolName
                                   ? "bg-slate-800 text-white border-slate-800 font-semibold"
-                                  : "bg-transparent text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                                  : "bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750"
                               )}
                             >
                               {skipSchoolName ? 'Skipped' : 'Skip'}
@@ -629,16 +642,16 @@ export default function Step4EducationWork({
                 )}
               </div>
             )}
-          </>
+          </div>
         )}
 
         {/* --- PATH C: GRADUATED --- */}
         {path === 'GRADUATED' && (
-          <>
+          <div className="w-full">
             {/* Part C.2: Working Status */}
             {currentPart === 2 && (
               <div className="space-y-4">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label className="block text-xs sm:text-sm font-semibold text-slate-900 dark:text-slate-100 mb-2">
                   Are you currently working?
                 </label>
                 <div className="flex gap-3">
@@ -650,10 +663,10 @@ export default function Step4EducationWork({
                       setErrors((prev) => ({ ...prev, isWorking: '' }));
                     }}
                     className={clsx(
-                      "flex-1 py-3 text-xs rounded-xl border font-semibold transition-colors cursor-pointer",
+                      "flex-1 py-3.5 text-xs rounded-2xl border font-semibold transition-all cursor-pointer shadow-xs",
                       isWorking === true
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-transparent text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700"
+                        ? "bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-600 dark:border-blue-500 text-blue-700 dark:text-blue-300 shadow-sm"
+                        : "bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300"
                     )}
                   >
                     Yes
@@ -668,10 +681,10 @@ export default function Step4EducationWork({
                       setErrors((prev) => ({ ...prev, isWorking: '' }));
                     }}
                     className={clsx(
-                      "flex-1 py-3 text-xs rounded-xl border font-semibold transition-colors cursor-pointer",
+                      "flex-1 py-3.5 text-xs rounded-2xl border font-semibold transition-all cursor-pointer shadow-xs",
                       isWorking === false
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-transparent text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700"
+                        ? "bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-600 dark:border-blue-500 text-blue-700 dark:text-blue-300 shadow-sm"
+                        : "bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-slate-300"
                     )}
                   >
                     No
@@ -686,7 +699,7 @@ export default function Step4EducationWork({
               <div className="space-y-4">
                 {isWorking === false && (
                   <div className="space-y-3">
-                    <h4 className="text-xs font-semibold text-slate-500 dark:text-slate-400">University Details (Optional)</h4>
+                    <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-400">University Details (Optional)</h4>
                     {renderUniversityInputs()}
                   </div>
                 )}
@@ -700,7 +713,7 @@ export default function Step4EducationWork({
                           type="text"
                           value={jobTitle}
                           onChange={(e) => setJobTitle(e.target.value)}
-                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-slate-900 dark:text-slate-100"
+                          className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                           placeholder="Optional"
                         />
                       </div>
@@ -710,7 +723,7 @@ export default function Step4EducationWork({
                           type="text"
                           value={companyName}
                           onChange={(e) => setCompanyName(e.target.value)}
-                          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-slate-900 dark:text-slate-100"
+                          className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                           placeholder="Optional"
                         />
                       </div>
@@ -728,7 +741,7 @@ export default function Step4EducationWork({
                         + Add University Details
                       </button>
                     ) : (
-                      <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 relative">
+                      <div className="p-3.5 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700 relative">
                         <button
                           type="button"
                           onClick={(e) => {
@@ -737,7 +750,7 @@ export default function Step4EducationWork({
                             setUniversityId('');
                             setFacultyId('');
                           }}
-                          className="absolute top-2 right-2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                          className="absolute top-2.5 right-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
                         >
                           ✕
                         </button>
@@ -760,7 +773,7 @@ export default function Step4EducationWork({
                       Are you pursuing Post-Graduate studies?
                     </button>
                   ) : (
-                    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-100 dark:border-blue-800 relative">
+                    <div className="p-3.5 bg-blue-50 dark:bg-blue-900/20 rounded-2xl border border-blue-100 dark:border-blue-800 relative">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -768,7 +781,7 @@ export default function Step4EducationWork({
                           setIsPostgrad(false);
                           setPostgradDetails('');
                         }}
-                        className="absolute top-2 right-2 text-blue-400 cursor-pointer"
+                        className="absolute top-2.5 right-2.5 text-blue-400 cursor-pointer"
                       >
                         ✕
                       </button>
@@ -776,7 +789,7 @@ export default function Step4EducationWork({
                       <textarea
                         value={postgradDetails}
                         onChange={(e) => setPostgradDetails(e.target.value)}
-                        className="w-full px-3 py-2 text-xs rounded-xl border border-blue-200 dark:border-blue-850 bg-transparent text-blue-900 dark:text-blue-100"
+                        className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-blue-200 dark:border-blue-850 bg-white dark:bg-slate-800 text-blue-900 dark:text-blue-100 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
                         rows={2}
                       />
                     </div>
@@ -784,7 +797,7 @@ export default function Step4EducationWork({
                 </div>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
 
@@ -793,7 +806,7 @@ export default function Step4EducationWork({
         <button
           type="button"
           onClick={handleBack}
-          className="text-xs sm:text-sm font-semibold text-[#0B57D0] dark:text-[#93C5FD] hover:underline px-3 py-2 rounded-full cursor-pointer"
+          className="text-xs sm:text-sm font-semibold text-[#0B57D0] dark:text-[#93C5FD] hover:underline px-4 py-2 rounded-full cursor-pointer"
         >
           Back
         </button>
