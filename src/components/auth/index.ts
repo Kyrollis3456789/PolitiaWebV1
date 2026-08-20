@@ -13,5 +13,4 @@ export * from './Step5Locations';
 export * from './Step6ChurchCommitment';
 export * from './FacebookHobbiesSelector';
 export * from './LanguagesSelector';
-export * from './GenderStep';
 export * from './translations';
