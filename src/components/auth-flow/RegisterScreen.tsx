@@ -35,6 +35,7 @@ import Step5Locations from './Step5Locations';
 import Step6ChurchCommitment from './Step6ChurchCommitment';
 import FacebookHobbiesSelector from './FacebookHobbiesSelector';
 import LanguagesSelector from './LanguagesSelector';
+import PasswordStrengthMeter, { checkPasswordStrength } from '@/components/ui/PasswordStrengthMeter';
 import { Step5LocationPayload, Step6ChurchPayload, Diocese, Church, Priest } from '@/types/database.types';
 import { fetchChurchesDataAction } from '@/app/actions/location-data';
 import {
@@ -1368,8 +1369,22 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
     e.preventDefault();
     setErrorMessage(null);
 
-    if (password.length < 8) {
-      setErrorMessage(isRtl ? 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل' : 'Password must be at least 8 characters long.');
+    // Password Strength & Match Validations
+    const strength = checkPasswordStrength(password);
+    if (!strength.isStrong) {
+      if (!strength.criteria.hasMinLength) {
+        setErrorMessage(isRtl ? 'يجب أن تتكون كلمة المرور من 8 أحرف على الأقل' : 'Password must be at least 8 characters long.');
+      } else if (!strength.criteria.hasUppercase) {
+        setErrorMessage(isRtl ? 'يجب أن تحتوي كلمة المرور على حرف كبير واحد على الأقل (A-Z)' : 'Password must include at least one uppercase letter (A-Z).');
+      } else if (!strength.criteria.hasLowercase) {
+        setErrorMessage(isRtl ? 'يجب أن تحتوي كلمة المرور على حرف صغير واحد على الأقل (a-z)' : 'Password must include at least one lowercase letter (a-z).');
+      } else if (!strength.criteria.hasNumber) {
+        setErrorMessage(isRtl ? 'يجب أن تحتوي كلمة المرور على رقم واحد على الأقل (0-9)' : 'Password must include at least one number (0-9).');
+      } else if (!strength.criteria.hasSpecialChar) {
+        setErrorMessage(isRtl ? 'يجب أن تحتوي كلمة المرور على رمز خاص واحد على الأقل (!@#$%^&*)' : 'Password must include at least one special symbol (!@#$%^&*).');
+      } else {
+        setErrorMessage(isRtl ? 'يجب أن تكون كلمة المرور قوية وتستوفي جميع شروط الأمان' : 'Password must be strong and satisfy all security criteria.');
+      }
       return;
     }
 
@@ -2935,9 +2950,16 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                         : 'text-[#444746] dark:text-[#8E918F]'
                     }`}
                   >
-                    <bdi>{isRtl ? 'كلمة المرور (8 أحرف على الأقل)' : 'Password (8+ characters)'}</bdi>
+                    <bdi>{isRtl ? 'كلمة المرور (يجب أن تكون قوية ومحمية)' : 'Password (Must be strong & secure)'}</bdi>
                   </label>
                 </div>
+
+                {/* Real-time Password Strength Meter & Security Checklist */}
+                {password && (
+                  <div className="animate-fadeIn">
+                    <PasswordStrengthMeter password={password} isRtl={isRtl} />
+                  </div>
+                )}
 
                 <div className="relative">
                   <input
