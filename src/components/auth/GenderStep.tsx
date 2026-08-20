@@ -13,10 +13,11 @@ import {
 } from 'lucide-react';
 import { tapScale } from '@/lib/animations/transitions';
 
-type GenderValue = 'male' | 'female';
+export type GenderValue = 'male' | 'female' | 'prefer-not-to-say';
+export type GenderOptionValue = GenderValue;
 
 interface GenderCardData {
-  id: GenderOptionValue;
+  id: GenderValue;
   label: string;
   labelAr: string;
   icon: React.ReactNode;
@@ -83,10 +84,10 @@ const GENDER_CARDS: GenderCardData[] = [
 ];
 
 interface GenderStepProps {
-  onNext?: (selected: GenderOptionValue) => void;
+  onNext?: (selected: GenderValue) => void;
   onBack?: () => void;
   onNavigateLogin?: () => void;
-  initialValue?: GenderOptionValue | null;
+  initialValue?: GenderValue | null;
   isRtl?: boolean;
   currentStep?: number;
   totalSteps?: number;
@@ -101,7 +102,7 @@ export function GenderStep({
   currentStep = 1,
   totalSteps = 7,
 }: GenderStepProps) {
-  const [selected, setSelected] = useState<GenderOptionValue | null>(initialValue);
+  const [selected, setSelected] = useState<GenderValue | null>(initialValue);
 
   const handleNext = () => {
     if (selected && onNext) {
@@ -109,7 +110,7 @@ export function GenderStep({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent, val: GenderOptionValue) => {
+  const handleKeyDown = (e: React.KeyboardEvent, val: GenderValue) => {
     if (e.key === ' ' || e.key === 'Enter') {
       e.preventDefault();
       setSelected(val);
