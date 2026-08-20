@@ -201,6 +201,14 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const [subStepIndex, setSubStepIndex] = useState<number>(1);
   const [slideDirection, setSlideDirection] = useState<'forward' | 'backward'>('forward');
 
+  // Safeguard: Ensure mainStepIndex is always within valid range [1, 8]
+  useEffect(() => {
+    if (mainStepIndex > 8 || mainStepIndex < 1) {
+      setMainStepIndex(1);
+      setSubStepIndex(1);
+    }
+  }, [mainStepIndex]);
+
   // Milestone 1: Personal Info
   const [englishFullName, setEnglishFullName] = useState<string>('');
   const [isEnglishFullNameFocused, setIsEnglishFullNameFocused] = useState(false);
@@ -342,8 +350,13 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
     try {
       const savedMain = getLocalNumber('main_step', 1);
       const savedSub = getLocalNumber('sub_step', 1);
-      if (savedMain > 1) setMainStepIndex(savedMain);
-      if (savedSub > 1) setSubStepIndex(savedSub);
+      if (savedMain >= 1 && savedMain <= 8) {
+        setMainStepIndex(savedMain);
+      } else {
+        setMainStepIndex(1);
+        try { localStorage.removeItem('politia_reg_main_step'); } catch {}
+      }
+      if (savedSub >= 1) setSubStepIndex(savedSub);
 
       const fnEn = getLocalItem('full_name_en', '');
       if (fnEn) setEnglishFullName(fnEn);
