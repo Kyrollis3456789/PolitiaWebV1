@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { clsx } from 'clsx';
 import { MapPin, Building, Home } from 'lucide-react';
 import { Country, Governorate, City, Step5LocationPayload } from '@/types/database.types';
+import GooglePlacesAutocomplete from '@/components/ui/GooglePlacesAutocomplete';
 
 export interface Step5LocationsProps {
   countries?: Country[];
@@ -249,27 +250,31 @@ export default function Step5Locations({
             </div>
           </div>
 
-          {/* Row 3: Street Address (Full Width) */}
+          {/* Row 3: Street Address with Google Maps Places Autocomplete */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center gap-1.5">
               <Building className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-              <span>{isRtl ? 'اسم الشارع / العنوان' : 'Street Address'}</span>
+              <span>{isRtl ? 'اسم الشارع / العنوان (بحث في خرائط جوجل)' : 'Street Address (Search on Google Maps)'}</span>
               <span className="text-rose-500 font-bold">*</span>
             </label>
-            <input
-              type="text"
+            <GooglePlacesAutocomplete
               value={streetAddress}
-              onChange={(e) => {
-                setStreetAddress(e.target.value);
+              onChange={(val) => {
+                setStreetAddress(val);
                 setErrors((prev) => ({ ...prev, streetAddress: '' }));
               }}
-              placeholder={isRtl ? 'مثال: شارع الجمهورية' : 'e.g. 12 El Gomhoureya St.'}
-              className={clsx(
-                "w-full px-3.5 py-2.5 text-xs rounded-xl border bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all",
-                errors.streetAddress
-                  ? "border-red-500 bg-red-50/20"
-                  : "border-slate-300 dark:border-slate-700"
-              )}
+              onPlaceSelect={(details) => {
+                if (details.route || details.formattedAddress) {
+                  setStreetAddress(details.route || details.formattedAddress);
+                }
+                if (details.streetNumber && !buildingNo) {
+                  setBuildingNo(details.streetNumber);
+                }
+                setErrors((prev) => ({ ...prev, streetAddress: '' }));
+              }}
+              placeholder={isRtl ? 'ابحث في خرائط جوجل عن اسم الشارع أو العنوان...' : 'Search Google Maps for street or address...'}
+              isRtl={isRtl}
+              hasError={Boolean(errors.streetAddress)}
             />
             {errors.streetAddress && (
               <p className="text-red-500 text-xs mt-1 font-medium">{errors.streetAddress}</p>
