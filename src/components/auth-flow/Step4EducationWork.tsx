@@ -13,6 +13,7 @@ export interface Step4Props {
   faculties?: { id: string; university_id: string; name_en: string; name_ar?: string }[];
   defaultValues?: any;
   isRtl?: boolean;
+  onPartChange?: (current: number, total: number) => void;
   onNext: (payload: any) => void;
   onBack: () => void;
 }
@@ -23,6 +24,7 @@ export default function Step4EducationWork({
   faculties = [],
   defaultValues,
   isRtl = false,
+  onPartChange,
   onNext,
   onBack,
 }: Step4Props) {
@@ -389,18 +391,15 @@ export default function Step4EducationWork({
     </div>
   );
 
+  // Notify parent of dynamic parts changes for unified header pill
+  React.useEffect(() => {
+    if (onPartChange) {
+      onPartChange(currentPart, totalParts);
+    }
+  }, [currentPart, totalParts, onPartChange]);
+
   return (
     <div className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
-      {/* Header Progress / Part Pill */}
-      <div className="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800/80">
-        <span className="text-[11px] font-semibold tracking-wider uppercase text-slate-500 dark:text-slate-400">
-          Education & Career
-        </span>
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-50 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 shadow-2xs">
-          Part {currentPart}/{totalParts}
-        </span>
-      </div>
-
       {/* Vertically Centered Sub-step Card Container */}
       <div
         key={`${path || 'ROOT'}-${currentPart}`}

@@ -298,6 +298,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
   // Milestone 4: Education & Work
   const [step4Payload, setStep4Payload] = useState<any>(null);
+  const [step4Parts, setStep4Parts] = useState<{ current: number; total: number }>({ current: 1, total: 1 });
 
   // Milestone 5: Locations
   const [governorate, setGovernorate] = useState<string>(isRtl ? 'القاهرة' : 'Cairo');
@@ -1548,7 +1549,11 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   {mainStepIndex <= 7 && (
                     <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/50">
                       <bdi suppressHydrationWarning>
-                        {mainStepIndex === 3 && currentAge !== null && currentAge < 18
+                        {mainStepIndex === 4
+                          ? isRtl
+                            ? `القسم ${step4Parts.current}/${step4Parts.total}`
+                            : `Part ${step4Parts.current}/${step4Parts.total}`
+                          : mainStepIndex === 3 && currentAge !== null && currentAge < 18
                           ? isRtl ? 'القسم 1/1' : 'Part 1/1'
                           : isRtl
                           ? `القسم ${subStepIndex}/${currentMainConfig?.subSteps.length}`
@@ -2605,6 +2610,8 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
               <Step4EducationWork
                 age={currentAge ?? 18}
                 defaultValues={step4Payload}
+                isRtl={isRtl}
+                onPartChange={(curr, tot) => setStep4Parts({ current: curr, total: tot })}
                 onNext={(data) => {
                   setStep4Payload(data);
                   // Manually advance to step 5 here if handleAdvance needs an event
