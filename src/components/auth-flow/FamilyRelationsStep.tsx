@@ -840,7 +840,21 @@ export const FamilyRelationsStep: React.FC<FamilyRelationsStepProps> = ({
           const isFather = member.relation === 'father';
           const isMother = member.relation === 'mother';
           const isSpouse = member.relation === 'spouse';
-          const isMandatory = isFather || isMother || (isSpouse && maritalStatus === 'married');
+
+          const fatherMember = familyMembers.find((m) => m.relation === 'father');
+          const motherMember = familyMembers.find((m) => m.relation === 'mother');
+          const isFatherFulfilled = Boolean(
+            fatherMember && (fatherMember.isDeceased || fatherMember.memberId || (fatherMember.phone?.trim() && fatherMember.phone.trim().length >= 8))
+          );
+          const isMotherFulfilled = Boolean(
+            motherMember && (motherMember.isDeceased || motherMember.memberId || (motherMember.phone?.trim() && motherMember.phone.trim().length >= 8))
+          );
+          const isAnyParentFulfilled = isFatherFulfilled || isMotherFulfilled;
+
+          const isMandatory =
+            (isFather && !isAnyParentFulfilled) ||
+            (isMother && !isAnyParentFulfilled) ||
+            (isSpouse && maritalStatus === 'married');
 
           // Localized relation labels & vector icons
           let titleEn = 'Family Member';
@@ -849,13 +863,29 @@ export const FamilyRelationsStep: React.FC<FamilyRelationsStepProps> = ({
           let iconColorClass = 'text-slate-600 dark:text-slate-400';
 
           if (isFather) {
-            titleEn = 'Father (Required)';
-            titleAr = 'الأب (إلزامي)';
+            titleEn = isAnyParentFulfilled
+              ? isFatherFulfilled
+                ? 'Father'
+                : 'Father (Optional)'
+              : 'Father (Father or Mother Required)';
+            titleAr = isAnyParentFulfilled
+              ? isFatherFulfilled
+                ? 'الأب'
+                : 'الأب (اختياري)'
+              : 'الأب (مطلوب الأب أو الأم)';
             IconComponent = User;
             iconColorClass = 'text-blue-600 dark:text-blue-400';
           } else if (isMother) {
-            titleEn = 'Mother (Required)';
-            titleAr = 'الأم (إلزامي)';
+            titleEn = isAnyParentFulfilled
+              ? isMotherFulfilled
+                ? 'Mother'
+                : 'Mother (Optional)'
+              : 'Mother (Father or Mother Required)';
+            titleAr = isAnyParentFulfilled
+              ? isMotherFulfilled
+                ? 'الأم'
+                : 'الأم (اختياري)'
+              : 'الأم (مطلوب الأب أو الأم)';
             IconComponent = UserCheck;
             iconColorClass = 'text-rose-500 dark:text-rose-400';
           } else if (isSpouse) {

@@ -522,23 +522,18 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
     const isFatherOk = Boolean(
       father && (father.isDeceased || father.memberId || (father.phone?.trim() && father.phone.trim().length >= 8))
     );
-    if (!isFatherOk) {
-      reqs.push(
-        isRtl
-          ? 'بيانات الأب مطلوبة (ربط عضو، إدخال هاتف، أو تحديد متوفى)'
-          : 'Father details are required (linked member, manual phone, or marked deceased)'
-      );
-    }
 
     const mother = familyMembers.find((m) => m.relation === 'mother');
     const isMotherOk = Boolean(
       mother && (mother.isDeceased || mother.memberId || (mother.phone?.trim() && mother.phone.trim().length >= 8))
     );
-    if (!isMotherOk) {
+
+    const isParentOk = isFatherOk || isMotherOk;
+    if (!isParentOk) {
       reqs.push(
         isRtl
-          ? 'بيانات الأم مطلوبة (ربط عضو، إدخال هاتف، أو تحديد متوفاة)'
-          : 'Mother details are required (linked member, manual phone, or marked deceased)'
+          ? 'بيانات أحد الوالدين مطلوبة (الأب أو الأم: ربط عضو، إدخال هاتف، أو تحديد متوفى)'
+          : 'At least one parent is required (Father or Mother: linked member, manual phone, or marked deceased)'
       );
     }
 
@@ -1176,22 +1171,15 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
         const father = familyMembers.find((m) => m.relation === 'father');
         const isFatherOk = Boolean(father && (father.isDeceased || father.memberId || (father.phone?.trim() && father.phone.trim().length >= 8)));
-        if (!isFatherOk) {
-          setErrorMessage(
-            isRtl
-              ? 'يرجى استكمال بيانات الأب (بحث في دليل الأعضاء، إدخال رقم الهاتف، أو تحديد متوفى)'
-              : 'Please complete father information (search directory, enter phone number, or mark deceased)'
-          );
-          return;
-        }
 
         const mother = familyMembers.find((m) => m.relation === 'mother');
         const isMotherOk = Boolean(mother && (mother.isDeceased || mother.memberId || (mother.phone?.trim() && mother.phone.trim().length >= 8)));
-        if (!isMotherOk) {
+
+        if (!isFatherOk && !isMotherOk) {
           setErrorMessage(
             isRtl
-              ? 'يرجى استكمال بيانات الأم (بحث في دليل الأعضاء، إدخال رقم الهاتف، أو تحديد متوفاة)'
-              : 'Please complete mother information (search directory, enter phone number, or mark deceased)'
+              ? 'يرجى استكمال بيانات أحد الوالدين على الأقل (الأب أو الأم: بحث في دليل الأعضاء، إدخال رقم الهاتف، أو تحديد متوفى)'
+              : 'Please complete at least one parent (Father or Mother: search directory, enter phone number, or mark deceased)'
           );
           return;
         }
