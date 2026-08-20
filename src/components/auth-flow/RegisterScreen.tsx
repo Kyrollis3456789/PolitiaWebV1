@@ -2845,7 +2845,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
               >
                 {/* 7.1: Facebook-style Hobbies & Church Activities */}
                 {subStepIndex === 1 && (
-                  <div className="bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-xs">
+                  <div className="w-full">
                     <FacebookHobbiesSelector
                       selectedHobbies={selectedHobbies}
                       onChange={setSelectedHobbies}
@@ -2856,9 +2856,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
                 {/* 7.2: Languages */}
                 {subStepIndex === 2 && (
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      <bdi>{isRtl ? 'اللغات المتقنة' : 'Languages Spoken'}</bdi>
+                  <div className="space-y-3 w-full">
+                    <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                      <span>🗣️</span>
+                      <span>{isRtl ? 'اللغات المتقنة' : 'Languages Spoken'}</span>
                     </label>
                     <div className="flex flex-wrap gap-2 pt-1">
                       {AVAILABLE_LANGUAGES.map((l) => {
@@ -2871,10 +2872,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                               if (selected) setSelectedLanguages(selectedLanguages.filter((x) => x !== l.id));
                               else setSelectedLanguages([...selectedLanguages, l.id]);
                             }}
-                            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer ${
+                            className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-150 cursor-pointer transform active:scale-95 ${
                               selected
-                                ? 'bg-[#0B57D0] text-white shadow-sm'
-                                : 'border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                ? 'bg-blue-600 text-white border border-blue-600 shadow-xs'
+                                : 'border border-slate-300/80 dark:border-slate-700/80 bg-transparent text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-600 dark:hover:border-blue-400 dark:hover:text-blue-400'
                             }`}
                           >
                             <bdi>{isRtl ? l.labelAr : l.labelEn}</bdi>
