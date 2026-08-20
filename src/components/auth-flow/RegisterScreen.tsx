@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import Image from 'next/image';
 import {
   Loader2,
@@ -299,6 +299,12 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   // Milestone 4: Education & Work
   const [step4Payload, setStep4Payload] = useState<any>(null);
   const [step4Parts, setStep4Parts] = useState<{ current: number; total: number }>({ current: 1, total: 1 });
+  const handleStep4PartChange = useCallback((curr: number, tot: number) => {
+    setStep4Parts((prev) => {
+      if (prev.current === curr && prev.total === tot) return prev;
+      return { current: curr, total: tot };
+    });
+  }, []);
 
   // Milestone 5: Locations
   const [governorate, setGovernorate] = useState<string>(isRtl ? 'القاهرة' : 'Cairo');
@@ -2611,7 +2617,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 age={currentAge ?? 18}
                 defaultValues={step4Payload}
                 isRtl={isRtl}
-                onPartChange={(curr, tot) => setStep4Parts({ current: curr, total: tot })}
+                onPartChange={handleStep4PartChange}
                 onNext={(data) => {
                   setStep4Payload(data);
                   // Manually advance to step 5 here if handleAdvance needs an event

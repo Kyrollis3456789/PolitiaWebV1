@@ -392,11 +392,14 @@ export default function Step4EducationWork({
   );
 
   // Notify parent of dynamic parts changes for unified header pill
+  const onPartChangeRef = React.useRef(onPartChange);
   React.useEffect(() => {
-    if (onPartChange) {
-      onPartChange(currentPart, totalParts);
-    }
-  }, [currentPart, totalParts, onPartChange]);
+    onPartChangeRef.current = onPartChange;
+  }, [onPartChange]);
+
+  React.useEffect(() => {
+    onPartChangeRef.current?.(currentPart, totalParts);
+  }, [currentPart, totalParts]);
 
   return (
     <div className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
