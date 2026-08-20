@@ -100,9 +100,45 @@ export async function searchGooglePlacesAction(
     const lang = options?.language || 'ar';
     const country = options?.country || 'eg';
 
-    // 1. If Google Maps API key is configured, query Google Places Autocomplete API
+    // 1. If Google Maps API key is configured, query modern Places API (New) & legacy API
     if (apiKey) {
       try {
+        // Modern Places API (New) endpoint
+        const newApiRes = await fetch('https://places.googleapis.com/v1/places:autocomplete', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Goog-Api-Key': apiKey,
+          },
+          body: JSON.stringify({
+            input: rawTrimmed,
+            languageCode: lang,
+            includedRegionCodes: country ? [country.toUpperCase()] : undefined,
+          }),
+        });
+
+        if (newApiRes.ok) {
+          const newData = await newApiRes.json();
+          if (Array.isArray(newData.suggestions) && newData.suggestions.length > 0) {
+            const predictions: PlacePrediction[] = newData.suggestions
+              .filter((s: any) => s.placePrediction)
+              .map((s: any) => {
+                const p = s.placePrediction;
+                return {
+                  placeId: p.placeId || p.place,
+                  description: p.text?.text || '',
+                  mainText: p.structuredFormat?.mainText?.text || p.text?.text || '',
+                  secondaryText: p.structuredFormat?.secondaryText?.text || '',
+                  types: p.types || [],
+                };
+              });
+            if (predictions.length > 0) {
+              return { success: true, predictions, source: 'google' };
+            }
+          }
+        }
+
+        // Legacy Places Autocomplete API fallback
         let url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
           rawTrimmed
         )}&key=${apiKey}&language=${lang}&components=country:${country}`;
@@ -130,7 +166,7 @@ export async function searchGooglePlacesAction(
           }
         }
       } catch (apiErr) {
-        console.warn('Google Places API network warning, using fallback:', apiErr);
+        console.warn('Google Places API warning, falling back:', apiErr);
       }
     }
 
