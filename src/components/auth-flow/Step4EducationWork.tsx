@@ -461,7 +461,7 @@ export default function Step4EducationWork({
                         ? "bg-slate-800 text-white border-slate-800"
                         : "bg-transparent text-slate-600 dark:text-slate-300 border-slate-300 dark:border-slate-700"
                     )}
-                    bdi>
+                  >
                     {skipSchoolName ? 'Skipped' : 'Skip'}
                   </button>
                 </div>
