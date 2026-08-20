@@ -33,7 +33,7 @@ import { createAccountAction, CreateAccountPayload } from '@/app/actions/create-
 import Step4EducationWork from './Step4EducationWork';
 import Step5Locations from './Step5Locations';
 import Step6ChurchCommitment from './Step6ChurchCommitment';
-import { Step5LocationPayload, Step6ChurchPayload, Diocese, Church } from '@/types/database.types';
+import { Step5LocationPayload, Step6ChurchPayload, Diocese, Church, Priest } from '@/types/database.types';
 import { fetchChurchesDataAction } from '@/app/actions/location-data';
 import {
   checkEnglishNameCollision,
@@ -324,17 +324,21 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const [step6Payload, setStep6Payload] = useState<Step6ChurchPayload | null>(null);
   const [diocesesList, setDiocesesList] = useState<Diocese[]>([]);
   const [churchesList, setChurchesList] = useState<Church[]>([]);
+  const [priestsList, setPriestsList] = useState<Priest[]>([]);
   const [diocese, setDiocese] = useState<string>('');
   const [primaryChurch, setPrimaryChurch] = useState<string>('');
   const [secondaryChurch, setSecondaryChurch] = useState<string>('');
+  const [priestId, setPriestId] = useState<string>('');
   const [priestName, setPriestName] = useState<string>('');
+  const [isCustomPriest, setIsCustomPriest] = useState<boolean>(false);
 
-  // Fetch Dioceses and Churches
+  // Fetch Dioceses, Churches, and Priests
   useEffect(() => {
     fetchChurchesDataAction().then((res) => {
       if (res.success) {
         if (res.dioceses) setDiocesesList(res.dioceses);
         if (res.churches) setChurchesList(res.churches);
+        if (res.priests) setPriestsList(res.priests);
       }
     });
   }, []);
@@ -1428,6 +1432,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
         primary_church_id: step6Payload?.primary_church_id || undefined,
         secondary_diocese_id: step6Payload?.secondary_diocese_id || undefined,
         secondary_church_id: step6Payload?.secondary_church_id || undefined,
+        priest_id: priestId || undefined,
         diocese: step6Payload?.primary_diocese_name || diocese.trim() || undefined,
         primaryChurch: step6Payload?.primary_church_name || primaryChurch.trim() || undefined,
         secondaryChurch: step6Payload?.secondary_church_name || secondaryChurch.trim() || undefined,
@@ -2695,24 +2700,104 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 />
               )}
 
-              {/* 6.2: Priest Selection */}
+              {/* 6.2: Priest / Father of Confession Selection Dropdown */}
               {subStepIndex === 2 && (
                 <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
                   <div className="flex-grow flex flex-col justify-center min-h-[300px] w-full py-2 animate-fadeIn">
                     <div className="space-y-4 max-w-xl mx-auto w-full">
                       <div className="bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-xs space-y-3.5">
-                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
-                          <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                          <span>{isRtl ? 'اسم أب الاعتراف / الكاهن المسؤول (اختياري)' : 'Father of Confession / Priest (Optional)'}</span>
-                        </label>
-                        <input
-                          type="text"
-                          aria-label="Confession Father / Priest Name"
-                          placeholder={isRtl ? 'أدخل اسم أب الاعتراف...' : 'Enter priest name...'}
-                          value={priestName}
-                          onChange={(e) => setPriestName(e.target.value)}
-                          className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                        />
+                        
+                        {/* Header */}
+                        <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800/80">
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+                            <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                            <span>{isRtl ? 'أب الاعتراف / الكاهن المسؤول (اختياري)' : 'Father of Confession / Priest (Optional)'}</span>
+                          </span>
+
+                          {step6Payload?.primary_church_name && (
+                            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 truncate max-w-[200px]">
+                              {step6Payload.primary_church_name}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Priest Dropdown Selection */}
+                        <div>
+                          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                            {isRtl ? 'اختر أب الاعتراف من قائمة كهنة الكنيسة' : 'Select priest from church clergy'}
+                          </label>
+                          <select
+                            value={isCustomPriest ? '__custom__' : priestId}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              if (val === '__custom__') {
+                                setIsCustomPriest(true);
+                                setPriestId('');
+                                setPriestName('');
+                              } else if (val === '') {
+                                setIsCustomPriest(false);
+                                setPriestId('');
+                                setPriestName('');
+                              } else {
+                                setIsCustomPriest(false);
+                                setPriestId(val);
+                                const found = priestsList.find((p) => p.id === val);
+                                if (found) {
+                                  setPriestName(isRtl ? found.name_ar : found.name_en);
+                                }
+                              }
+                            }}
+                            className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
+                          >
+                            <option value="" className="bg-white dark:bg-slate-900">
+                              {isRtl ? 'اختر أب الاعتراف (اختياري)...' : 'Select Father of Confession (optional)...'}
+                            </option>
+                            
+                            {/* Priests belonging to selected church */}
+                            {priestsList
+                              .filter((p) => !step6Payload?.primary_church_id || p.church_id === step6Payload?.primary_church_id)
+                              .map((p) => (
+                                <option key={p.id} value={p.id} className="bg-white dark:bg-slate-900">
+                                  {isRtl ? p.name_ar : p.name_en}
+                                </option>
+                              ))}
+
+                            {/* Other Priests in the Diocese / All */}
+                            {priestsList.filter((p) => step6Payload?.primary_church_id && p.church_id !== step6Payload?.primary_church_id).length > 0 && (
+                              <optgroup label={isRtl ? 'كهنة آخرون' : 'Other Clergy'}>
+                                {priestsList
+                                  .filter((p) => step6Payload?.primary_church_id && p.church_id !== step6Payload?.primary_church_id)
+                                  .map((p) => (
+                                    <option key={p.id} value={p.id} className="bg-white dark:bg-slate-900">
+                                      {isRtl ? p.name_ar : p.name_en}
+                                    </option>
+                                  ))}
+                              </optgroup>
+                            )}
+
+                            <option value="__custom__" className="bg-white dark:bg-slate-900 font-semibold text-blue-600">
+                              {isRtl ? '✍️ كتابة اسم كاهن آخر غير موجود بالقائمة...' : '✍️ Enter another priest name manually...'}
+                            </option>
+                          </select>
+                        </div>
+
+                        {/* Optional Custom Priest Name Input */}
+                        {isCustomPriest && (
+                          <div className="animate-fadeIn pt-1">
+                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
+                              {isRtl ? 'اسم أب الاعتراف' : 'Priest Name'}
+                            </label>
+                            <input
+                              type="text"
+                              aria-label="Confession Father / Priest Name"
+                              placeholder={isRtl ? 'أدخل اسم أب الاعتراف...' : 'Enter priest name...'}
+                              value={priestName}
+                              onChange={(e) => setPriestName(e.target.value)}
+                              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                            />
+                          </div>
+                        )}
+
                       </div>
                     </div>
                   </div>

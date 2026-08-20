@@ -71,6 +71,7 @@ export interface CreateAccountPayload {
   primary_church_id?: string | null;
   secondary_diocese_id?: string | null;
   secondary_church_id?: string | null;
+  priest_id?: string | null;
   diocese?: string;
   primaryChurch?: string;
   secondaryChurch?: string;
@@ -323,6 +324,7 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
         primary_church_id: payload.primary_church_id || null,
         secondary_diocese_id: payload.secondary_diocese_id || null,
         secondary_church_id: payload.secondary_church_id || null,
+        priest_id: payload.priest_id || null,
         diocese: payload.diocese || null,
         primary_church: payload.primaryChurch || null,
         secondary_church: payload.secondaryChurch || null,

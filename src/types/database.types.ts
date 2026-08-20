@@ -89,6 +89,16 @@ export interface Church {
   name_ar: string;
 }
 
+export interface Priest {
+  id: string;
+  church_id?: string | null;
+  diocese_id?: string | null;
+  name_en: string;
+  name_ar: string;
+  title_en?: string | null;
+  title_ar?: string | null;
+}
+
 export interface Step6ChurchPayload {
   primary_diocese_id?: string;
   primary_church_id: string;
@@ -98,6 +108,8 @@ export interface Step6ChurchPayload {
   primary_church_name?: string;
   secondary_diocese_name?: string;
   secondary_church_name?: string;
+  priest_id?: string;
+  priest_name?: string;
 }
 
 export interface SearchedMember {

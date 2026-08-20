@@ -83,20 +83,22 @@ export async function fetchStreetsAction(
 }
 
 /**
- * Fetches all Dioceses and Churches from Supabase database.
+ * Fetches all Dioceses, Churches, and Priests from Supabase database.
  */
 export async function fetchChurchesDataAction(): Promise<{
   success: boolean;
   dioceses: { id: string; name_en: string; name_ar: string; governorate_id?: string }[];
   churches: { id: string; diocese_id: string; city_id: string; name_en: string; name_ar: string }[];
+  priests: { id: string; church_id?: string; diocese_id?: string; name_en: string; name_ar: string; title_en?: string; title_ar?: string }[];
   error?: string;
 }> {
   try {
     const supabase = await createClient();
 
-    const [dioRes, churchRes] = await Promise.all([
+    const [dioRes, churchRes, priestRes] = await Promise.all([
       supabase.from('dioceses').select('id, name_en, name_ar, governorate_id').order('name_ar', { ascending: true }),
       supabase.from('churches').select('id, diocese_id, city_id, name_en, name_ar').order('name_ar', { ascending: true }),
+      supabase.from('priests').select('id, church_id, diocese_id, name_en, name_ar, title_en, title_ar').order('name_ar', { ascending: true }),
     ]);
 
     if (dioRes.error) throw dioRes.error;
@@ -106,6 +108,7 @@ export async function fetchChurchesDataAction(): Promise<{
       success: true,
       dioceses: (dioRes.data as any[]) || [],
       churches: (churchRes.data as any[]) || [],
+      priests: (priestRes.data as any[]) || [],
     };
   } catch (err: any) {
     console.error('Error fetching churches data:', err);
@@ -113,6 +116,7 @@ export async function fetchChurchesDataAction(): Promise<{
       success: false,
       dioceses: [],
       churches: [],
+      priests: [],
       error: err.message || 'Failed to load churches',
     };
   }
