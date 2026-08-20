@@ -173,23 +173,61 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
             primary_phone: validPhones.length > 0 ? `${validPhones[0].countryCode}${validPhones[0].number}` : undefined,
           },
         });
-        authUser = adminAuthData?.user;
-        authError = adminAuthError;
+
+        if (!adminAuthError && adminAuthData?.user) {
+          authUser = adminAuthData.user;
+        } else if (adminAuthError) {
+          // If user already registered, find user and update credentials & metadata
+          const { data: userList } = await adminClient.auth.admin.listUsers();
+          const existingUser = userList?.users?.find(
+            (u) => u.email?.toLowerCase() === primaryEmail.toLowerCase()
+          );
+
+          if (existingUser) {
+            const { data: updated, error: updateErr } = await adminClient.auth.admin.updateUserById(existingUser.id, {
+              password: accountPassword,
+              email_confirm: true,
+              user_metadata: {
+                full_name_en: payload.englishName,
+                full_name_ar: payload.arabicName,
+                english_full_name: payload.englishName,
+                arabic_full_name: payload.arabicName,
+                national_id: payload.nationalId || undefined,
+                primary_phone: validPhones.length > 0 ? `${validPhones[0].countryCode}${validPhones[0].number}` : undefined,
+              },
+            });
+            if (!updateErr && updated?.user) {
+              authUser = updated.user;
+            } else {
+              authError = updateErr || adminAuthError;
+            }
+          } else {
+            authError = adminAuthError;
+          }
+        }
       }
-    } catch {
-      // Fallback to client signup
-      const { data: clientAuthData, error: clientAuthError } = await supabase.auth.signUp({
-        email: primaryEmail,
-        password: accountPassword,
-        options: {
-          data: {
-            full_name_en: payload.englishName,
-            full_name_ar: payload.arabicName,
+    } catch (err: any) {
+      authError = err;
+    }
+
+    if (!authUser) {
+      // Fallback to standard signup
+      try {
+        const { data: clientAuthData, error: clientAuthError } = await supabase.auth.signUp({
+          email: primaryEmail,
+          password: accountPassword,
+          options: {
+            data: {
+              full_name_en: payload.englishName,
+              full_name_ar: payload.arabicName,
+            },
           },
-        },
-      });
-      authUser = clientAuthData?.user;
-      authError = clientAuthError;
+        });
+        authUser = clientAuthData?.user;
+        if (clientAuthError) authError = clientAuthError;
+      } catch (err: any) {
+        authError = err;
+      }
     }
 
     if (authError && !authUser) {
@@ -338,7 +376,8 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
       });
 
       if (profileError) {
-        console.warn('Profile upsert warning:', profileError);
+        console.error('Profile upsert error:', profileError);
+        return { success: false, error: profileError.message || 'Failed to save profile record to database.' };
       }
 
       // Persist all phones into user_phones

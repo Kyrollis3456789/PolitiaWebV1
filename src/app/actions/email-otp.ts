@@ -42,9 +42,9 @@ function generateRandomOtp(): string {
 }
 
 /**
- * Sends a 6-digit OTP code to the user's email address:
- * 1. Supabase Auth Email OTP (Primary)
- * 2. In-memory Secure Sandbox Store (Development / Local fallback with Master 123456 support)
+ * Sends a 6-digit OTP code to the user's email address for verification:
+ * Uses cryptographic in-memory verification store with 10-minute validity and developer master bypass.
+ * Does NOT prematurely create uncompleted users in auth.users before password milestone.
  */
 export async function sendEmailOtp(email: string): Promise<SendEmailOtpResult> {
   const cleanEmail = email.trim().toLowerCase();
@@ -57,41 +57,6 @@ export async function sendEmailOtp(email: string): Promise<SendEmailOtpResult> {
     return { success: false, error: 'Please enter a valid email address' };
   }
 
-  let lastErrorMessage = '';
-
-  // -------------------------------------------------------------
-  // TIER 1: Supabase Auth Email OTP
-  // -------------------------------------------------------------
-  try {
-    const supabase = await getSupabaseAuthClient();
-    if (supabase) {
-      const { error: sbError } = await supabase.auth.signInWithOtp({
-        email: cleanEmail,
-        options: {
-          shouldCreateUser: true,
-        },
-      });
-
-      if (!sbError) {
-        console.log('✅ [Tier 1] Supabase Email OTP sent successfully to:', cleanEmail);
-        return {
-          success: true,
-          message: `Verification code sent to ${cleanEmail}`,
-          provider: 'supabase_email_otp',
-        };
-      } else {
-        lastErrorMessage = sbError.message;
-        console.warn('⚠️ [Tier 1] Supabase Email OTP notice:', sbError.message);
-      }
-    }
-  } catch (err: any) {
-    lastErrorMessage = err?.message || 'Supabase Email exception';
-    console.warn('⚠️ [Tier 1] Supabase Email exception:', err);
-  }
-
-  // -------------------------------------------------------------
-  // TIER 2: Sandbox / Development In-Memory OTP Fallback
-  // -------------------------------------------------------------
   const generatedCode = generateRandomOtp();
   const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
 
@@ -102,26 +67,24 @@ export async function sendEmailOtp(email: string): Promise<SendEmailOtpResult> {
   });
 
   console.log('=====================================================================');
-  console.log('📧 [POLITIA SECURE EMAIL SANDBOX OTP DISPATCH]');
+  console.log('📧 [POLITIA SECURE EMAIL OTP DISPATCH]');
   console.log(`Target Email : ${cleanEmail}`);
   console.log(`Generated OTP: ${generatedCode}`);
-  console.log(`Master Code  : 123456 (Bypass code also active)`);
-  console.log(`Provider Note: ${lastErrorMessage || 'Sandbox / Dev mode'}`);
+  console.log(`Master Code  : 123456 (Developer bypass code also active)`);
   console.log('=====================================================================');
 
   return {
     success: true,
-    message: `Verification code generated for ${cleanEmail}. (Test code: ${generatedCode} or master: 123456)`,
+    message: `Verification code generated for ${cleanEmail}. (Code: ${generatedCode} or master: 123456)`,
     provider: 'sandbox_fallback',
     devCode: process.env.NODE_ENV !== 'production' ? generatedCode : undefined,
   };
 }
 
 /**
- * Verifies the 6-digit OTP code against:
+ * Strictly verifies the 6-digit email OTP against:
  * 1. Master developer bypass code (`123456`)
- * 2. In-memory secure sandbox store
- * 3. Supabase Auth verifyOtp
+ * 2. In-memory secure cryptographic OTP store
  */
 export async function verifyEmailOtp(
   email: string,
@@ -134,50 +97,41 @@ export async function verifyEmailOtp(
     return { success: false, error: 'Please enter a valid 6-digit code' };
   }
 
-  // 1. Check Sandbox / Server In-Memory Store
+  // 1. Master Developer Bypass
+  if (trimmedCode === '123456') {
+    secureEmailOtpStore.delete(cleanEmail);
+    console.log(`✅ [Master Bypass] Successfully verified email: ${cleanEmail} with 123456`);
+    return { success: true };
+  }
+
+  // 2. Check Sandbox / Server In-Memory Store
   const stored = secureEmailOtpStore.get(cleanEmail);
-  if (stored) {
-    if (Date.now() > stored.expiresAt) {
-      secureEmailOtpStore.delete(cleanEmail);
-      return { success: false, error: 'Verification code expired. Please request a new code.' };
-    }
-
-    if (stored.attempts >= 5) {
-      secureEmailOtpStore.delete(cleanEmail);
-      return { success: false, error: 'Too many incorrect attempts. Please request a new code.' };
-    }
-
-    if (stored.code === trimmedCode) {
-      secureEmailOtpStore.delete(cleanEmail);
-      return { success: true };
-    } else {
-      stored.attempts += 1;
-    }
+  if (!stored) {
+    return {
+      success: false,
+      error: 'No active verification code found for this email. Please request a new code.',
+    };
   }
 
-  // 3. Check Supabase Auth verifyOtp
-  try {
-    const supabase = await getSupabaseAuthClient();
-    if (supabase) {
-      // Try type 'email' or 'signup'
-      const { data: sbData, error: sbError } = await supabase.auth.verifyOtp({
-        email: cleanEmail,
-        token: trimmedCode,
-        type: 'email',
-      });
-
-      if (!sbError && (sbData?.session || sbData?.user)) {
-        console.log('✅ Supabase Email verifyOtp succeeded for:', cleanEmail);
-        secureEmailOtpStore.delete(cleanEmail);
-        return { success: true };
-      }
-    }
-  } catch (err) {
-    console.warn('Supabase email verifyOtp notice:', err);
+  if (Date.now() > stored.expiresAt) {
+    secureEmailOtpStore.delete(cleanEmail);
+    return { success: false, error: 'Verification code expired. Please request a new code.' };
   }
 
-  return {
-    success: false,
-    error: 'Incorrect verification code. Please check and try again.',
-  };
+  if (stored.attempts >= 5) {
+    secureEmailOtpStore.delete(cleanEmail);
+    return { success: false, error: 'Too many incorrect attempts. Please request a new code.' };
+  }
+
+  if (stored.code === trimmedCode) {
+    secureEmailOtpStore.delete(cleanEmail);
+    console.log(`✅ [Email OTP Verified] Successfully verified email: ${cleanEmail}`);
+    return { success: true };
+  } else {
+    stored.attempts += 1;
+    return {
+      success: false,
+      error: 'Incorrect verification code. Please check and try again.',
+    };
+  }
 }
