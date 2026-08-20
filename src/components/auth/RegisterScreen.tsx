@@ -30,13 +30,13 @@ import { validateEgyptianNationalId } from '@/lib/validation/national-id';
 import { validateBirthday } from '@/lib/validation/date-rules';
 import { validatePhoneNumber, normalizeDigits, COUNTRY_PHONE_RULES } from '@/lib/validation/phone-rules';
 import { createAccountAction, CreateAccountPayload } from '@/app/actions/create-account';
-import Step4EducationWork from './Step4EducationWork';
+import Step4EducationWork, { Step4Payload } from './Step4EducationWork';
 import Step5Locations from './Step5Locations';
 import Step6ChurchCommitment from './Step6ChurchCommitment';
 import FacebookHobbiesSelector from './FacebookHobbiesSelector';
 import LanguagesSelector from './LanguagesSelector';
 import PasswordStrengthMeter, { checkPasswordStrength } from '@/components/ui/PasswordStrengthMeter';
-import { Step5LocationPayload, Step6ChurchPayload, Diocese, Church, Priest } from '@/types/database.types';
+import { Country, Step5LocationPayload, Step6ChurchPayload, Diocese, Church, Priest } from '@/types/database.types';
 import { fetchChurchesDataAction } from '@/app/actions/location-data';
 import {
   checkEnglishNameCollision,
@@ -53,7 +53,7 @@ import {
   TOTAL_REGISTRATION_MAIN_STEPS,
   TOTAL_REGISTRATION_SUBSTEPS,
 } from '@/lib/constants/registrationSteps';
-import { ALL_COUNTRIES, getCountryByIso, getLocalizedCountryName } from '@/lib/data/countries';
+import { ALL_COUNTRIES, CountryInfo, getCountryByIso, getLocalizedCountryName } from '@/lib/data/countries';
 import { SocialMediaStep } from './SocialMediaStep';
 import { FamilyRelationsStep, calculateAge } from './FamilyRelationsStep';
 import { FamilyMemberEntry } from '@/types/database.types';
@@ -319,7 +319,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
   // Fetch Dioceses, Churches, and Priests
   useEffect(() => {
-    fetchChurchesDataAction().then((res) => {
+    fetchChurchesDataAction().then((res: { success: boolean; dioceses?: Diocese[]; churches?: Church[]; priests?: Priest[] }) => {
       if (res.success) {
         if (res.dioceses) setDiocesesList(res.dioceses);
         if (res.churches) setChurchesList(res.churches);
@@ -750,7 +750,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
   // Language changer
   const filteredLocales = langSearch.trim()
-    ? SUPPORTED_LOCALES.filter((loc) => {
+    ? SUPPORTED_LOCALES.filter((loc: string) => {
         const q = langSearch.toLowerCase();
         return (
           loc.toLowerCase().includes(q) ||
@@ -2120,7 +2120,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                           }}
                           className="w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] border border-[#747775] dark:border-[#8E918F] focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] focus:outline-none transition-all box-border cursor-pointer appearance-none"
                         >
-                          {ALL_COUNTRIES.map((c) => (
+                          {ALL_COUNTRIES.map((c: CountryInfo) => (
                             <option
                               key={c.iso}
                               value={c.iso}
@@ -2725,7 +2725,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 defaultValues={step4Payload}
                 isRtl={isRtl}
                 onPartChange={handleStep4PartChange}
-                onNext={(data) => {
+                onNext={(data: Step4Payload) => {
                   setStep4Payload(data);
                   // Manually advance to step 5 here if handleAdvance needs an event
                   setSlideDirection('forward');
@@ -2743,7 +2743,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
               <Step5Locations
                 defaultValues={step5Payload || undefined}
                 isRtl={isRtl}
-                onNext={(locData) => {
+                onNext={(locData: Step5LocationPayload) => {
                   setStep5Payload(locData);
                   setSlideDirection('forward');
                   setMainStepIndex(6);
@@ -2766,7 +2766,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   churches={churchesList}
                   defaultValues={step6Payload || undefined}
                   isRtl={isRtl}
-                  onSubmitAction={async (payload) => {
+                  onSubmitAction={async (payload: Step6ChurchPayload) => {
                     setStep6Payload(payload);
                     if (payload.primary_diocese_name) setDiocese(payload.primary_diocese_name);
                     if (payload.primary_church_name) setPrimaryChurch(payload.primary_church_name);
@@ -3135,7 +3135,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   />
                 </div>
                 <div className="overflow-y-auto p-1 max-h-56">
-                  {filteredLocales.map((loc) => (
+                  {filteredLocales.map((loc: string) => (
                     <button
                       key={loc}
                       type="button"

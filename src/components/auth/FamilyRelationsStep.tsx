@@ -227,7 +227,7 @@ export const FamilyRelationsStep: React.FC<FamilyRelationsStepProps> = ({
             .map((m) => m.memberId)
             .filter((id): id is string => Boolean(id))
         );
-        const filtered = res.members.filter((m) => !assignedProfileIds.has(m.id));
+        const filtered = (res.members || []).filter((m: { id: string }) => !assignedProfileIds.has(m.id));
         setSearchResults(filtered);
       }
     });

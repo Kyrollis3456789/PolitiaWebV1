@@ -13,6 +13,8 @@ import {
 import {
   COMPREHENSIVE_HOBBIES,
   HOBBY_CATEGORIES,
+  HobbyItem,
+  HobbyCategory,
 } from '@/lib/constants/hobbiesData';
 
 interface FacebookHobbiesSelectorProps {
@@ -59,7 +61,7 @@ export default function FacebookHobbiesSelector({
 
   // Filter hobbies by category and search query
   const filteredHobbies = useMemo(() => {
-    return COMPREHENSIVE_HOBBIES.filter((h) => {
+    return COMPREHENSIVE_HOBBIES.filter((h: HobbyItem) => {
       const matchesCategory = activeCategory === 'all' || h.category === activeCategory;
       if (!matchesCategory) return false;
 
@@ -77,7 +79,7 @@ export default function FacebookHobbiesSelector({
   // Selected items with metadata
   const selectedItemsDetails = useMemo(() => {
     return selectedHobbies.map((id) => {
-      const predefined = COMPREHENSIVE_HOBBIES.find((h) => h.id === id);
+      const predefined = COMPREHENSIVE_HOBBIES.find((h: HobbyItem) => h.id === id);
       if (predefined) {
         return {
           id: predefined.id,
@@ -165,7 +167,7 @@ export default function FacebookHobbiesSelector({
 
       {/* 4. Sleek Borderless Category Tabs Slider (Hidden Scrollbar) */}
       <div className="flex gap-1.5 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] text-[11px]">
-        {HOBBY_CATEGORIES.map((cat) => {
+        {HOBBY_CATEGORIES.map((cat: HobbyCategory) => {
           const isActive = activeCategory === cat.id;
           return (
             <button
@@ -189,7 +191,7 @@ export default function FacebookHobbiesSelector({
       {/* 5. Flat & Airy Hobbies Badges Grid (Hidden Scrollbar, Outline Style) */}
       <div className="max-h-[220px] overflow-y-auto py-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <div className="flex flex-wrap gap-1.5">
-          {filteredHobbies.map((h) => {
+          {filteredHobbies.map((h: HobbyItem) => {
             const isSelected = selectedHobbies.includes(h.id);
             return (
               <button

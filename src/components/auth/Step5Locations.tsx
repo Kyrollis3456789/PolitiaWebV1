@@ -103,7 +103,7 @@ export default function Step5Locations({
 
   useEffect(() => {
     let isMounted = true;
-    fetchWorldLocationsAction().then((res) => {
+    fetchWorldLocationsAction().then((res: { success: boolean; data?: { countries: Country[]; governorates: Governorate[]; cities: City[] } }) => {
       if (isMounted && res.success && res.data) {
         if (res.data.countries.length > 0) setDbCountries(res.data.countries);
         if (res.data.governorates.length > 0) setDbGovernorates(res.data.governorates);
@@ -493,7 +493,7 @@ export default function Step5Locations({
                 <div className="mt-2 animate-fadeIn">
                   <GoogleMapPlacePicker
                     isRtl={isRtl}
-                    onPlaceSelect={(place) => {
+                    onPlaceSelect={(place: { formattedAddress?: string }) => {
                       if (place.formattedAddress) {
                         setStreetAddress(place.formattedAddress);
                         setErrors((prev) => ({ ...prev, streetAddress: '' }));
@@ -505,13 +505,13 @@ export default function Step5Locations({
               ) : (
                 <GooglePlacesAutocomplete
                   value={streetAddress}
-                  onChange={(val) => {
+                  onChange={(val: string) => {
                     setStreetAddress(val);
                     setErrors((prev) => ({ ...prev, streetAddress: '' }));
                   }}
-                  onPlaceSelect={(details) => {
+                  onPlaceSelect={(details: { formattedAddress?: string; route?: string; streetNumber?: string }) => {
                     if (details.route || details.formattedAddress) {
-                      setStreetAddress(details.route || details.formattedAddress);
+                      setStreetAddress(details.route || details.formattedAddress || '');
                     }
                     if (details.streetNumber && !buildingNo) {
                       setBuildingNo(details.streetNumber);
@@ -702,10 +702,10 @@ export default function Step5Locations({
                 </label>
                 <GooglePlacesAutocomplete
                   value={secondaryStreetAddress}
-                  onChange={(val) => setSecondaryStreetAddress(val)}
-                  onPlaceSelect={(details) => {
+                  onChange={(val: string) => setSecondaryStreetAddress(val)}
+                  onPlaceSelect={(details: { formattedAddress?: string; route?: string; streetNumber?: string }) => {
                     if (details.route || details.formattedAddress) {
-                      setSecondaryStreetAddress(details.route || details.formattedAddress);
+                      setSecondaryStreetAddress(details.route || details.formattedAddress || '');
                     }
                     if (details.streetNumber && !secondaryBuildingNo) {
                       setSecondaryBuildingNo(details.streetNumber);

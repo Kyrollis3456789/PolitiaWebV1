@@ -7,14 +7,46 @@ import { clsx } from 'clsx';
 export type EducationPath = 'BASIC' | 'UNIVERSITY' | 'GRADUATED' | null;
 export type SchoolStage = 'PRIMARY' | 'PREPARATORY' | 'SECONDARY' | null;
 
+export interface Step4Payload {
+  education_path?: EducationPath;
+  school_stage?: SchoolStage;
+  education_system?: string | null;
+  grade_level?: string | null;
+  school_name?: string | null;
+  prev_school_stage?: SchoolStage;
+  prev_education_system?: string | null;
+  prev_grade_level?: string | null;
+  prev_school_name?: string | null;
+  high_school_stage?: string | null;
+  high_school_system?: string | null;
+  high_school_division?: string | null;
+  high_school_grade?: string | null;
+  high_school_name?: string | null;
+  university_id?: string | null;
+  university_name?: string | null;
+  faculty_id?: string | null;
+  faculty_name?: string | null;
+  academic_year?: string | null;
+  is_employed?: boolean | null;
+  job_type?: 'STANDARD' | 'NON_STANDARD' | null;
+  job_title_en?: string | null;
+  job_title_ar?: string | null;
+  job_category_id?: string | null;
+  work_field?: string | null;
+  company_name?: string | null;
+  work_address?: string | null;
+  custom_job_name?: string | null;
+  [key: string]: any;
+}
+
 export interface Step4Props {
   age: number;
   universities?: { id: string; name_en: string; name_ar?: string }[];
   faculties?: { id: string; university_id: string; name_en: string; name_ar?: string }[];
-  defaultValues?: any;
+  defaultValues?: Step4Payload;
   isRtl?: boolean;
   onPartChange?: (current: number, total: number) => void;
-  onNext: (payload: any) => void;
+  onNext: (payload: Step4Payload) => void;
   onBack: () => void;
 }
 

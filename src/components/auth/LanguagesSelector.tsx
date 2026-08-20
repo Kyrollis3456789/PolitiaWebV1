@@ -84,7 +84,7 @@ export default function LanguagesSelector({
   const filteredLanguages = useMemo(() => {
     if (!searchQuery.trim()) return ALL_GLOBAL_LANGUAGES;
     const q = searchQuery.toLowerCase().trim();
-    return ALL_GLOBAL_LANGUAGES.filter((l) => {
+    return ALL_GLOBAL_LANGUAGES.filter((l: LanguageItem) => {
       return (
         l.nameEn.toLowerCase().includes(q) ||
         l.nameAr.includes(q) ||
@@ -97,7 +97,7 @@ export default function LanguagesSelector({
   // Selected language items metadata
   const selectedItemsDetails = useMemo(() => {
     return selectedLanguages.map((code) => {
-      const predefined = ALL_GLOBAL_LANGUAGES.find((l) => l.code === code);
+      const predefined = ALL_GLOBAL_LANGUAGES.find((l: LanguageItem) => l.code === code);
       if (predefined) {
         return {
           code: predefined.code,
@@ -168,7 +168,7 @@ export default function LanguagesSelector({
           {isRtl ? 'اللغات الشائعة:' : 'Popular Languages:'}
         </span>
         <div className="flex flex-wrap gap-1.5">
-          {POPULAR_LANGUAGES.map((lang) => {
+          {POPULAR_LANGUAGES.map((lang: LanguageItem) => {
             const isSelected = selectedLanguages.includes(lang.code);
             return (
               <button
@@ -223,7 +223,7 @@ export default function LanguagesSelector({
         {/* Floating Dropdown Menu for Search Results */}
         {isDropdownOpen && (
           <div className="absolute z-30 start-0 end-0 mt-1 max-h-56 overflow-y-auto bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] animate-fadeIn p-1">
-            {filteredLanguages.map((lang) => {
+            {filteredLanguages.map((lang: LanguageItem) => {
               const isSelected = selectedLanguages.includes(lang.code);
               return (
                 <button
