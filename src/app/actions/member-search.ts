@@ -1,6 +1,22 @@
 'use server';
 
+import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
+
+/**
+ * Safely resolves the Supabase client, prioritizing admin service role for reliable directory searching.
+ */
+async function getSupabaseClient() {
+  try {
+    return createAdminClient();
+  } catch {
+    try {
+      return await createClient();
+    } catch {
+      return null;
+    }
+  }
+}
 
 export interface SearchedMember {
   id: string;
@@ -126,7 +142,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     gender: 'Female',
   },
   {
-    id: '11111111-1111-4111-8111-111111111111',
+    id: '11111111-1111-1111-1111-111111111111',
     fullNameEn: 'Maikel Nabih Malak Girgis',
     fullNameAr: 'مايكل نبيه ملك جرجس',
     avatarUrl: null,
@@ -137,7 +153,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     gender: 'Male',
   },
   {
-    id: '22222222-2222-4222-8222-222222222222',
+    id: '22222222-2222-2222-2222-222222222222',
     fullNameEn: 'Mariam Shokry Sourial Gourgy',
     fullNameAr: 'مريم شكري سوريال جورجي',
     avatarUrl: null,
@@ -148,7 +164,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     gender: 'Female',
   },
   {
-    id: '33333333-3333-4333-8333-333333333333',
+    id: '33333333-3333-3333-3333-333333333333',
     fullNameEn: 'Karas Maikel Nabih Malak Girgis',
     fullNameAr: 'كراس مايكل نبيه ملك جرجس',
     avatarUrl: null,
@@ -180,72 +196,82 @@ export async function searchMembersAction(
       return { success: true, members: [] };
     }
 
-    // 1. Try querying Supabase profiles
+    // 1. Query Supabase database (profiles table)
     try {
-      const supabase = await createClient();
-      let orConditions = `full_name_en.ilike.%${qLower}%,full_name_ar.ilike.%${rawTrimmed}%`;
-      if (isPhoneSearch) {
-        orConditions += `,primary_phone.ilike.%${cleanDigits}%,phone.ilike.%${cleanDigits}%`;
-      }
+      const supabase = await getSupabaseClient();
+      if (supabase) {
+        let orConditions = `full_name_en.ilike.%${qLower}%,full_name_ar.ilike.%${rawTrimmed}%`;
+        if (isPhoneSearch) {
+          orConditions += `,primary_phone.ilike.%${cleanDigits}%,phone.ilike.%${cleanDigits}%`;
+        }
 
-      let dbQuery = supabase
-        .from('profiles')
-        .select('id, full_name_en, full_name_ar, avatar_url, address_governorate, primary_church, date_of_birth, gender, primary_phone, phone')
-        .or(orConditions);
+        let dbQuery = supabase
+          .from('profiles')
+          .select('id, full_name_en, full_name_ar, avatar_url, address_governorate, governorate, primary_church, date_of_birth, birth_date, gender, primary_phone, phone')
+          .or(orConditions);
 
-      if (filter?.gender) {
-        dbQuery = dbQuery.eq('gender', filter.gender);
-      }
+        if (filter?.gender) {
+          dbQuery = dbQuery.ilike('gender', filter.gender);
+        }
 
-      const { data: dbProfiles, error } = await dbQuery.limit(8);
+        const { data: dbProfiles, error } = await dbQuery.limit(10);
 
-      if (!error && dbProfiles && dbProfiles.length > 0) {
-        const mapped: SearchedMember[] = (dbProfiles as Array<{
-          id: string;
-          full_name_en: string;
-          full_name_ar: string;
-          avatar_url?: string | null;
-          address_governorate?: string | null;
-          primary_church?: string | null;
-          date_of_birth?: string | null;
-          gender?: 'Male' | 'Female';
-          primary_phone?: string | null;
-          phone?: string | null;
-        }>)
-          .map((p) => {
-            let age: number | undefined;
-            if (p.date_of_birth) {
-              const b = new Date(p.date_of_birth);
-              const now = new Date();
-              age = now.getFullYear() - b.getFullYear();
-            }
-            return {
-              id: p.id,
-              fullNameEn: p.full_name_en,
-              fullNameAr: p.full_name_ar,
-              avatarUrl: p.avatar_url,
-              governorate: p.address_governorate,
-              church: p.primary_church,
-              phone: p.primary_phone || p.phone || null,
-              age,
-              gender: p.gender,
-            };
-          })
-          .filter((m) => {
-            if (filter?.gender && m.gender && m.gender !== filter.gender) return false;
-            if (filter?.minAge !== undefined && m.age !== undefined && m.age < filter.minAge) return false;
-            return true;
-          });
+        if (!error && dbProfiles && dbProfiles.length > 0) {
+          const mapped: SearchedMember[] = (dbProfiles as Array<{
+            id: string;
+            full_name_en: string;
+            full_name_ar: string;
+            avatar_url?: string | null;
+            address_governorate?: string | null;
+            governorate?: string | null;
+            primary_church?: string | null;
+            date_of_birth?: string | null;
+            birth_date?: string | null;
+            gender?: string | null;
+            primary_phone?: string | null;
+            phone?: string | null;
+          }>)
+            .map((p) => {
+              let age: number | undefined;
+              const dob = p.date_of_birth || p.birth_date;
+              if (dob) {
+                const b = new Date(dob);
+                if (!isNaN(b.getTime())) {
+                  const now = new Date();
+                  age = now.getFullYear() - b.getFullYear();
+                }
+              }
+              const gNormalized: 'Male' | 'Female' =
+                p.gender?.toLowerCase() === 'female' ? 'Female' : 'Male';
 
-        if (mapped.length > 0) {
-          return { success: true, members: mapped };
+              return {
+                id: p.id,
+                fullNameEn: p.full_name_en,
+                fullNameAr: p.full_name_ar,
+                avatarUrl: p.avatar_url,
+                governorate: p.address_governorate || p.governorate,
+                church: p.primary_church,
+                phone: p.primary_phone || p.phone || null,
+                age,
+                gender: gNormalized,
+              };
+            })
+            .filter((m) => {
+              if (filter?.gender && m.gender !== filter.gender) return false;
+              if (filter?.minAge !== undefined && m.age !== undefined && m.age < filter.minAge) return false;
+              return true;
+            });
+
+          if (mapped.length > 0) {
+            return { success: true, members: mapped };
+          }
         }
       }
-    } catch {
-      // Fall through to sample pool
+    } catch (dbErr) {
+      console.warn('searchMembersAction database lookup warning:', dbErr);
     }
 
-    // 2. Sample Pool Matcher with English/Arabic names, phone, gender and minAge filters
+    // 2. Fallback to Sample Pool Matcher with English/Arabic names, phone, gender and minAge filters
     const matched = SAMPLE_COMMUNITY_MEMBERS.filter((m) => {
       if (filter?.gender && m.gender !== filter.gender) return false;
       if (filter?.minAge !== undefined && m.age !== undefined && m.age < filter.minAge) return false;
@@ -305,42 +331,44 @@ export async function getMemberFamilyGraphAction(memberId: string): Promise<Memb
 
     // 1. Try querying Supabase Recursive Family Tree RPC
     try {
-      const supabase = await createClient();
-      const { data: treeRows, error: rpcError } = await supabase.rpc('get_user_full_family_tree', {
-        target_user_id: memberId,
-      });
+      const supabase = await getSupabaseClient();
+      if (supabase) {
+        const { data: treeRows, error: rpcError } = await supabase.rpc('get_user_full_family_tree', {
+          target_user_id: memberId,
+        });
 
-      if (!rpcError && treeRows && treeRows.length > 0) {
-        let spouse: SearchedMember | null = null;
-        const children: SearchedMember[] = [];
+        if (!rpcError && treeRows && treeRows.length > 0) {
+          let spouse: SearchedMember | null = null;
+          const children: SearchedMember[] = [];
 
-        for (const row of treeRows as any[]) {
-          let age: number | undefined;
-          if (row.date_of_birth) {
-            const b = new Date(row.date_of_birth);
-            const now = new Date();
-            age = now.getFullYear() - b.getFullYear();
+          for (const row of treeRows as any[]) {
+            let age: number | undefined;
+            if (row.date_of_birth) {
+              const b = new Date(row.date_of_birth);
+              const now = new Date();
+              age = now.getFullYear() - b.getFullYear();
+            }
+
+            const memberObj: SearchedMember = {
+              id: row.relative_id,
+              fullNameEn: row.full_name_en,
+              fullNameAr: row.full_name_ar,
+              avatarUrl: row.avatar_url,
+              governorate: 'Asyut',
+              church: 'مطرانية أسيوط للأقباط الأرثوذكس',
+              age,
+              gender: row.gender === 'female' ? 'Female' : 'Male',
+            };
+
+            if (row.relation_type === 'spouse') {
+              spouse = memberObj;
+            } else if (row.relation_type === 'child') {
+              children.push(memberObj);
+            }
           }
 
-          const memberObj: SearchedMember = {
-            id: row.relative_id,
-            fullNameEn: row.full_name_en,
-            fullNameAr: row.full_name_ar,
-            avatarUrl: row.avatar_url,
-            governorate: 'Asyut',
-            church: 'مطرانية أسيوط للأقباط الأرثوذكس',
-            age,
-            gender: row.gender === 'female' ? 'Female' : 'Male',
-          };
-
-          if (row.relation_type === 'spouse') {
-            spouse = memberObj;
-          } else if (row.relation_type === 'child') {
-            children.push(memberObj);
-          }
+          return { success: true, spouse, children };
         }
-
-        return { success: true, spouse, children };
       }
     } catch {
       // Fall through to legacy table or sample pool
@@ -394,69 +422,74 @@ export async function findMemberByPhoneAction(
 
     // 1. Query Supabase database
     try {
-      const supabase = await createClient();
+      const supabase = await getSupabaseClient();
+      if (supabase) {
+        // Query profiles by primary_phone
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('id, full_name_en, full_name_ar, avatar_url, address_governorate, governorate, primary_church, date_of_birth, birth_date, gender, primary_phone, phone')
+          .or(`primary_phone.eq.${fullE164},primary_phone.eq.${cleanDigits},primary_phone.eq.${localWithZero},phone.eq.${fullE164},phone.eq.${cleanDigits},phone.eq.${localWithZero}`)
+          .maybeSingle();
 
-      // Query profiles by primary_phone
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id, full_name_en, full_name_ar, avatar_url, address_governorate, primary_church, date_of_birth, gender, primary_phone')
-        .or(`primary_phone.eq.${fullE164},primary_phone.eq.${cleanDigits},primary_phone.eq.${localWithZero}`)
-        .maybeSingle();
+        if (profile) {
+          let age: number | undefined;
+          const dob = profile.date_of_birth || profile.birth_date;
+          if (dob) {
+            const b = new Date(dob);
+            const now = new Date();
+            age = now.getFullYear() - b.getFullYear();
+          }
 
-      if (profile) {
-        let age: number | undefined;
-        if (profile.date_of_birth) {
-          const b = new Date(profile.date_of_birth);
-          const now = new Date();
-          age = now.getFullYear() - b.getFullYear();
+          const gNormalized: 'Male' | 'Female' =
+            profile.gender?.toLowerCase() === 'female' ? 'Female' : 'Male';
+
+          return {
+            success: true,
+            member: {
+              id: profile.id,
+              fullNameEn: profile.full_name_en,
+              fullNameAr: profile.full_name_ar,
+              avatarUrl: profile.avatar_url,
+              governorate: profile.address_governorate || profile.governorate,
+              church: profile.primary_church,
+              age,
+              phone: profile.primary_phone || profile.phone,
+              gender: gNormalized,
+            },
+          };
         }
 
-        return {
-          success: true,
-          member: {
-            id: profile.id,
-            fullNameEn: profile.full_name_en,
-            fullNameAr: profile.full_name_ar,
-            avatarUrl: profile.avatar_url,
-            governorate: profile.address_governorate,
-            church: profile.primary_church,
-            age,
-            phone: profile.primary_phone,
-            gender: profile.gender === 'female' ? 'Female' : 'Male',
-          },
-        };
-      }
+        // Also query user_phones table
+        const { data: userPhone } = await supabase
+          .from('user_phones')
+          .select('user_id, phone_number, profiles:user_id(id, full_name_en, full_name_ar, avatar_url, address_governorate, primary_church, date_of_birth, gender)')
+          .or(`phone_number.eq.${fullE164},phone_number.eq.${cleanDigits},phone_number.eq.${localWithZero}`)
+          .maybeSingle();
 
-      // Also query user_phones table
-      const { data: userPhone } = await supabase
-        .from('user_phones')
-        .select('user_id, phone_number, profiles:user_id(id, full_name_en, full_name_ar, avatar_url, address_governorate, primary_church, date_of_birth, gender)')
-        .or(`phone_number.eq.${fullE164},phone_number.eq.${cleanDigits},phone_number.eq.${localWithZero}`)
-        .maybeSingle();
+        if (userPhone?.profiles) {
+          const p = userPhone.profiles as any;
+          let age: number | undefined;
+          if (p.date_of_birth) {
+            const b = new Date(p.date_of_birth);
+            const now = new Date();
+            age = now.getFullYear() - b.getFullYear();
+          }
 
-      if (userPhone?.profiles) {
-        const p = userPhone.profiles as any;
-        let age: number | undefined;
-        if (p.date_of_birth) {
-          const b = new Date(p.date_of_birth);
-          const now = new Date();
-          age = now.getFullYear() - b.getFullYear();
+          return {
+            success: true,
+            member: {
+              id: p.id,
+              fullNameEn: p.full_name_en,
+              fullNameAr: p.full_name_ar,
+              avatarUrl: p.avatar_url,
+              governorate: p.address_governorate,
+              church: p.primary_church,
+              age,
+              phone: userPhone.phone_number,
+              gender: p.gender === 'female' ? 'Female' : 'Male',
+            },
+          };
         }
-
-        return {
-          success: true,
-          member: {
-            id: p.id,
-            fullNameEn: p.full_name_en,
-            fullNameAr: p.full_name_ar,
-            avatarUrl: p.avatar_url,
-            governorate: p.address_governorate,
-            church: p.primary_church,
-            age,
-            phone: userPhone.phone_number,
-            gender: p.gender === 'female' ? 'Female' : 'Male',
-          },
-        };
       }
     } catch (dbErr) {
       console.warn('findMemberByPhoneAction DB lookup error:', dbErr);
