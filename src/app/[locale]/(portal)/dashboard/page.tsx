@@ -1,7 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 import { redirect } from '@/i18n/routing';
 import { createClient } from '@/lib/supabase/server';
-import { SignOutButton } from '@/components/auth/SignOutButton';
+import { SignOutButton } from '@/components/shared/SignOutButton';
 import { isRtlLocale } from '@/i18n/locales';
 import Image from 'next/image';
 import Link from 'next/link';

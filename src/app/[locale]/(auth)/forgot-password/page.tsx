@@ -1,4 +1,4 @@
-import { ForgotScreen } from '@/components/auth-flow';
+import { ForgotScreen } from '@/components/auth/ForgotScreen';
 
 export const metadata = {
   title: 'Forgot Password - Politia',

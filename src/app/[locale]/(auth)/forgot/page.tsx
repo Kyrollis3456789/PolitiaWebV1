@@ -1,5 +1,5 @@
 import { setRequestLocale } from 'next-intl/server';
-import { ForgotScreen } from '@/components/auth-flow/ForgotScreen';
+import { ForgotScreen } from '@/components/auth/ForgotScreen';
 
 export default async function ForgotPage({
   params,

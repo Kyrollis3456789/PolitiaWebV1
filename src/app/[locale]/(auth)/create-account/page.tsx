@@ -1,7 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from '@/i18n/routing';
-import { RegisterView } from '@/components/auth-flow/RegisterView';
+import { RegisterView } from '@/components/auth/RegisterView';
 
 export default async function CreateAccountPage({
   params,
