@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { clsx } from 'clsx';
-import { MapPin, Building, Home, Navigation, Crosshair, Loader2, Sparkles } from 'lucide-react';
+import { MapPin, Building, Home, Crosshair, Loader2 } from 'lucide-react';
 import { Country, Governorate, City, Step5LocationPayload } from '@/types/database.types';
 import GooglePlacesAutocomplete from '@/components/ui/GooglePlacesAutocomplete';
 import { reverseGeocodeLocationAction } from '@/app/actions/places-search';
@@ -363,33 +363,11 @@ export default function Step5Locations({
               placeholder={isRtl ? 'ابحث في خرائط جوجل عن اسم الشارع أو العنوان...' : 'Search Google Maps for street or address...'}
               isRtl={isRtl}
               hasError={Boolean(errors.streetAddress)}
+              defaultSuggestions={streetSuggestions}
             />
             {errors.streetAddress && (
               <p className="text-red-500 text-xs mt-1 font-medium">{errors.streetAddress}</p>
             )}
-
-            {/* Smart Street Suggestions Chips */}
-            <div className="mt-2 flex items-center gap-1.5 flex-wrap">
-              <span className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-amber-500" />
-                <span>{isRtl ? 'مقترحات شائعة:' : 'Suggestions:'}</span>
-              </span>
-              {streetSuggestions.map((sugg, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => {
-                    const chosen = isRtl ? sugg.ar : sugg.en;
-                    setStreetAddress(chosen);
-                    setErrors((prev) => ({ ...prev, streetAddress: '' }));
-                  }}
-                  className="text-[11px] font-medium px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-blue-50 dark:hover:bg-blue-900/40 hover:text-blue-600 dark:hover:text-blue-300 border border-slate-200/80 dark:border-slate-700/80 transition-all cursor-pointer flex items-center gap-1"
-                >
-                  <Navigation className="w-2.5 h-2.5 text-slate-400" />
-                  <span>{isRtl ? sugg.ar : sugg.en}</span>
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Row 4: Building No, Floor No, Apartment (3 Columns) */}
