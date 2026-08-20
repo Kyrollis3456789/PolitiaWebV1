@@ -1048,8 +1048,8 @@ export const FamilyRelationsStep: React.FC<FamilyRelationsStepProps> = ({
                             dir={isRtl ? 'rtl' : 'ltr'}
                             placeholder={
                               isRtl
-                                ? `ابحث بالاسم عن ${isFather ? 'الأب' : isMother ? 'الأم' : 'فرد العائلة'}...`
-                                : `Search ${isFather ? 'father' : isMother ? 'mother' : 'member'} by name...`
+                                ? `ابحث بالاسم (عربي / إنجليزي) أو برقم الهاتف...`
+                                : `Search by name (English / Arabic) or phone...`
                             }
                             value={activeSearchId === member.id ? searchQuery : ''}
                             onChange={(e) => handleSearchMembers(e.target.value, member.id)}
@@ -1064,7 +1064,7 @@ export const FamilyRelationsStep: React.FC<FamilyRelationsStepProps> = ({
 
                         {/* Auto-suggest Dropdown with Embedded Deceased Option */}
                         {activeSearchId === member.id && searchResults.length > 0 && (
-                          <div className="absolute z-30 start-0 end-0 mt-1 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden max-h-[240px] overflow-y-auto animate-fadeIn">
+                          <div className="absolute z-30 start-0 end-0 mt-1 bg-white dark:bg-slate-900 rounded-2xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden max-h-[260px] overflow-y-auto animate-fadeIn">
                             {searchResults.map((sr) => (
                               <button
                                 key={sr.id}
@@ -1072,22 +1072,34 @@ export const FamilyRelationsStep: React.FC<FamilyRelationsStepProps> = ({
                                 onClick={() => handleSelectMember(member.id, sr)}
                                 className="w-full flex items-center justify-between p-2.5 hover:bg-blue-50 dark:hover:bg-slate-800 transition cursor-pointer text-start border-b border-slate-100 dark:border-slate-800 last:border-0"
                               >
-                                <div className="flex items-center gap-2.5 min-w-0">
-                                  <div className="w-7 h-7 rounded-full bg-[#0B57D0] text-white flex items-center justify-center font-bold text-xs shrink-0">
-                                    {sr.fullNameAr.charAt(0)}
+                                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                  <div className="w-8 h-8 rounded-full bg-[#0B57D0] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                                    {sr.fullNameAr.charAt(0) || sr.fullNameEn.charAt(0)}
                                   </div>
-                                  <div className="min-w-0">
-                                    <p className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
-                                      {isRtl ? sr.fullNameAr : sr.fullNameEn}
-                                    </p>
-                                    <p className="text-[10px] text-slate-400 truncate">
-                                      {sr.church || sr.governorate || ''}
-                                    </p>
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-1.5 flex-wrap">
+                                      <p className="text-xs font-bold text-slate-900 dark:text-slate-100">
+                                        {sr.fullNameAr}
+                                      </p>
+                                      <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
+                                        • {sr.fullNameEn}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400 flex-wrap">
+                                      {sr.phone && (
+                                        <span className="inline-flex items-center gap-1 text-blue-600 dark:text-blue-400 font-mono font-medium">
+                                          <Phone className="w-2.5 h-2.5" />
+                                          {sr.phone}
+                                        </span>
+                                      )}
+                                      {sr.church && <span>{sr.church}</span>}
+                                      {sr.governorate && <span>({sr.governorate})</span>}
+                                    </div>
                                   </div>
                                 </div>
 
                                 {sr.age && (
-                                  <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 shrink-0">
+                                  <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 shrink-0 ms-2">
                                     <bdi>{sr.age} {isRtl ? 'سنة' : 'yrs'}</bdi>
                                   </span>
                                 )}

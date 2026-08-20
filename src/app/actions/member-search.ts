@@ -22,6 +22,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     avatarUrl: null,
     governorate: 'Cairo',
     church: 'كنيسة مارجرجس هليوبوليس',
+    phone: '+201012345671',
     age: 56,
     gender: 'Male',
   },
@@ -32,6 +33,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     avatarUrl: null,
     governorate: 'Cairo',
     church: 'كنيسة العذراء مريم الزيتون',
+    phone: '+201012345672',
     age: 52,
     gender: 'Female',
   },
@@ -42,6 +44,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     avatarUrl: null,
     governorate: 'Giza',
     church: 'كنيسة مارمرقس الدقي',
+    phone: '+201012345673',
     age: 61,
     gender: 'Male',
   },
@@ -52,6 +55,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     avatarUrl: null,
     governorate: 'Giza',
     church: 'كنيسة الشهيد أبي سيفين المهندسين',
+    phone: '+201012345674',
     age: 58,
     gender: 'Female',
   },
@@ -62,6 +66,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     avatarUrl: null,
     governorate: 'Alexandria',
     church: 'الكاتدرائية المرقسية بالإسكندرية',
+    phone: '+201012345675',
     age: 48,
     gender: 'Male',
   },
@@ -72,6 +77,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     avatarUrl: null,
     governorate: 'Alexandria',
     church: 'كنيسة العذراء سموحة',
+    phone: '+201012345676',
     age: 44,
     gender: 'Female',
   },
@@ -82,6 +88,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     avatarUrl: null,
     governorate: 'Cairo',
     church: 'كنيسة القديس بطرس وبولس بالعباسية',
+    phone: '+201012345677',
     age: 34,
     gender: 'Male',
   },
@@ -92,6 +99,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     avatarUrl: null,
     governorate: 'Cairo',
     church: 'كنيسة العذراء مريم بالزمالك',
+    phone: '+201012345678',
     age: 29,
     gender: 'Female',
   },
@@ -102,6 +110,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     avatarUrl: null,
     governorate: 'Cairo',
     church: 'كنيسة مارمينا شبرا',
+    phone: '+201012345679',
     age: 59,
     gender: 'Male',
   },
@@ -112,6 +121,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     avatarUrl: null,
     governorate: 'Cairo',
     church: 'كنيسة الملاك ميخائيل الظاهر',
+    phone: '+201012345680',
     age: 54,
     gender: 'Female',
   },
@@ -122,6 +132,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     avatarUrl: null,
     governorate: 'Asyut',
     church: 'مطرانية أسيوط للأقباط الأرثوذكس',
+    phone: '+201099887766',
     age: 50,
     gender: 'Male',
   },
@@ -132,6 +143,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     avatarUrl: null,
     governorate: 'Asyut',
     church: 'مطرانية أسيوط للأقباط الأرثوذكس',
+    phone: '+201099887755',
     age: 46,
     gender: 'Female',
   },
@@ -142,6 +154,7 @@ const SAMPLE_COMMUNITY_MEMBERS: SearchedMember[] = [
     avatarUrl: null,
     governorate: 'Asyut',
     church: 'مطرانية أسيوط للأقباط الأرثوذكس',
+    phone: '+201099887744',
     age: 16,
     gender: 'Male',
   },
@@ -158,18 +171,27 @@ export async function searchMembersAction(
   filter?: MemberSearchFilter
 ): Promise<{ success: boolean; members: SearchedMember[] }> {
   try {
-    const q = query.trim().toLowerCase();
-    if (!q || q.length < 2) {
+    const rawTrimmed = query.trim();
+    const qLower = rawTrimmed.toLowerCase();
+    const cleanDigits = rawTrimmed.replace(/\D/g, '');
+    const isPhoneSearch = cleanDigits.length >= 3;
+
+    if (!rawTrimmed || (rawTrimmed.length < 2 && !isPhoneSearch)) {
       return { success: true, members: [] };
     }
 
     // 1. Try querying Supabase profiles
     try {
       const supabase = await createClient();
+      let orConditions = `full_name_en.ilike.%${qLower}%,full_name_ar.ilike.%${rawTrimmed}%`;
+      if (isPhoneSearch) {
+        orConditions += `,primary_phone.ilike.%${cleanDigits}%,phone.ilike.%${cleanDigits}%`;
+      }
+
       let dbQuery = supabase
         .from('profiles')
-        .select('id, full_name_en, full_name_ar, avatar_url, address_governorate, primary_church, date_of_birth, gender')
-        .or(`full_name_en.ilike.%${q}%,full_name_ar.ilike.%${q}%`);
+        .select('id, full_name_en, full_name_ar, avatar_url, address_governorate, primary_church, date_of_birth, gender, primary_phone, phone')
+        .or(orConditions);
 
       if (filter?.gender) {
         dbQuery = dbQuery.eq('gender', filter.gender);
@@ -187,6 +209,8 @@ export async function searchMembersAction(
           primary_church?: string | null;
           date_of_birth?: string | null;
           gender?: 'Male' | 'Female';
+          primary_phone?: string | null;
+          phone?: string | null;
         }>)
           .map((p) => {
             let age: number | undefined;
@@ -202,6 +226,7 @@ export async function searchMembersAction(
               avatarUrl: p.avatar_url,
               governorate: p.address_governorate,
               church: p.primary_church,
+              phone: p.primary_phone || p.phone || null,
               age,
               gender: p.gender,
             };
@@ -220,13 +245,15 @@ export async function searchMembersAction(
       // Fall through to sample pool
     }
 
-    // 2. Sample Pool Matcher with gender and minAge filters
+    // 2. Sample Pool Matcher with English/Arabic names, phone, gender and minAge filters
     const matched = SAMPLE_COMMUNITY_MEMBERS.filter((m) => {
       if (filter?.gender && m.gender !== filter.gender) return false;
       if (filter?.minAge !== undefined && m.age !== undefined && m.age < filter.minAge) return false;
-      const matchName = m.fullNameEn.toLowerCase().includes(q) || m.fullNameAr.includes(q);
-      const matchGov = m.governorate?.toLowerCase().includes(q);
-      return matchName || matchGov;
+      const matchNameEn = m.fullNameEn.toLowerCase().includes(qLower);
+      const matchNameAr = m.fullNameAr.includes(rawTrimmed);
+      const matchGov = m.governorate?.toLowerCase().includes(qLower);
+      const matchPhone = isPhoneSearch && m.phone ? m.phone.replace(/\D/g, '').includes(cleanDigits) : false;
+      return matchNameEn || matchNameAr || matchGov || matchPhone;
     });
 
     // Sort matching preferred governorate first
