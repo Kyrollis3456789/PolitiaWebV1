@@ -27,7 +27,7 @@ export interface PlaceDetails {
 }
 
 // Built-in offline database of famous streets and roads in Egypt (Cairo, Giza, Alexandria, Assiut, etc.)
-export const EGYPT_STREETS_DATABASE: PlacePrediction[] = [
+const EGYPT_STREETS_DATABASE: PlacePrediction[] = [
   // Cairo Streets
   { placeId: 'st_cairo_1', description: 'شارع الجمهورية، وسط البلد، القاهرة', mainText: 'شارع الجمهورية', secondaryText: 'وسط البلد، القاهرة، مصر', types: ['route', 'street_address'] },
   { placeId: 'st_cairo_2', description: 'شارع طلعت حرب، وسط البلد، القاهرة', mainText: 'شارع طلعت حرب', secondaryText: 'وسط البلد، القاهرة، مصر', types: ['route', 'street_address'] },
