@@ -18,12 +18,16 @@ import {
   X,
   Loader2,
 } from 'lucide-react';
-import { GenderType, FamilyRelationType, FamilyMemberEntry } from '@/types/database.types';
+import {
+  GenderType,
+  FamilyRelationType,
+  FamilyMemberEntry,
+  SearchedMember,
+} from '@/types/database.types';
 import {
   searchMembersAction,
   getMemberFamilyGraphAction,
   findMemberByPhoneAction,
-  SearchedMember,
 } from '@/app/actions/member-search';
 import { validateFamilyNameLineage } from '@/lib/validation/nameLineageValidation';
 

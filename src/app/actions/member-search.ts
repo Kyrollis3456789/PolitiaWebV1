@@ -18,17 +18,9 @@ async function getSupabaseClient() {
   }
 }
 
-export interface SearchedMember {
-  id: string;
-  fullNameEn: string;
-  fullNameAr: string;
-  avatarUrl?: string | null;
-  governorate?: string | null;
-  church?: string | null;
-  age?: number;
-  phone?: string | null;
-  gender?: 'Male' | 'Female';
-}
+import type { SearchedMember } from '@/types/database.types';
+
+export type { SearchedMember };
 
 export interface MemberSearchFilter {
   gender?: 'Male' | 'Female';
