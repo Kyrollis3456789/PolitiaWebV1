@@ -74,6 +74,32 @@ export interface Step5LocationPayload {
   secondary_apartment?: string;
 }
 
+export interface Diocese {
+  id: string;
+  name_en: string;
+  name_ar: string;
+  governorate_id?: string | null;
+}
+
+export interface Church {
+  id: string;
+  diocese_id: string;
+  city_id: string;
+  name_en: string;
+  name_ar: string;
+}
+
+export interface Step6ChurchPayload {
+  primary_diocese_id?: string;
+  primary_church_id: string;
+  secondary_diocese_id?: string;
+  secondary_church_id?: string;
+  primary_diocese_name?: string;
+  primary_church_name?: string;
+  secondary_diocese_name?: string;
+  secondary_church_name?: string;
+}
+
 export interface SearchedMember {
   id: string;
   fullNameEn: string;

@@ -81,3 +81,39 @@ export async function fetchStreetsAction(
     };
   }
 }
+
+/**
+ * Fetches all Dioceses and Churches from Supabase database.
+ */
+export async function fetchChurchesDataAction(): Promise<{
+  success: boolean;
+  dioceses: { id: string; name_en: string; name_ar: string; governorate_id?: string }[];
+  churches: { id: string; diocese_id: string; city_id: string; name_en: string; name_ar: string }[];
+  error?: string;
+}> {
+  try {
+    const supabase = await createClient();
+
+    const [dioRes, churchRes] = await Promise.all([
+      supabase.from('dioceses').select('id, name_en, name_ar, governorate_id').order('name_ar', { ascending: true }),
+      supabase.from('churches').select('id, diocese_id, city_id, name_en, name_ar').order('name_ar', { ascending: true }),
+    ]);
+
+    if (dioRes.error) throw dioRes.error;
+    if (churchRes.error) throw churchRes.error;
+
+    return {
+      success: true,
+      dioceses: (dioRes.data as any[]) || [],
+      churches: (churchRes.data as any[]) || [],
+    };
+  } catch (err: any) {
+    console.error('Error fetching churches data:', err);
+    return {
+      success: false,
+      dioceses: [],
+      churches: [],
+      error: err.message || 'Failed to load churches',
+    };
+  }
+}

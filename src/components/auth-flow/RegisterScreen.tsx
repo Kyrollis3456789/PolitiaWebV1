@@ -32,7 +32,9 @@ import { validatePhoneNumber, normalizeDigits, COUNTRY_PHONE_RULES } from '@/lib
 import { createAccountAction, CreateAccountPayload } from '@/app/actions/create-account';
 import Step4EducationWork from './Step4EducationWork';
 import Step5Locations from './Step5Locations';
-import { Step5LocationPayload } from '@/types/database.types';
+import Step6ChurchCommitment from './Step6ChurchCommitment';
+import { Step5LocationPayload, Step6ChurchPayload, Diocese, Church } from '@/types/database.types';
+import { fetchChurchesDataAction } from '@/app/actions/location-data';
 import {
   checkEnglishNameCollision,
   checkArabicNameCollision,
@@ -319,10 +321,23 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const [secondaryAddress, setSecondaryAddress] = useState<string>('');
 
   // Milestone 6: Church Commitment
+  const [step6Payload, setStep6Payload] = useState<Step6ChurchPayload | null>(null);
+  const [diocesesList, setDiocesesList] = useState<Diocese[]>([]);
+  const [churchesList, setChurchesList] = useState<Church[]>([]);
   const [diocese, setDiocese] = useState<string>('');
   const [primaryChurch, setPrimaryChurch] = useState<string>('');
   const [secondaryChurch, setSecondaryChurch] = useState<string>('');
   const [priestName, setPriestName] = useState<string>('');
+
+  // Fetch Dioceses and Churches
+  useEffect(() => {
+    fetchChurchesDataAction().then((res) => {
+      if (res.success) {
+        if (res.dioceses) setDiocesesList(res.dioceses);
+        if (res.churches) setChurchesList(res.churches);
+      }
+    });
+  }, []);
 
   // Milestone 7: Additional Info
   const [selectedHobbies, setSelectedHobbies] = useState<string[]>(['hymns']);
@@ -1401,6 +1416,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
         familyMembers,
         ...step4Payload,
         ...step5Payload,
+        ...step6Payload,
         governorate: step5Payload?.governorate_id || governorate,
         city: step5Payload?.city_id || city.trim() || undefined,
         streetAddress: step5Payload?.street_address || streetAddress.trim() || undefined,
@@ -1408,9 +1424,13 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
         floorNumber: step5Payload?.floor_no || floorNumber.trim() || undefined,
         apartmentNumber: step5Payload?.apartment || apartmentNumber.trim() || undefined,
         secondaryAddress: secondaryAddress.trim() || undefined,
-        diocese: diocese.trim() || undefined,
-        primaryChurch: primaryChurch.trim() || undefined,
-        secondaryChurch: secondaryChurch.trim() || undefined,
+        primary_diocese_id: step6Payload?.primary_diocese_id || undefined,
+        primary_church_id: step6Payload?.primary_church_id || undefined,
+        secondary_diocese_id: step6Payload?.secondary_diocese_id || undefined,
+        secondary_church_id: step6Payload?.secondary_church_id || undefined,
+        diocese: step6Payload?.primary_diocese_name || diocese.trim() || undefined,
+        primaryChurch: step6Payload?.primary_church_name || primaryChurch.trim() || undefined,
+        secondaryChurch: step6Payload?.secondary_church_name || secondaryChurch.trim() || undefined,
         priestName: priestName.trim() || undefined,
         hobbies: selectedHobbies,
         languages: selectedLanguages,
@@ -2653,82 +2673,81 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
           {/* Milestone 6: Church Commitment */}
           {mainStepIndex === 6 && (
-            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
-              <div
-                key={`6-${subStepIndex}`}
-                className={`w-full flex-1 flex flex-col justify-center py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
-              >
-                {/* 6.1: Churches Selection */}
-                {subStepIndex === 1 && (
-                  <div className="space-y-2.5">
-                    <input
-                      type="text"
-                      aria-label="Diocese or Region"
-                      placeholder={isRtl ? 'الإيبارشية أو المنطقة' : 'Diocese / Region'}
-                      value={diocese}
-                      onChange={(e) => setDiocese(e.target.value)}
-                      className="w-full px-3 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3]"
-                    />
-                    <input
-                      type="text"
-                      aria-label="Primary Church"
-                      placeholder={isRtl ? 'الكنيسة الأساسية' : 'Primary Church'}
-                      value={primaryChurch}
-                      onChange={(e) => setPrimaryChurch(e.target.value)}
-                      className="w-full px-3 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3]"
-                    />
-                    <input
-                      type="text"
-                      aria-label="Secondary Church"
-                      placeholder={isRtl ? 'كنيسة إضافية (اختياري)' : 'Secondary Church (Optional)'}
-                      value={secondaryChurch}
-                      onChange={(e) => setSecondaryChurch(e.target.value)}
-                      className="w-full px-3 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3]"
-                    />
-                  </div>
-                )}
-
-                {/* 6.2: Priest Selection */}
-                {subStepIndex === 2 && (
-                  <div className="space-y-2.5">
-                    <input
-                      type="text"
-                      aria-label="Confession Father / Priest Name"
-                      placeholder={isRtl ? 'اسم أب الاعتراف / الكاهن المسؤول' : 'Father of Confession / Priest Name'}
-                      value={priestName}
-                      onChange={(e) => setPriestName(e.target.value)}
-                      className="w-full px-3 py-3 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3]"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Error Alert */}
-              {errorMessage && (
-                <div id="register-error-alert" className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5] mt-1.5">
-                  <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#B3261E] dark:bg-[#F2B8B5] text-white dark:text-[#601410] text-[11px] font-bold select-none leading-none pb-[1px]">
-                    !
-                  </span>
-                  <bdi id="error-message-text">{errorMessage}</bdi>
-                </div>
+            <div className={`w-full flex-1 flex flex-col justify-between min-h-[420px] ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}>
+              {/* 6.1: Dynamic Location-Dependent Church Commitment */}
+              {subStepIndex === 1 && (
+                <Step6ChurchCommitment
+                  primaryCityId={step5Payload?.city_id}
+                  secondaryCityId={step5Payload?.secondary_city_id}
+                  dioceses={diocesesList}
+                  churches={churchesList}
+                  defaultValues={step6Payload || undefined}
+                  isRtl={isRtl}
+                  onSubmitAction={async (payload) => {
+                    setStep6Payload(payload);
+                    if (payload.primary_diocese_name) setDiocese(payload.primary_diocese_name);
+                    if (payload.primary_church_name) setPrimaryChurch(payload.primary_church_name);
+                    if (payload.secondary_church_name) setSecondaryChurch(payload.secondary_church_name);
+                    setSlideDirection('forward');
+                    setSubStepIndex(2);
+                  }}
+                  onBack={handleBack}
+                />
               )}
 
-              <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="text-xs sm:text-sm font-semibold text-[#0B57D0] dark:text-[#93C5FD] hover:underline px-3 py-2 rounded-full cursor-pointer"
-                >
-                  <bdi>{isRtl ? 'السابق' : 'Back'}</bdi>
-                </button>
-                <button
-                  type="submit"
-                  className="bg-[#0B57D0] hover:bg-[#0842A0] text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full shadow-sm cursor-pointer"
-                >
-                  <bdi>{isRtl ? 'التالي' : 'Next'}</bdi>
-                </button>
-              </div>
-            </form>
+              {/* 6.2: Priest Selection */}
+              {subStepIndex === 2 && (
+                <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
+                  <div className="flex-grow flex flex-col justify-center min-h-[300px] w-full py-2 animate-fadeIn">
+                    <div className="space-y-4 max-w-xl mx-auto w-full">
+                      <div className="bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-xs space-y-3.5">
+                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1.5">
+                          <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                          <span>{isRtl ? 'اسم أب الاعتراف / الكاهن المسؤول (اختياري)' : 'Father of Confession / Priest (Optional)'}</span>
+                        </label>
+                        <input
+                          type="text"
+                          aria-label="Confession Father / Priest Name"
+                          placeholder={isRtl ? 'أدخل اسم أب الاعتراف...' : 'Enter priest name...'}
+                          value={priestName}
+                          onChange={(e) => setPriestName(e.target.value)}
+                          className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Error Alert */}
+                  {errorMessage && (
+                    <div id="register-error-alert" className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5] mt-1.5">
+                      <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#B3261E] dark:bg-[#F2B8B5] text-white dark:text-[#601410] text-[11px] font-bold select-none leading-none pb-[1px]">
+                        !
+                      </span>
+                      <bdi id="error-message-text">{errorMessage}</bdi>
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSlideDirection('backward');
+                        setSubStepIndex(1);
+                      }}
+                      className="text-xs sm:text-sm font-semibold text-[#0B57D0] dark:text-[#93C5FD] hover:underline px-4 py-2 rounded-full cursor-pointer"
+                    >
+                      <bdi>{isRtl ? 'السابق' : 'Back'}</bdi>
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-[#0B57D0] hover:bg-[#0842A0] text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full shadow-sm cursor-pointer"
+                    >
+                      <bdi>{isRtl ? 'التالي' : 'Next'}</bdi>
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           )}
 
           {/* Milestone 7: Additional Info */}

@@ -67,6 +67,10 @@ export interface CreateAccountPayload {
   apartmentNumber?: string;
   secondaryAddress?: string;
   // Step 6: Church Commitment
+  primary_diocese_id?: string | null;
+  primary_church_id?: string | null;
+  secondary_diocese_id?: string | null;
+  secondary_church_id?: string | null;
   diocese?: string;
   primaryChurch?: string;
   secondaryChurch?: string;
@@ -315,6 +319,10 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
         secondary_apartment: payload.has_secondary_address ? payload.secondary_apartment || null : null,
         secondary_address_type: payload.has_secondary_address ? payload.secondary_address_type || null : null,
         // Church Commitment
+        primary_diocese_id: payload.primary_diocese_id || null,
+        primary_church_id: payload.primary_church_id || null,
+        secondary_diocese_id: payload.secondary_diocese_id || null,
+        secondary_church_id: payload.secondary_church_id || null,
         diocese: payload.diocese || null,
         primary_church: payload.primaryChurch || null,
         secondary_church: payload.secondaryChurch || null,
