@@ -34,6 +34,7 @@ import Step4EducationWork from './Step4EducationWork';
 import Step5Locations from './Step5Locations';
 import Step6ChurchCommitment from './Step6ChurchCommitment';
 import FacebookHobbiesSelector from './FacebookHobbiesSelector';
+import LanguagesSelector from './LanguagesSelector';
 import { Step5LocationPayload, Step6ChurchPayload, Diocese, Church, Priest } from '@/types/database.types';
 import { fetchChurchesDataAction } from '@/app/actions/location-data';
 import {
@@ -2854,35 +2855,14 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   </div>
                 )}
 
-                {/* 7.2: Languages */}
+                {/* 7.2: Hybrid Global Languages Selector */}
                 {subStepIndex === 2 && (
-                  <div className="space-y-3 w-full">
-                    <label className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                      <span>🗣️</span>
-                      <span>{isRtl ? 'اللغات المتقنة' : 'Languages Spoken'}</span>
-                    </label>
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {AVAILABLE_LANGUAGES.map((l) => {
-                        const selected = selectedLanguages.includes(l.id);
-                        return (
-                          <button
-                            key={l.id}
-                            type="button"
-                            onClick={() => {
-                              if (selected) setSelectedLanguages(selectedLanguages.filter((x) => x !== l.id));
-                              else setSelectedLanguages([...selectedLanguages, l.id]);
-                            }}
-                            className={`px-4 py-2 rounded-full text-xs font-semibold transition-all duration-150 cursor-pointer transform active:scale-95 ${
-                              selected
-                                ? 'bg-blue-600 text-white border border-blue-600 shadow-xs'
-                                : 'border border-slate-300/80 dark:border-slate-700/80 bg-transparent text-slate-700 dark:text-slate-300 hover:border-blue-500 hover:text-blue-600 dark:hover:border-blue-400 dark:hover:text-blue-400'
-                            }`}
-                          >
-                            <bdi>{isRtl ? l.labelAr : l.labelEn}</bdi>
-                          </button>
-                        );
-                      })}
-                    </div>
+                  <div className="w-full">
+                    <LanguagesSelector
+                      selectedLanguages={selectedLanguages}
+                      onChange={setSelectedLanguages}
+                      isRtl={isRtl}
+                    />
                   </div>
                 )}
               </div>
