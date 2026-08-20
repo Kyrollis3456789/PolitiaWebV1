@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Script from 'next/script';
-import { MapPin, Loader2, AlertCircle } from 'lucide-react';
+import { MapPin, Loader2, AlertCircle, ExternalLink, ShieldAlert } from 'lucide-react';
 
 interface GoogleMapPlacePickerProps {
   apiKey?: string;
@@ -32,26 +32,33 @@ export default function GoogleMapPlacePicker({
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedPlaceName, setSelectedPlaceName] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [hasError, setHasError] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   useEffect(() => {
     let isMounted = true;
+
+    // Handle Google Maps Authentication and Referrer errors gracefully
+    (window as any).gm_authFailure = () => {
+      if (isMounted) {
+        setAuthError('RefererNotAllowedMapError');
+        setLoading(false);
+      }
+    };
 
     async function setupMap() {
       try {
         if (!containerRef.current) return;
 
-        // Ensure container is empty before injecting
         const mountPoint = containerRef.current;
         mountPoint.innerHTML = '';
 
-        // 1. Create and configure <gmpx-api-loader> with direct DOM attribute
+        // 1. Create <gmpx-api-loader>
         const apiLoader = document.createElement('gmpx-api-loader');
         apiLoader.setAttribute('key', apiKey);
         apiLoader.setAttribute('solution-channel', 'GMP_GE_mapsandplacesautocomplete_v2');
         mountPoint.appendChild(apiLoader);
 
-        // 2. Create and configure <gmp-map>
+        // 2. Create <gmp-map>
         const map = document.createElement('gmp-map') as any;
         map.setAttribute('center', `${defaultCenter.lat},${defaultCenter.lng}`);
         map.setAttribute('zoom', defaultZoom.toString());
@@ -60,7 +67,7 @@ export default function GoogleMapPlacePicker({
         map.style.height = '100%';
         map.style.display = 'block';
 
-        // 3. Create control slot container for Place Picker
+        // 3. Create control slot container
         const controlContainer = document.createElement('div');
         controlContainer.setAttribute('slot', 'control-block-start-inline-start');
         controlContainer.className = 'p-3 w-full max-w-sm sm:max-w-md pointer-events-auto';
@@ -82,7 +89,6 @@ export default function GoogleMapPlacePicker({
         map.appendChild(marker);
         mountPoint.appendChild(map);
 
-        // Wait for web components to define
         if (typeof customElements !== 'undefined') {
           await customElements.whenDefined('gmp-map');
           await customElements.whenDefined('gmpx-place-picker');
@@ -91,7 +97,6 @@ export default function GoogleMapPlacePicker({
         if (!isMounted) return;
         setLoading(false);
 
-        // Configure InfoWindow & place change listener
         let infowindow: any = null;
 
         const handlePlaceChange = () => {
@@ -153,7 +158,7 @@ export default function GoogleMapPlacePicker({
       } catch (err) {
         console.warn('Google Maps Place Picker initialization:', err);
         if (isMounted) {
-          setHasError(true);
+          setAuthError('init_failed');
           setLoading(false);
         }
       }
@@ -176,10 +181,10 @@ export default function GoogleMapPlacePicker({
       />
 
       <div className="relative w-full h-[360px] sm:h-[420px]">
-        {/* Imperatively mounted Google Maps Web Components */}
+        {/* Mounted Google Maps Web Components */}
         <div ref={containerRef} className="w-full h-full" />
 
-        {loading && (
+        {loading && !authError && (
           <div className="absolute inset-0 bg-slate-50/80 dark:bg-slate-900/80 backdrop-blur-xs flex flex-col items-center justify-center gap-2 z-10">
             <Loader2 className="w-6 h-6 animate-spin text-blue-600 dark:text-blue-400" />
             <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
@@ -188,15 +193,28 @@ export default function GoogleMapPlacePicker({
           </div>
         )}
 
-        {hasError && (
-          <div className="absolute inset-0 bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-4 text-center z-10">
-            <AlertCircle className="w-8 h-8 text-amber-500 mb-2" />
-            <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-              {isRtl ? 'تعذر تحميل الخريطة التفاعلية' : 'Unable to load interactive map'}
+        {authError && (
+          <div className="absolute inset-0 bg-slate-50 dark:bg-slate-900 flex flex-col items-center justify-center p-6 text-center z-20">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center mb-3">
+              <ShieldAlert className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+            </div>
+            <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 mb-1">
+              {isRtl ? 'مطلوب السماح بالرابط في Google Cloud Console' : 'Authorize URL in Google Cloud Console'}
+            </h4>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 max-w-sm mb-3">
+              {isRtl
+                ? 'مفتاح Google Maps الخاص بك مقيد بنطاقات محددة. يرجى إضافة http://localhost:3000/* إلى قائمة المواقع المسموح بها في Google Cloud Console.'
+                : 'Your Google Maps API key has website restrictions. Please add http://localhost:3000/* to your authorized HTTP referrers in Google Cloud Console.'}
             </p>
-            <p className="text-[11px] text-slate-500 mt-1">
-              {isRtl ? 'يمكنك استخدام البحث السريع عن العنوان بالأعلى.' : 'You can use the quick search above.'}
-            </p>
+            <a
+              href="https://console.cloud.google.com/apis/credentials?project=50359153115"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-blue-600 hover:bg-blue-700 text-white transition shadow-xs"
+            >
+              <span>{isRtl ? 'فتح إعدادات المفتاح في Google Cloud' : 'Open Key Settings in Google Cloud'}</span>
+              <ExternalLink className="w-3.5 h-3.5" />
+            </a>
           </div>
         )}
       </div>
