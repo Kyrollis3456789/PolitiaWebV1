@@ -50,6 +50,15 @@ export interface CreateAccountPayload {
   building_no?: string | null;
   floor_no?: string | null;
   apartment?: string | null;
+  has_secondary_address?: boolean;
+  secondary_address_type?: string | null;
+  secondary_country_id?: string | null;
+  secondary_governorate_id?: string | null;
+  secondary_city_id?: string | null;
+  secondary_street_address?: string | null;
+  secondary_building_no?: string | null;
+  secondary_floor_no?: string | null;
+  secondary_apartment?: string | null;
   governorate?: string;
   city?: string;
   streetAddress?: string;
@@ -286,7 +295,17 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
         address_building: payload.building_no || payload.buildingNumber || null,
         address_floor: payload.floor_no || payload.floorNumber || null,
         address_apartment: payload.apartment || payload.apartmentNumber || null,
-        secondary_address: payload.secondaryAddress || null,
+        secondary_address: payload.has_secondary_address
+          ? [
+              payload.secondary_address_type ? `[${payload.secondary_address_type}]` : '',
+              payload.secondary_street_address,
+              payload.secondary_building_no ? `عمارة ${payload.secondary_building_no}` : '',
+              payload.secondary_floor_no ? `دور ${payload.secondary_floor_no}` : '',
+              payload.secondary_apartment ? `شقة ${payload.secondary_apartment}` : '',
+            ]
+              .filter(Boolean)
+              .join(' - ')
+          : payload.secondaryAddress || null,
         // Church Commitment
         diocese: payload.diocese || null,
         primary_church: payload.primaryChurch || null,

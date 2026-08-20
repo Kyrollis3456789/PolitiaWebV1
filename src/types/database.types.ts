@@ -61,6 +61,17 @@ export interface Step5LocationPayload {
   building_no?: string;
   floor_no?: string;
   apartment?: string;
+
+  // Secondary Address Fields
+  has_secondary_address?: boolean;
+  secondary_address_type?: string; // 'work' | 'second_home' | 'vacation' | 'family' | 'other'
+  secondary_country_id?: string;
+  secondary_governorate_id?: string;
+  secondary_city_id?: string;
+  secondary_street_address?: string;
+  secondary_building_no?: string;
+  secondary_floor_no?: string;
+  secondary_apartment?: string;
 }
 
 export interface SearchedMember {
