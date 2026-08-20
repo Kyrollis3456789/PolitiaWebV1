@@ -293,7 +293,6 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
         date_of_birth: payload.dob,
         gender: payload.gender,
         national_id: payload.nationalId || null,
-        birth_province_code: payload.governorate || null,
         avatar_url: avatarUrl,
         avatar_skipped_at: photoGracePeriodUntil,
         landline_phone: payload.landlineNumber || null,
