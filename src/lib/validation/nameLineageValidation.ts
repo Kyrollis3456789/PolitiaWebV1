@@ -1,7 +1,12 @@
 /**
- * Intelligent Name Heuristics Matcher and Lineage Cross-Verification Engine
+ * Intelligent Name Heuristics Matcher and Full-Lineage Cross-Verification Engine
  * for Politia Family Relations Mapping.
+ *
+ * Compares the full sequential name tokens across entire patronymic lineages
+ * in both Arabic and English with phonetic equivalence and fuzzy matching.
  */
+
+import { FamilyRelationType } from '@/types/database.types';
 
 export interface LineageValidationResult {
   isValid: boolean;
@@ -53,7 +58,7 @@ export function normalizeEnglishName(name: string): string {
  * Egyptian Christian / Arabic Common Transliteration & Phonetic Dictionary
  */
 const PHONETIC_EQUIVALENCE_GROUPS: string[][] = [
-  ['guirguis', 'girgis', 'george', 'giorgis', 'gerges', 'gurgus', 'girguis'],
+  ['guirguis', 'girgis', 'george', 'giorgis', 'gerges', 'gurgus', 'girguis', 'gourgy', 'gourgi'],
   ['youssef', 'yousef', 'yosef', 'joseph', 'yossef'],
   ['mina', 'meena'],
   ['bishoy', 'beshoy', 'bishoi', 'beshoy', 'peshoy'],
@@ -79,6 +84,12 @@ const PHONETIC_EQUIVALENCE_GROUPS: string[][] = [
   ['fakhry', 'fakhri'],
   ['tawadros', 'todros', 'theodore'],
   ['sobhy', 'sobhi', 'subhi'],
+  ['maikel', 'michael', 'micheal', 'mechael'],
+  ['malak', 'malek'],
+  ['karas', 'karras'],
+  ['shokry', 'shoukry', 'shokri'],
+  ['sourial', 'surial', 'soryal'],
+  ['abdel', 'abdul'],
 ];
 
 /**
@@ -165,8 +176,38 @@ export function extractNameTokens(fullName: string): string[] {
     .filter((t) => t.length > 0);
 }
 
-import { FamilyRelationType } from '@/types/database.types';
+/**
+ * Compares two token arrays sequentially across ALL positions.
+ * Ensures that EVERY overlapping name in the full name matches in sequential order.
+ */
+export function compareTokenSequences(
+  seqA: string[],
+  seqB: string[]
+): { matchedCount: number; totalComparable: number; isFullMatch: boolean; hasMismatch: boolean } {
+  if (!seqA || !seqB || seqA.length === 0 || seqB.length === 0) {
+    return { matchedCount: 0, totalComparable: 0, isFullMatch: false, hasMismatch: false };
+  }
 
+  const totalComparable = Math.min(seqA.length, seqB.length);
+  let matchedCount = 0;
+  let hasMismatch = false;
+
+  for (let i = 0; i < totalComparable; i++) {
+    if (areNameTokensMatching(seqA[i], seqB[i])) {
+      matchedCount++;
+    } else {
+      hasMismatch = true;
+      break; // Sequential lineage must match in order
+    }
+  }
+
+  const isFullMatch = matchedCount === totalComparable && !hasMismatch && totalComparable > 0;
+  return { matchedCount, totalComparable, isFullMatch, hasMismatch };
+}
+
+/**
+ * Validates family lineage by checking all full name tokens sequentially.
+ */
 export function validateFamilyNameLineage(params: {
   userFullNameEn: string;
   userFullNameAr?: string;
@@ -203,7 +244,6 @@ export function validateFamilyNameLineage(params: {
         errorAr: 'تعارض: شريك الحياة المسجل في الدليل نشط وحي. يرجى إلغاء ربط الوالد أولاً لتغيير الحساب.',
       };
     }
-    // If she is the verified bound spouse of the father in the graph
     return {
       isValid: true,
       confidence: 'high',
@@ -224,7 +264,6 @@ export function validateFamilyNameLineage(params: {
         errorAr: 'تعارض: شريك الحياة المسجل في الدليل نشط وحي. يرجى إلغاء ربط الوالدة أولاً لتغيير الحساب.',
       };
     }
-    // If he is the verified bound spouse of the mother in the graph
     return {
       isValid: true,
       confidence: 'high',
@@ -233,92 +272,64 @@ export function validateFamilyNameLineage(params: {
     };
   }
 
-  // 1. Father Validation
+  const userTokensEn = extractNameTokens(userFullNameEn);
+  const userTokensAr = extractNameTokens(userFullNameAr || '');
+  const relativeTokensEn = extractNameTokens(relativeFullNameEn);
+  const relativeTokensAr = extractNameTokens(relativeFullNameAr || '');
+
+  // 1. Father Validation: Compare all tokens of Father's full name with User's patronymic lineage (tokens starting from index 1)
   if (relationType === 'father') {
-    const userTokensEn = extractNameTokens(userFullNameEn);
-    const userTokensAr = extractNameTokens(userFullNameAr || '');
-    const fatherTokensEn = extractNameTokens(relativeFullNameEn);
-    const fatherTokensAr = extractNameTokens(relativeFullNameAr || '');
+    const userAncestryEn = userTokensEn.slice(1);
+    const userAncestryAr = userTokensAr.slice(1);
 
-    let isFatherFirstMatch = false;
-    let isGrandfatherMatch = false;
+    const matchEn = compareTokenSequences(userAncestryEn, relativeTokensEn);
+    const matchAr = compareTokenSequences(userAncestryAr, relativeTokensAr);
 
-    // Check English
-    if (userTokensEn.length >= 2 && fatherTokensEn.length >= 1) {
-      const userFatherNameEn = userTokensEn[1];
-      const fatherFirstEn = fatherTokensEn[0];
-      if (areNameTokensMatching(userFatherNameEn, fatherFirstEn)) {
-        isFatherFirstMatch = true;
-      }
-      if (userTokensEn.length >= 3 && fatherTokensEn.length >= 2) {
-        const userGrandfatherEn = userTokensEn[2];
-        const fatherFatherEn = fatherTokensEn[1];
-        if (areNameTokensMatching(userGrandfatherEn, fatherFatherEn)) {
-          isGrandfatherMatch = true;
-        }
-      }
-    }
+    const isMatch = (matchEn.isFullMatch && matchEn.matchedCount >= 1) || (matchAr.isFullMatch && matchAr.matchedCount >= 1);
+    const hasAnyMismatch = (matchEn.hasMismatch && matchAr.hasMismatch) || (matchEn.matchedCount === 0 && matchAr.matchedCount === 0);
 
-    // Check Arabic
-    if (userTokensAr.length >= 2 && fatherTokensAr.length >= 1) {
-      const userFatherNameAr = userTokensAr[1];
-      const fatherFirstAr = fatherTokensAr[0];
-      if (areNameTokensMatching(userFatherNameAr, fatherFirstAr)) {
-        isFatherFirstMatch = true;
-      }
-      if (userTokensAr.length >= 3 && fatherTokensAr.length >= 2) {
-        const userGrandfatherAr = userTokensAr[2];
-        const fatherFatherAr = fatherTokensAr[1];
-        if (areNameTokensMatching(userGrandfatherAr, fatherFatherAr)) {
-          isGrandfatherMatch = true;
-        }
-      }
-    }
-
-    if (isFatherFirstMatch) {
+    if (isMatch) {
+      const bestMatchCount = Math.max(matchEn.matchedCount, matchAr.matchedCount);
       return {
         isValid: true,
-        confidence: isGrandfatherMatch ? 'high' : 'medium',
+        confidence: bestMatchCount >= 2 ? 'high' : 'medium',
         linkStatus: 'auto_approved',
         verificationMethod: 'heuristic_name_match',
       };
     }
 
+    if (hasAnyMismatch) {
+      return {
+        isValid: false,
+        confidence: 'low',
+        linkStatus: 'disputed',
+        verificationMethod: 'heuristic_name_match',
+        errorCode: 'ERR_FATHER_LINEAGE_MISMATCH',
+        errorEn: 'Lineage mismatch: The selected father does not match your patronymic names.',
+        errorAr: 'عدم تطابق في النسب: اسم الأب المختار لا يتطابق مع الاسم الكامل المسجل في هويتك.',
+      };
+    }
+
     return {
-      isValid: false,
-      confidence: 'low',
-      linkStatus: 'disputed',
+      isValid: true,
+      confidence: 'medium',
+      linkStatus: 'pending_review',
       verificationMethod: 'heuristic_name_match',
-      errorCode: 'ERR_FATHER_LINEAGE_MISMATCH',
-      errorEn: 'Lineage mismatch: The selected father does not match your patronymic names.',
-      errorAr: 'عدم تطابق في النسب: اسم الأب المختار لا يتطابق مع الاسم المسجل في هويتك.',
     };
   }
 
-  // 2. Mother Validation
+  // 2. Mother Validation: Compare spouse's full name with user's father/ancestry if spouse is registered
   if (relationType === 'mother') {
-    const userTokensEn = extractNameTokens(userFullNameEn);
-    const userTokensAr = extractNameTokens(userFullNameAr || '');
-
-    // If mother has a registered spouse name, check against user's father name
     if (relativeSpouseNameEn || relativeSpouseNameAr) {
-      let isSpouseFatherMatch = false;
       const spouseTokensEn = extractNameTokens(relativeSpouseNameEn || '');
       const spouseTokensAr = extractNameTokens(relativeSpouseNameAr || '');
+      const userAncestryEn = userTokensEn.slice(1);
+      const userAncestryAr = userTokensAr.slice(1);
 
-      if (userTokensEn.length >= 2 && spouseTokensEn.length >= 1) {
-        if (areNameTokensMatching(userTokensEn[1], spouseTokensEn[0])) {
-          isSpouseFatherMatch = true;
-        }
-      }
+      const matchEn = compareTokenSequences(userAncestryEn, spouseTokensEn);
+      const matchAr = compareTokenSequences(userAncestryAr, spouseTokensAr);
 
-      if (userTokensAr.length >= 2 && spouseTokensAr.length >= 1) {
-        if (areNameTokensMatching(userTokensAr[1], spouseTokensAr[0])) {
-          isSpouseFatherMatch = true;
-        }
-      }
-
-      if (isSpouseFatherMatch) {
+      if (matchEn.isFullMatch || matchAr.isFullMatch) {
         return {
           isValid: true,
           confidence: 'high',
@@ -346,26 +357,50 @@ export function validateFamilyNameLineage(params: {
     };
   }
 
-  // 3. Siblings Validation
+  // 3. Siblings (Brother / Sister): Compare all patronymic tokens starting from index 1
   if (relationType === 'brother' || relationType === 'sister') {
-    const userTokensEn = extractNameTokens(userFullNameEn);
-    const userTokensAr = extractNameTokens(userFullNameAr || '');
-    const siblingTokensEn = extractNameTokens(relativeFullNameEn);
-    const siblingTokensAr = extractNameTokens(relativeFullNameAr || '');
+    const userAncestryEn = userTokensEn.slice(1);
+    const userAncestryAr = userTokensAr.slice(1);
+    const siblingAncestryEn = relativeTokensEn.slice(1);
+    const siblingAncestryAr = relativeTokensAr.slice(1);
 
-    let isSiblingFatherMatch = false;
-    if (userTokensEn.length >= 2 && siblingTokensEn.length >= 2) {
-      if (areNameTokensMatching(userTokensEn[1], siblingTokensEn[1])) {
-        isSiblingFatherMatch = true;
-      }
-    }
-    if (userTokensAr.length >= 2 && siblingTokensAr.length >= 2) {
-      if (areNameTokensMatching(userTokensAr[1], siblingTokensAr[1])) {
-        isSiblingFatherMatch = true;
-      }
+    const matchEn = compareTokenSequences(userAncestryEn, siblingAncestryEn);
+    const matchAr = compareTokenSequences(userAncestryAr, siblingAncestryAr);
+
+    const isMatch = (matchEn.isFullMatch && matchEn.matchedCount >= 1) || (matchAr.isFullMatch && matchAr.matchedCount >= 1);
+
+    if (isMatch) {
+      const bestMatchCount = Math.max(matchEn.matchedCount, matchAr.matchedCount);
+      return {
+        isValid: true,
+        confidence: bestMatchCount >= 2 ? 'high' : 'medium',
+        linkStatus: 'auto_approved',
+        verificationMethod: 'heuristic_name_match',
+      };
     }
 
-    if (isSiblingFatherMatch) {
+    return {
+      isValid: false,
+      confidence: 'low',
+      linkStatus: 'disputed',
+      verificationMethod: 'heuristic_name_match',
+      errorCode: 'ERR_SIBLING_LINEAGE_MISMATCH',
+      errorEn: 'Selected sibling does not share the same father/grandfather lineage.',
+      errorAr: 'الشقيق المختار لا يشترك في نفس نسب الأب أو الجد عبر الاسم بالكامل.',
+    };
+  }
+
+  // 4. Son / Daughter: Compare child's ancestry (index 1+) against user's full name
+  if (relationType === 'son' || relationType === 'daughter') {
+    const childAncestryEn = relativeTokensEn.slice(1);
+    const childAncestryAr = relativeTokensAr.slice(1);
+
+    const matchEn = compareTokenSequences(userTokensEn, childAncestryEn);
+    const matchAr = compareTokenSequences(userTokensAr, childAncestryAr);
+
+    const isMatch = (matchEn.isFullMatch && matchEn.matchedCount >= 1) || (matchAr.isFullMatch && matchAr.matchedCount >= 1);
+
+    if (isMatch) {
       return {
         isValid: true,
         confidence: 'high',
@@ -379,38 +414,28 @@ export function validateFamilyNameLineage(params: {
       confidence: 'low',
       linkStatus: 'disputed',
       verificationMethod: 'heuristic_name_match',
-      errorCode: 'ERR_SIBLING_LINEAGE_MISMATCH',
-      errorEn: 'Selected sibling does not share the same father/grandfather lineage.',
-      errorAr: 'الشقيق المختار لا يشترك في نفس نسب الأب أو الجد.',
+      errorCode: 'ERR_CHILD_LINEAGE_MISMATCH',
+      errorEn: 'Selected child lineage does not match your full name.',
+      errorAr: 'نسب الابن/الابنة لا يتطابق مع اسمك الكامل.',
     };
   }
 
-  // 4. Paternal Uncle / Aunt Validation
+  // 5. Paternal Uncle / Aunt: Compare uncle's ancestry (index 1+) against user's grandfather lineage (index 2+)
   if (
     relationType === 'uncle' ||
     relationType === 'aunt' ||
     relationType === 'paternal_uncle' ||
     relationType === 'paternal_aunt'
   ) {
-    const userTokensEn = extractNameTokens(userFullNameEn);
-    const userTokensAr = extractNameTokens(userFullNameAr || '');
-    const uncleTokensEn = extractNameTokens(relativeFullNameEn);
-    const uncleTokensAr = extractNameTokens(relativeFullNameAr || '');
+    const userGfAncestryEn = userTokensEn.slice(2);
+    const userGfAncestryAr = userTokensAr.slice(2);
+    const uncleAncestryEn = relativeTokensEn.slice(1);
+    const uncleAncestryAr = relativeTokensAr.slice(1);
 
-    let isGrandfatherMatch = false;
-    // User Grandfather is token 2, Uncle's Father is token 1
-    if (userTokensEn.length >= 3 && uncleTokensEn.length >= 2) {
-      if (areNameTokensMatching(userTokensEn[2], uncleTokensEn[1])) {
-        isGrandfatherMatch = true;
-      }
-    }
-    if (userTokensAr.length >= 3 && uncleTokensAr.length >= 2) {
-      if (areNameTokensMatching(userTokensAr[2], uncleTokensAr[1])) {
-        isGrandfatherMatch = true;
-      }
-    }
+    const matchEn = compareTokenSequences(userGfAncestryEn, uncleAncestryEn);
+    const matchAr = compareTokenSequences(userGfAncestryAr, uncleAncestryAr);
 
-    if (isGrandfatherMatch) {
+    if (matchEn.isFullMatch || matchAr.isFullMatch) {
       return {
         isValid: true,
         confidence: 'high',
@@ -420,7 +445,6 @@ export function validateFamilyNameLineage(params: {
     }
 
     if (userTokensEn.length < 3 && userTokensAr.length < 3) {
-      // If user provided only 2 name tokens, allow as pending review
       return {
         isValid: true,
         confidence: 'medium',
@@ -435,31 +459,20 @@ export function validateFamilyNameLineage(params: {
       linkStatus: 'disputed',
       verificationMethod: 'heuristic_name_match',
       errorCode: 'ERR_SIBLING_LINEAGE_MISMATCH',
-      errorEn: "Paternal uncle/aunt must share your grandfather's name.",
-      errorAr: 'اسم والد العم/العمة يجب أن يتطابق مع اسم جدك المسجل.',
+      errorEn: "Paternal uncle/aunt must share your grandfather's lineage.",
+      errorAr: 'نسب العم/العمة يجب أن يتطابق مع نسب جدك المسجل.',
     };
   }
 
-  // 5. Grandfather Validation
+  // 6. Grandfather: Compare Grandfather's full name against user's grandfather lineage (index 2+)
   if (relationType === 'grandfather') {
-    const userTokensEn = extractNameTokens(userFullNameEn);
-    const userTokensAr = extractNameTokens(userFullNameAr || '');
-    const gfTokensEn = extractNameTokens(relativeFullNameEn);
-    const gfTokensAr = extractNameTokens(relativeFullNameAr || '');
+    const userGfAncestryEn = userTokensEn.slice(2);
+    const userGfAncestryAr = userTokensAr.slice(2);
 
-    let isGfMatch = false;
-    if (userTokensEn.length >= 3 && gfTokensEn.length >= 1) {
-      if (areNameTokensMatching(userTokensEn[2], gfTokensEn[0])) {
-        isGfMatch = true;
-      }
-    }
-    if (userTokensAr.length >= 3 && gfTokensAr.length >= 1) {
-      if (areNameTokensMatching(userTokensAr[2], gfTokensAr[0])) {
-        isGfMatch = true;
-      }
-    }
+    const matchEn = compareTokenSequences(userGfAncestryEn, relativeTokensEn);
+    const matchAr = compareTokenSequences(userGfAncestryAr, relativeTokensAr);
 
-    if (isGfMatch) {
+    if (matchEn.isFullMatch || matchAr.isFullMatch) {
       return {
         isValid: true,
         confidence: 'high',
@@ -467,6 +480,16 @@ export function validateFamilyNameLineage(params: {
         verificationMethod: 'heuristic_name_match',
       };
     }
+
+    return {
+      isValid: false,
+      confidence: 'low',
+      linkStatus: 'disputed',
+      verificationMethod: 'heuristic_name_match',
+      errorCode: 'ERR_GRANDFATHER_LINEAGE_MISMATCH',
+      errorEn: 'Grandfather name does not match your grandfather lineage.',
+      errorAr: 'اسم الجد المختار لا يتطابق مع نسب جدك المسجل في هويتك.',
+    };
   }
 
   // Default fallback for Spouse, Grandmother, Maternal Uncle/Aunt, Cousin, etc.
