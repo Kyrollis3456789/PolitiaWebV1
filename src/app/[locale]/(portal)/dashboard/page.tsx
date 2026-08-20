@@ -224,8 +224,8 @@ export default async function DashboardPage({
   const secondaryDisplay = isRtl ? englishName : arabicName;
 
   // Resolve hobbies details
-  const userHobbies = (profile?.hobbies || []).map((hobbyId) => {
-    const found = COMPREHENSIVE_HOBBIES.find((h) => h.id === hobbyId);
+  const userHobbies = (profile?.hobbies || []).map((hobbyId: string) => {
+    const found = COMPREHENSIVE_HOBBIES.find((h: { id: string }) => h.id === hobbyId);
     if (found) {
       return { id: found.id, emoji: found.emoji, label: isRtl ? found.labelAr : found.labelEn };
     }
@@ -233,8 +233,8 @@ export default async function DashboardPage({
   });
 
   // Resolve languages details
-  const userLanguages = (profile?.languages || []).map((code) => {
-    const found = ALL_GLOBAL_LANGUAGES.find((l) => l.code === code);
+  const userLanguages = (profile?.languages || []).map((code: string) => {
+    const found = ALL_GLOBAL_LANGUAGES.find((l: { code: string }) => l.code === code);
     if (found) {
       return { code: found.code, flag: found.flag || '🌐', label: isRtl ? found.nameAr : found.nameEn };
     }
