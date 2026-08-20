@@ -43,6 +43,13 @@ export interface CreateAccountPayload {
   is_postgrad?: boolean;
   postgrad_details?: string | null;
   // Step 5: Locations
+  country_id?: string | null;
+  governorate_id?: string | null;
+  city_id?: string | null;
+  street_address?: string | null;
+  building_no?: string | null;
+  floor_no?: string | null;
+  apartment?: string | null;
   governorate?: string;
   city?: string;
   streetAddress?: string;
@@ -264,13 +271,21 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
         company_name: payload.company_name || null,
         is_postgrad: payload.is_postgrad || false,
         postgrad_details: payload.postgrad_details || null,
-        // Locations & Addresses
+        // Relational Locations & Addresses
+        country_id: payload.country_id || null,
+        governorate_id: payload.governorate_id || null,
+        city_id: payload.city_id || null,
+        street_address: payload.street_address || payload.streetAddress || null,
+        building_no: payload.building_no || payload.buildingNumber || null,
+        floor_no: payload.floor_no || payload.floorNumber || null,
+        apartment: payload.apartment || payload.apartmentNumber || null,
+        // Legacy Text Locations & Addresses
         address_governorate: payload.governorate || null,
         address_city: payload.city || null,
-        address_street: payload.streetAddress || null,
-        address_building: payload.buildingNumber || null,
-        address_floor: payload.floorNumber || null,
-        address_apartment: payload.apartmentNumber || null,
+        address_street: payload.street_address || payload.streetAddress || null,
+        address_building: payload.building_no || payload.buildingNumber || null,
+        address_floor: payload.floor_no || payload.floorNumber || null,
+        address_apartment: payload.apartment || payload.apartmentNumber || null,
         secondary_address: payload.secondaryAddress || null,
         // Church Commitment
         diocese: payload.diocese || null,

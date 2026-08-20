@@ -8,6 +8,37 @@ export type Json =
 
 export type GenderType = 'Male' | 'Female';
 
+export interface Country {
+  id: string;
+  code: string;
+  name_en: string;
+  name_ar: string;
+}
+
+export interface Governorate {
+  id: string;
+  country_id: string;
+  name_en: string;
+  name_ar: string;
+}
+
+export interface City {
+  id: string;
+  governorate_id: string;
+  name_en: string;
+  name_ar: string;
+}
+
+export interface Step5LocationPayload {
+  country_id: string;
+  governorate_id: string;
+  city_id: string;
+  street_address: string;
+  building_no?: string;
+  floor_no?: string;
+  apartment?: string;
+}
+
 export interface SearchedMember {
   id: string;
   fullNameEn: string;

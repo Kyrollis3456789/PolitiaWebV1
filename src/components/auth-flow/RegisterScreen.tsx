@@ -31,6 +31,8 @@ import { validateBirthday } from '@/lib/validation/date-rules';
 import { validatePhoneNumber, normalizeDigits, COUNTRY_PHONE_RULES } from '@/lib/validation/phone-rules';
 import { createAccountAction, CreateAccountPayload } from '@/app/actions/create-account';
 import Step4EducationWork from './Step4EducationWork';
+import Step5Locations from './Step5Locations';
+import { Step5LocationPayload } from '@/types/database.types';
 import {
   checkEnglishNameCollision,
   checkArabicNameCollision,
@@ -307,6 +309,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   }, []);
 
   // Milestone 5: Locations
+  const [step5Payload, setStep5Payload] = useState<Step5LocationPayload | null>(null);
   const [governorate, setGovernorate] = useState<string>(isRtl ? 'القاهرة' : 'Cairo');
   const [city, setCity] = useState<string>('');
   const [streetAddress, setStreetAddress] = useState<string>('');
@@ -1397,12 +1400,13 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
         familyRelationType,
         familyMembers,
         ...step4Payload,
-        governorate,
-        city: city.trim() || undefined,
-        streetAddress: streetAddress.trim() || undefined,
-        buildingNumber: buildingNumber.trim() || undefined,
-        floorNumber: floorNumber.trim() || undefined,
-        apartmentNumber: apartmentNumber.trim() || undefined,
+        ...step5Payload,
+        governorate: step5Payload?.governorate_id || governorate,
+        city: step5Payload?.city_id || city.trim() || undefined,
+        streetAddress: step5Payload?.street_address || streetAddress.trim() || undefined,
+        buildingNumber: step5Payload?.building_no || buildingNumber.trim() || undefined,
+        floorNumber: step5Payload?.floor_no || floorNumber.trim() || undefined,
+        apartmentNumber: step5Payload?.apartment || apartmentNumber.trim() || undefined,
         secondaryAddress: secondaryAddress.trim() || undefined,
         diocese: diocese.trim() || undefined,
         primaryChurch: primaryChurch.trim() || undefined,
@@ -2632,127 +2636,19 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
           {/* Milestone 5: Locations & Addresses */}
           {mainStepIndex === 5 && (
-            <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
-              <div
-                key={`5-${subStepIndex}`}
-                className={`w-full flex-1 flex flex-col justify-center py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
-              >
-                {/* 5.1: Primary Address */}
-                {subStepIndex === 1 && (
-                  <div className="space-y-2.5">
-                    <div className="grid grid-cols-2 gap-2">
-                      <select
-                        value={governorate}
-                        onChange={(e) => setGovernorate(e.target.value)}
-                        className="px-3 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3] cursor-pointer"
-                      >
-                        {(isRtl ? EGYPTIAN_GOVERNORATES_AR : EGYPTIAN_GOVERNORATES).map((gov) => (
-                          <option key={gov} value={gov} className="bg-white dark:bg-[#1B212D]">
-                            {gov}
-                          </option>
-                        ))}
-                      </select>
-
-                      <input
-                        type="text"
-                        aria-label="City or District"
-                        placeholder={isRtl ? 'المدينة أو الحي' : 'City or District'}
-                        value={city}
-                        onChange={(e) => setCity(e.target.value)}
-                        className="px-3 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3]"
-                      />
-                    </div>
-
-                    <input
-                      type="text"
-                      aria-label="Street Address"
-                      placeholder={isRtl ? 'اسم الشارع' : 'Street Address'}
-                      value={streetAddress}
-                      onChange={(e) => setStreetAddress(e.target.value)}
-                      className="w-full px-3 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3]"
-                    />
-
-                    <div className="grid grid-cols-3 gap-2">
-                      <input
-                        type="text"
-                        aria-label="Building Number"
-                        placeholder={isRtl ? 'رقم العقار' : 'Building No.'}
-                        value={buildingNumber}
-                        onChange={(e) => setBuildingNumber(e.target.value)}
-                        className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3]"
-                      />
-                      <input
-                        type="text"
-                        aria-label="Floor Number"
-                        placeholder={isRtl ? 'الدور' : 'Floor No.'}
-                        value={floorNumber}
-                        onChange={(e) => setFloorNumber(e.target.value)}
-                        className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3]"
-                      />
-                      <input
-                        type="text"
-                        aria-label="Apartment Number"
-                        placeholder={isRtl ? 'رقم الشقة' : 'Apartment'}
-                        value={apartmentNumber}
-                        onChange={(e) => setApartmentNumber(e.target.value)}
-                        className="px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3]"
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* 5.2: Secondary Address */}
-                {subStepIndex === 2 && (
-                  <div className="space-y-2 py-2">
-                    <input
-                      type="text"
-                      aria-label="Secondary Address"
-                      placeholder={isRtl ? 'عنوان بديل أو إضافي (اختياري)' : 'Secondary / Alternative Address (Optional)'}
-                      value={secondaryAddress}
-                      onChange={(e) => setSecondaryAddress(e.target.value)}
-                      className="w-full px-3 py-3 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3]"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Error Alert */}
-              {errorMessage && (
-                <div id="register-error-alert" className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5] mt-1.5">
-                  <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#B3261E] dark:bg-[#F2B8B5] text-white dark:text-[#601410] text-[11px] font-bold select-none leading-none pb-[1px]">
-                    !
-                  </span>
-                  <bdi id="error-message-text">{errorMessage}</bdi>
-                </div>
-              )}
-
-              <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="text-xs sm:text-sm font-semibold text-[#0B57D0] dark:text-[#93C5FD] hover:underline px-3 py-2 rounded-full cursor-pointer"
-                >
-                  <bdi>{isRtl ? 'السابق' : 'Back'}</bdi>
-                </button>
-                <div className="flex items-center gap-2">
-                  {currentSubConfig?.isOptional && (
-                    <button
-                      type="button"
-                      onClick={handleSkip}
-                      className="text-xs font-semibold text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 px-3.5 py-2 rounded-full cursor-pointer"
-                    >
-                      <bdi>{isRtl ? 'تخطي' : 'Skip'}</bdi>
-                    </button>
-                  )}
-                  <button
-                    type="submit"
-                    className="bg-[#0B57D0] hover:bg-[#0842A0] text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full shadow-sm cursor-pointer"
-                  >
-                    <bdi>{isRtl ? 'التالي' : 'Next'}</bdi>
-                  </button>
-                </div>
-              </div>
-            </form>
+            <div className={`w-full flex-1 flex flex-col justify-between min-h-[420px] ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}>
+              <Step5Locations
+                defaultValues={step5Payload || undefined}
+                isRtl={isRtl}
+                onNext={(locData) => {
+                  setStep5Payload(locData);
+                  setSlideDirection('forward');
+                  setMainStepIndex(6);
+                  setSubStepIndex(1);
+                }}
+                onBack={handleBack}
+              />
+            </div>
           )}
 
           {/* Milestone 6: Church Commitment */}
