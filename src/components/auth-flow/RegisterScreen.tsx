@@ -1113,13 +1113,8 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
           }
         }
       } else if (subStepIndex === 2) {
-        const isEmailOptional = currentAge !== null && currentAge < 13;
         const trimmedEmail = email.trim();
-        if (!isEmailOptional || trimmedEmail) {
-          if (!trimmedEmail) {
-            setErrorMessage(isRtl ? 'يرجى إدخال البريد الإلكتروني' : 'Please enter an email address');
-            return;
-          }
+        if (trimmedEmail) {
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
           if (!emailRegex.test(trimmedEmail)) {
             setErrorMessage(isRtl ? 'يرجى إدخال بريد إلكتروني صحيح' : 'Please enter a valid email address');
@@ -1333,6 +1328,11 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
     setSlideDirection('forward');
     if (mainStepIndex === 1 && subStepIndex === 6) {
       setPhotoSkippedGracePeriod(true);
+    }
+    if (mainStepIndex === 2 && subStepIndex === 2) {
+      setEmail('');
+      setIsEmailVerified(false);
+      setIsEmailOtpActive(false);
     }
     if (subStepIndex < currentMainConfig.subSteps.length) {
       setSubStepIndex((prev) => prev + 1);

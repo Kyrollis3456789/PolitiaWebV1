@@ -89,6 +89,7 @@ export const REGISTRATION_SCHEMA: MainStepConfig[] = [
         labelEn: 'Email Address',
         labelAr: 'البريد الإلكتروني',
         component: 'EmailInput',
+        isOptional: true,
       },
       {
         id: 'landline',

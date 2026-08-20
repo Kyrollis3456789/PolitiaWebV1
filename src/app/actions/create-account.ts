@@ -127,9 +127,8 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
     const supabase = await createClient();
 
     // 2. Resolve or generate authentication credentials
-    const primaryEmail =
-      payload.emails.find((e) => e.isPrimary && e.email.trim())?.email.trim() ||
-      `${payload.nationalId || `user_${Date.now()}`}@politia.internal`;
+    const userEnteredEmail = payload.emails.find((e) => e.isPrimary && e.email.trim())?.email.trim() || null;
+    const primaryEmail = userEnteredEmail || `${payload.nationalId || `user_${Date.now()}`}@politia.internal`;
 
     const accountPassword = payload.password || `Politia#${(payload.nationalId || '123456').slice(-6)}`;
 
@@ -236,10 +235,10 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
         avatar_skipped_at: photoGracePeriodUntil,
         landline_phone: payload.landlineNumber || null,
         // Contact & Social
-        primary_email: primaryEmail,
+        primary_email: userEnteredEmail,
         primary_phone: primaryPhoneStr,
         phone: primaryPhoneStr,
-        email: primaryEmail,
+        email: userEnteredEmail,
         facebook_url: payload.socials?.facebook?.url || null,
         instagram_url: payload.socials?.instagram?.url || null,
         linkedin_url: payload.socials?.linkedin?.url || null,
