@@ -2266,19 +2266,6 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                             </button>
                           )}
                         </div>
-
-                        {/* Optional Skip Verification Button */}
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsEmailOtpActive(false);
-                            setSlideDirection('forward');
-                            setSubStepIndex(3);
-                          }}
-                          className="text-xs text-slate-500 dark:text-slate-400 hover:underline pt-1 cursor-pointer"
-                        >
-                          <bdi>{isRtl ? 'تخطي تأكيد البريد مؤقتاً' : 'Skip email verification for now'}</bdi>
-                        </button>
                       </div>
                     </div>
                   ) : (
