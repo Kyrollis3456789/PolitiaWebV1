@@ -340,3 +340,92 @@ export async function verifyRecoveryEmailOtp(
     return { success: false, error: err.message || 'Verification failed.' };
   }
 }
+
+/**
+ * Checks if a phone number is already registered to another active profile.
+ */
+export async function checkPhoneCollision(phone: string): Promise<boolean> {
+  const cleanDigits = phone.replace(/\D/g, '');
+  if (!cleanDigits || cleanDigits.length < 8) return false;
+
+  try {
+    const admin = getSupabaseClient();
+    const supabase = admin || (await createClient());
+
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('id')
+      .or(`phone.eq.${phone},primary_phone.eq.${phone}`)
+      .limit(1);
+
+    if (prof && prof.length > 0) return true;
+
+    const { data: userPhone } = await supabase
+      .from('user_phones')
+      .select('id')
+      .or(`phone.eq.${phone},phone_number.eq.${phone}`)
+      .limit(1);
+
+    return (userPhone && userPhone.length > 0) || false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Checks if an email address is already registered.
+ */
+export async function checkEmailCollision(email: string): Promise<boolean> {
+  const cleanEmail = email.trim().toLowerCase();
+  if (!cleanEmail || !cleanEmail.includes('@')) return false;
+
+  try {
+    const admin = getSupabaseClient();
+    const supabase = admin || (await createClient());
+
+    const { data: prof } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('email', cleanEmail)
+      .limit(1);
+
+    if (prof && prof.length > 0) return true;
+
+    const { data: userEmail } = await supabase
+      .from('user_emails')
+      .select('id')
+      .eq('email', cleanEmail)
+      .limit(1);
+
+    return (userEmail && userEmail.length > 0) || false;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Checks if a social handle is already registered to another active account.
+ */
+export async function checkSocialHandleCollision(
+  platform: 'facebook' | 'instagram' | 'tiktok' | 'x',
+  handle: string
+): Promise<boolean> {
+  const cleanHandle = handle.replace(/^[@\/]+|\s+/g, '').trim().toLowerCase();
+  if (!cleanHandle || cleanHandle.length < 2) return false;
+
+  try {
+    const admin = getSupabaseClient();
+    const supabase = admin || (await createClient());
+    const colName = `${platform}_handle`;
+
+    const { data } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq(colName, cleanHandle)
+      .limit(1);
+
+    return (data && data.length > 0) || false;
+  } catch {
+    return false;
+  }
+}

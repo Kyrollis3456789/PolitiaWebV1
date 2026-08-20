@@ -7,4 +7,6 @@ export * from './PhoneMockup';
 export * from './LoginView';
 export * from './RegisterView';
 export * from './ThemeLanguageControls';
+export * from './SocialMediaStep';
+export * from './FamilyRelationsStep';
 export * from './translations';

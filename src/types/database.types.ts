@@ -74,7 +74,9 @@ export type SocialPlatform =
   | 'threads'
   | 'x'
   | 'github'
-  | 'linkedin';
+  | 'linkedin'
+  | 'whatsapp'
+  | 'messenger';
 
 export interface UserSocialLink {
   id: string;
@@ -84,6 +86,60 @@ export interface UserSocialLink {
   display_name?: string | null;
   bio_snippet?: string | null;
   avatar_url?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export type FamilyRelationType =
+  | 'father'
+  | 'mother'
+  | 'spouse'
+  | 'brother'
+  | 'sister'
+  | 'son'
+  | 'daughter'
+  | 'paternal_uncle'
+  | 'paternal_aunt'
+  | 'maternal_uncle'
+  | 'maternal_aunt'
+  | 'uncle_aunt_spouse'
+  | 'cousin'
+  | 'grandfather'
+  | 'grandmother'
+  | 'uncle'
+  | 'aunt'
+  | 'grandparent'
+  | 'other';
+export type FamilyLinkStatus = 'auto_approved' | 'pending_review' | 'disputed';
+export type FamilyVerificationMethod = 'heuristic_name_match' | 'manual_phone' | 'graph_resolution' | 'manual_override';
+
+export interface FamilyMemberEntry {
+  id: string; // unique local client key
+  relation: FamilyRelationType;
+  fullName?: string;
+  memberId?: string | null;
+  countryCode?: string;
+  phone?: string;
+  isDeceased: boolean;
+  mode: 'search' | 'manual' | 'deceased';
+  autoLinkedFrom?: 'father' | 'mother';
+  isAutoDiscovered?: boolean;
+  linkStatus?: FamilyLinkStatus;
+  verificationMethod?: FamilyVerificationMethod;
+  requiresAuditNotice?: boolean;
+}
+
+export interface UserFamilyRelation {
+  id: string;
+  user_id: string;
+  relation: FamilyRelationType;
+  related_member_id?: string | null;
+  full_name?: string | null;
+  phone_number?: string | null;
+  is_deceased: boolean;
+  link_status?: FamilyLinkStatus | null;
+  verification_method?: FamilyVerificationMethod | null;
+  requires_audit_notice?: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -110,6 +166,11 @@ export interface Database {
         Row: UserSocialLink;
         Insert: Partial<UserSocialLink> & Pick<UserSocialLink, 'user_id' | 'platform' | 'profile_url'>;
         Update: Partial<UserSocialLink>;
+      };
+      user_family_relations: {
+        Row: UserFamilyRelation;
+        Insert: Partial<UserFamilyRelation> & Pick<UserFamilyRelation, 'user_id' | 'relation'>;
+        Update: Partial<UserFamilyRelation>;
       };
     };
   };

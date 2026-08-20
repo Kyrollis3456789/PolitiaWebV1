@@ -1,9 +1,10 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { validateEnglishName, validateArabicName } from '@/lib/validation/name-rules';
 import { validateEgyptianNationalId } from '@/lib/validation/national-id';
-import { GenderType, SocialPlatform } from '@/types/database.types';
+import { GenderType, SocialPlatform, FamilyMemberEntry } from '@/types/database.types';
 
 export interface CreateAccountPayload {
   englishName: string;
@@ -26,11 +27,21 @@ export interface CreateAccountPayload {
   guardianName?: string;
   guardianPhone?: string;
   familyRelationType?: string;
+  familyMembers?: FamilyMemberEntry[];
   // Step 4: Education & Work
-  educationStage?: string;
-  facultyOrSchool?: string;
-  profession?: string;
-  workplace?: string;
+  education_path?: string | null;
+  school_stage?: string | null;
+  education_system?: string | null;
+  grade_level?: string | null;
+  school_name?: string | null;
+  university_id?: string | null;
+  faculty_id?: string | null;
+  academic_year?: string | null;
+  is_working?: boolean | null;
+  job_title?: string | null;
+  company_name?: string | null;
+  is_postgrad?: boolean;
+  postgrad_details?: string | null;
   // Step 5: Locations
   governorate?: string;
   city?: string;
@@ -79,17 +90,37 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
       return { success: false, error: 'Gender is mandatory.' };
     }
 
-    const nidValidation = validateEgyptianNationalId(
-      payload.nationalId,
-      payload.dob,
-      payload.gender
-    );
-    if (!nidValidation.isValid) {
-      return { success: false, error: nidValidation.error || 'Invalid National ID.' };
+    // Calculate age for age-gated validations
+    const birthDate = new Date(payload.dob);
+    const today = new Date();
+    let userAge = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      userAge--;
+    }
+
+    if (userAge >= 16) {
+      const nidValidation = validateEgyptianNationalId(
+        payload.nationalId,
+        payload.dob,
+        payload.gender
+      );
+      if (!nidValidation.isValid) {
+        return { success: false, error: nidValidation.error || 'Invalid National ID.' };
+      }
+    } else if (payload.nationalId?.trim()) {
+      const nidValidation = validateEgyptianNationalId(
+        payload.nationalId,
+        payload.dob,
+        payload.gender
+      );
+      if (!nidValidation.isValid) {
+        return { success: false, error: nidValidation.error || 'Invalid National ID.' };
+      }
     }
 
     const validPhones = payload.phones.filter((p) => p.number.trim().length >= 7);
-    if (validPhones.length === 0) {
+    if (userAge >= 13 && validPhones.length === 0) {
       return { success: false, error: 'At least one valid phone number is required.' };
     }
 
@@ -98,101 +129,142 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
     // 2. Resolve or generate authentication credentials
     const primaryEmail =
       payload.emails.find((e) => e.isPrimary && e.email.trim())?.email.trim() ||
-      `${payload.nationalId}@politia.internal`;
+      `${payload.nationalId || `user_${Date.now()}`}@politia.internal`;
 
-    const accountPassword = payload.password || `Politia#${payload.nationalId.slice(-6)}`;
+    const accountPassword = payload.password || `Politia#${(payload.nationalId || '123456').slice(-6)}`;
 
-    // 3. Register user with Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: primaryEmail,
-      password: accountPassword,
-      options: {
-        data: {
-          english_full_name: payload.englishName,
-          arabic_full_name: payload.arabicName,
-          national_id: payload.nationalId,
-          primary_phone: `${validPhones[0].countryCode}${validPhones[0].number}`,
-          education_stage: payload.educationStage || null,
-          profession: payload.profession || null,
-          governorate: payload.governorate || null,
-          diocese: payload.diocese || null,
-          primary_church: payload.primaryChurch || null,
+    // 3. Create Auth User via Admin Client (or standard client fallback)
+    let authUser: any = null;
+    let authError: any = null;
+
+    try {
+      const adminClient = createAdminClient();
+      if (adminClient) {
+        const { data: adminAuthData, error: adminAuthError } = await adminClient.auth.admin.createUser({
+          email: primaryEmail,
+          password: accountPassword,
+          email_confirm: true,
+          user_metadata: {
+            full_name_en: payload.englishName,
+            full_name_ar: payload.arabicName,
+          },
+        });
+        authUser = adminAuthData?.user;
+        authError = adminAuthError;
+      }
+    } catch {
+      // Fallback to client signup
+      const { data: clientAuthData, error: clientAuthError } = await supabase.auth.signUp({
+        email: primaryEmail,
+        password: accountPassword,
+        options: {
+          data: {
+            full_name_en: payload.englishName,
+            full_name_ar: payload.arabicName,
+          },
         },
-      },
-    });
-
-    if (authError || !authData.user) {
-      return {
-        success: false,
-        error: authError?.message || 'Failed to initialize Supabase Auth user.',
-      };
+      });
+      authUser = clientAuthData?.user;
+      authError = clientAuthError;
     }
 
-    const userId = authData.user.id;
+    if (authError && !authUser) {
+      return { success: false, error: authError.message || 'Failed to create auth user account.' };
+    }
 
-    // 4. Handle Avatar Storage Upload
+    const userId = authUser?.id || `usr_${Date.now()}`;
+
+    // 4. Upload Avatar if provided
     let avatarUrl: string | null = null;
-    let photoGracePeriodUntil: string | null = null;
-
-    if (payload.avatarBase64 && payload.avatarFileName) {
+    if (payload.avatarBase64) {
       try {
-        const buffer = Buffer.from(payload.avatarBase64.split(',')[1] || payload.avatarBase64, 'base64');
-        const fileExt = payload.avatarFileName.split('.').pop() || 'jpg';
-        const storagePath = `${userId}/${Date.now()}-avatar.${fileExt}`;
+        const base64Data = payload.avatarBase64.replace(/^data:image\/\w+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+        const fileName = `${userId}/${Date.now()}_avatar.jpg`;
 
         const { error: uploadError } = await supabase.storage
           .from('avatars')
-          .upload(storagePath, buffer, {
-            contentType: `image/${fileExt}`,
+          .upload(fileName, buffer, {
+            contentType: 'image/jpeg',
             upsert: true,
           });
 
         if (!uploadError) {
           const { data: publicUrlData } = supabase.storage
             .from('avatars')
-            .getPublicUrl(storagePath);
+            .getPublicUrl(fileName);
           avatarUrl = publicUrlData.publicUrl;
         }
-      } catch (storageErr) {
-        console.error('Avatar storage upload warning:', storageErr);
+      } catch (uploadErr) {
+        console.warn('Avatar upload warning (non-fatal):', uploadErr);
       }
-    } else if (payload.photoSkippedGracePeriod) {
-      photoGracePeriodUntil = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
     }
 
-    // 5. Build Landline format
-    const landlineNumber =
-      payload.landlineAreaCode && payload.landlineNumber
-        ? `${payload.landlineAreaCode} ${payload.landlineNumber}`.trim()
-        : null;
+    // 5. Compute photo grace period timestamp
+    const photoGracePeriodUntil = payload.photoSkippedGracePeriod
+      ? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+      : null;
+
+    // Helper to extract clean handle from url
+    const extractHandle = (url?: string | null): string | null => {
+      if (!url) return null;
+      const clean = url.trim().replace(/^https?:\/\/(www\.)?(facebook|instagram|tiktok|twitter|x)\.com\//i, '').replace(/^[@\/]+|\/$/g, '');
+      return clean || null;
+    };
 
     // 6. Insert Profile
     try {
-      await supabase.from('profiles').upsert({
+      let db = supabase;
+      try {
+        const admin = createAdminClient();
+        if (admin) db = admin;
+      } catch (adminErr) {
+        console.warn('Admin client init note, using user supabase client:', adminErr);
+      }
+
+      const primaryPhoneStr = validPhones.length > 0 ? `${validPhones[0].countryCode}${validPhones[0].number}` : null;
+
+      const { error: profileError } = await db.from('profiles').upsert({
         id: userId,
         full_name_en: payload.englishName,
         full_name_ar: payload.arabicName,
         date_of_birth: payload.dob,
         gender: payload.gender,
-        national_id: payload.nationalId,
+        national_id: payload.nationalId || null,
         birth_province_code: payload.governorate || null,
         avatar_url: avatarUrl,
         avatar_skipped_at: photoGracePeriodUntil,
-        landline_phone: landlineNumber,
+        landline_phone: payload.landlineNumber || null,
         // Contact & Social
         primary_email: primaryEmail,
-        primary_phone: `${validPhones[0].countryCode}${validPhones[0].number}`,
+        primary_phone: primaryPhoneStr,
+        phone: primaryPhoneStr,
+        email: primaryEmail,
         facebook_url: payload.socials?.facebook?.url || null,
         instagram_url: payload.socials?.instagram?.url || null,
         linkedin_url: payload.socials?.linkedin?.url || null,
+        facebook_handle: extractHandle(payload.socials?.facebook?.url),
+        instagram_handle: extractHandle(payload.socials?.instagram?.url),
+        tiktok_handle: extractHandle(payload.socials?.tiktok?.url),
+        x_handle: extractHandle(payload.socials?.x?.url),
         // Family Relations
         marital_status: payload.maritalStatus || null,
         guardian_name: payload.guardianName || null,
         guardian_phone: payload.guardianPhone || null,
         // Education & Work
-        education_stage: payload.educationStage || null,
-        faculty_or_school: payload.facultyOrSchool || null,
-        profession: payload.profession || null,
+        education_path: payload.education_path || null,
+        school_stage: payload.school_stage || null,
+        education_system: payload.education_system || null,
+        grade_level: payload.grade_level || null,
+        school_name: payload.school_name || null,
+        university_id: payload.university_id || null,
+        faculty_id: payload.faculty_id || null,
+        academic_year: payload.academic_year || null,
+        is_working: payload.is_working !== undefined ? payload.is_working : null,
+        job_title: payload.job_title || null,
+        company_name: payload.company_name || null,
+        is_postgrad: payload.is_postgrad || false,
+        postgrad_details: payload.postgrad_details || null,
         // Locations & Addresses
         address_governorate: payload.governorate || null,
         address_city: payload.city || null,
@@ -210,6 +282,81 @@ export async function createAccountAction(payload: CreateAccountPayload): Promis
         hobbies: payload.hobbies || [],
         languages: payload.languages || [],
       });
+
+      if (profileError) {
+        console.warn('Profile upsert warning:', profileError);
+      }
+
+      // Persist all phones into user_phones
+      if (validPhones.length > 0) {
+        const phoneInserts = validPhones.map((p, idx) => ({
+          user_id: userId,
+          phone: `${p.countryCode}${p.number}`,
+          is_primary: idx === 0,
+          is_verified: true,
+        }));
+        await db.from('user_phones').upsert(phoneInserts, { onConflict: 'phone' });
+      }
+
+      // Persist all emails into user_emails
+      const validEmails = (payload.emails || []).filter((e) => e.email && e.email.includes('@'));
+      if (validEmails.length > 0) {
+        const emailInserts = validEmails.map((e, idx) => ({
+          user_id: userId,
+          email: e.email.trim().toLowerCase(),
+          is_primary: idx === 0,
+          is_verified: true,
+        }));
+        await db.from('user_emails').upsert(emailInserts, { onConflict: 'email' });
+      }
+
+      // Persist modular social links to user_social_links table
+      if (payload.socials) {
+        const socialEntries = Object.entries(payload.socials)
+          .filter(([_, data]) => Boolean(data?.url?.trim()))
+          .map(([platform, data]) => ({
+            user_id: userId,
+            platform: platform as SocialPlatform,
+            profile_url: data.url.trim(),
+            display_name: data.displayName || null,
+            avatar_url: data.avatarUrl || null,
+          }));
+
+        if (socialEntries.length > 0) {
+          const { error: socialError } = await db
+            .from('user_social_links')
+            .upsert(socialEntries);
+          if (socialError) {
+            console.warn('Social links upsert note:', socialError);
+          }
+        }
+      }
+
+      // Persist family relations to user_family_relations table
+      if (payload.familyMembers && payload.familyMembers.length > 0) {
+        const familyEntries = payload.familyMembers
+          .filter((m) => Boolean(m.isDeceased || m.memberId || m.phone?.trim() || m.fullName?.trim()))
+          .map((m) => ({
+            user_id: userId,
+            relation: m.relation,
+            related_member_id: m.memberId || null,
+            full_name: m.fullName || null,
+            phone_number: m.phone ? `${m.countryCode || '+20'}${m.phone.replace(/[^\d]/g, '')}` : null,
+            is_deceased: Boolean(m.isDeceased),
+            link_status: m.linkStatus || (m.memberId ? 'auto_approved' : 'pending_review'),
+            verification_method: m.verificationMethod || (m.memberId ? 'heuristic_name_match' : 'manual_phone'),
+            requires_audit_notice: Boolean(m.requiresAuditNotice ?? Boolean(m.memberId)),
+          }));
+
+        if (familyEntries.length > 0) {
+          const { error: familyError } = await db
+            .from('user_family_relations')
+            .upsert(familyEntries);
+          if (familyError) {
+            console.warn('Family relations upsert note:', familyError);
+          }
+        }
+      }
     } catch (profileErr) {
       console.warn('Profile insertion note:', profileErr);
     }

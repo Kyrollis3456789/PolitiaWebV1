@@ -116,10 +116,17 @@ export const REGISTRATION_SCHEMA: MainStepConfig[] = [
     titleAr: 'شبكة العلاقات الأسرية',
     subSteps: [
       {
-        id: 'guardian_links',
-        titleKey: 'auth.fields.guardian_links',
-        labelEn: 'Family Links & Guardian Mapping',
-        labelAr: 'الربط العائلي وولي الأمر',
+        id: 'marital_status',
+        titleKey: 'auth.fields.marital_status',
+        labelEn: 'Marital Status',
+        labelAr: 'الحالة الاجتماعية',
+        component: 'MaritalStatusStep',
+      },
+      {
+        id: 'family_mapping',
+        titleKey: 'auth.fields.family_mapping',
+        labelEn: 'Parents & Family Mapping',
+        labelAr: 'بيانات الوالدين والربط العائلي',
         component: 'FamilyLinksStep',
       },
     ],
