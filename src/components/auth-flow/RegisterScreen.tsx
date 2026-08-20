@@ -33,6 +33,7 @@ import { createAccountAction, CreateAccountPayload } from '@/app/actions/create-
 import Step4EducationWork from './Step4EducationWork';
 import Step5Locations from './Step5Locations';
 import Step6ChurchCommitment from './Step6ChurchCommitment';
+import FacebookHobbiesSelector from './FacebookHobbiesSelector';
 import { Step5LocationPayload, Step6ChurchPayload, Diocese, Church, Priest } from '@/types/database.types';
 import { fetchChurchesDataAction } from '@/app/actions/location-data';
 import {
@@ -2842,34 +2843,14 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 key={`7-${subStepIndex}`}
                 className={`w-full flex-1 flex flex-col justify-center py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
               >
-                {/* 7.1: Hobbies */}
+                {/* 7.1: Facebook-style Hobbies & Church Activities */}
                 {subStepIndex === 1 && (
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                      <bdi>{isRtl ? 'اختر اهتماماتك وأنشطتك الكنسية' : 'Select Hobbies & Church Activities'}</bdi>
-                    </label>
-                    <div className="flex flex-wrap gap-2 pt-1">
-                      {AVAILABLE_HOBBIES.map((h) => {
-                        const selected = selectedHobbies.includes(h.id);
-                        return (
-                          <button
-                            key={h.id}
-                            type="button"
-                            onClick={() => {
-                              if (selected) setSelectedHobbies(selectedHobbies.filter((x) => x !== h.id));
-                              else setSelectedHobbies([...selectedHobbies, h.id]);
-                            }}
-                            className={`px-3 py-1.5 rounded-full text-xs font-semibold transition cursor-pointer ${
-                              selected
-                                ? 'bg-[#0B57D0] text-white shadow-sm'
-                                : 'border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-                            }`}
-                          >
-                            <bdi>{isRtl ? h.labelAr : h.labelEn}</bdi>
-                          </button>
-                        );
-                      })}
-                    </div>
+                  <div className="bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-xs">
+                    <FacebookHobbiesSelector
+                      selectedHobbies={selectedHobbies}
+                      onChange={setSelectedHobbies}
+                      isRtl={isRtl}
+                    />
                   </div>
                 )}
 
