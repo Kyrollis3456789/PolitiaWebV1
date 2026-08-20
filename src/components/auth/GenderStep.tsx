@@ -9,13 +9,14 @@ import {
   ArrowLeft,
   Globe,
   ChevronDown,
+  ShieldCheck,
 } from 'lucide-react';
 import { tapScale } from '@/lib/animations/transitions';
 
-type GenderValue = 'male' | 'female';
+export type GenderOptionValue = 'male' | 'female' | 'prefer-not-to-say';
 
 interface GenderCardData {
-  id: GenderValue;
+  id: GenderOptionValue;
   label: string;
   labelAr: string;
   icon: React.ReactNode;
@@ -24,7 +25,16 @@ interface GenderCardData {
 /* Minimalist Line-Art Gender Icons */
 function MaleIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
       <circle cx="10" cy="14" r="5" />
       <path d="M19 5l-5.4 5.4" />
       <path d="M15 5h4v4" />
@@ -34,7 +44,16 @@ function MaleIcon({ className }: { className?: string }) {
 
 function FemaleIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" className={className}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
       <circle cx="12" cy="9" r="5" />
       <path d="M12 14v7" />
       <path d="M9 18h6" />
@@ -47,20 +66,27 @@ const GENDER_CARDS: GenderCardData[] = [
     id: 'male',
     label: 'Male',
     labelAr: 'ذكر',
-    icon: <MaleIcon className="w-7 h-7" />,
+    icon: <MaleIcon className="w-6 h-6" />,
   },
   {
     id: 'female',
     label: 'Female',
     labelAr: 'أنثى',
-    icon: <FemaleIcon className="w-7 h-7" />,
+    icon: <FemaleIcon className="w-6 h-6" />,
+  },
+  {
+    id: 'prefer-not-to-say',
+    label: 'Prefer not to say',
+    labelAr: 'أفضل عدم الإجابة',
+    icon: <ShieldCheck className="w-6 h-6" />,
   },
 ];
 
 interface GenderStepProps {
-  onNext?: (selected: GenderValue) => void;
+  onNext?: (selected: GenderOptionValue) => void;
   onBack?: () => void;
-  initialValue?: GenderValue | null;
+  onNavigateLogin?: () => void;
+  initialValue?: GenderOptionValue | null;
   isRtl?: boolean;
   currentStep?: number;
   totalSteps?: number;
@@ -69,12 +95,13 @@ interface GenderStepProps {
 export function GenderStep({
   onNext,
   onBack,
+  onNavigateLogin,
   initialValue = null,
   isRtl = false,
-  currentStep = 3,
-  totalSteps = 6,
+  currentStep = 1,
+  totalSteps = 7,
 }: GenderStepProps) {
-  const [selected, setSelected] = useState<GenderValue | null>(initialValue);
+  const [selected, setSelected] = useState<GenderOptionValue | null>(initialValue);
 
   const handleNext = () => {
     if (selected && onNext) {
@@ -82,6 +109,14 @@ export function GenderStep({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent, val: GenderOptionValue) => {
+    if (e.key === ' ' || e.key === 'Enter') {
+      e.preventDefault();
+      setSelected(val);
+    }
+  };
+
+  // Accurate 14% progress bar for Step 1 of 7
   const progressPercent = Math.round((currentStep / totalSteps) * 100);
 
   return (
@@ -94,9 +129,9 @@ export function GenderStep({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="w-full max-w-2xl mt-8 sm:mt-14"
+        className="w-full max-w-2xl mt-6 sm:mt-12"
       >
-        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-7 sm:p-10">
+        <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6 sm:p-8 md:p-10">
           {/* ── Progress Header ── */}
           <div className="space-y-3.5">
             <div className="flex items-center justify-between">
@@ -113,7 +148,7 @@ export function GenderStep({
                 />
               </div>
 
-              {/* Right: Pill Badge */}
+              {/* Right: Unified Step & Progress Badge */}
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-700 bg-blue-50 px-3.5 py-1.5 rounded-full border border-blue-100 select-none">
                 <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                 <bdi>
@@ -124,53 +159,58 @@ export function GenderStep({
               </span>
             </div>
 
-            {/* Progress Bar */}
+            {/* Slim Animated Progress Bar (14% width for Step 1 of 7) */}
             <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}
-                transition={{ duration: 0.6, ease: 'easeOut', delay: 0.2 }}
+                transition={{ duration: 0.6, ease: 'easeOut', delay: 0.15 }}
                 className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full"
               />
             </div>
           </div>
 
-          {/* ── Typography ── */}
+          {/* ── Typography & Subtext ── */}
           <div className="mt-7 space-y-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
-              <bdi>{isRtl ? 'ما هو جنسك؟' : 'What is your gender?'}</bdi>
+              <bdi>{isRtl ? 'اختر الجنس' : 'Select your gender'}</bdi>
             </h1>
             <p className="text-sm sm:text-base text-slate-500 leading-relaxed">
               <bdi>
                 {isRtl
-                  ? 'يرجى تحديد جنسك لإكمال إعداد ملفك الشخصي.'
-                  : 'Please select your gender to continue your profile setup.'}
+                  ? 'اختر الخيار الذي يصفك بشكل أفضل.'
+                  : 'Choose the option that best describes you.'}
               </bdi>
             </p>
           </div>
 
-          {/* ── Interactive Gender Cards ── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8">
+          {/* ── Interactive Selection Cards Grid (Accessible Radio Group) ── */}
+          <div
+            role="radiogroup"
+            aria-label={isRtl ? 'اختيار الجنس' : 'Select your gender'}
+            className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mt-8"
+          >
             {GENDER_CARDS.map((card) => {
-              const isActive = selected === card.id;
+              const isSelected = selected === card.id;
 
               return (
-                <motion.button
+                <div
                   key={card.id}
-                  type="button"
-                  whileHover={tapScale.hover}
-                  whileTap={tapScale.tap}
+                  role="radio"
+                  aria-checked={isSelected}
+                  tabIndex={0}
                   onClick={() => setSelected(card.id)}
-                  className={`relative p-6 rounded-2xl border-2 flex items-center gap-4 transition-all duration-200 cursor-pointer group ${
-                    isActive
+                  onKeyDown={(e) => handleKeyDown(e, card.id)}
+                  className={`relative p-5 rounded-2xl border-2 flex flex-col items-center justify-center text-center gap-3 transition-all duration-200 cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 ${
+                    isSelected
                       ? 'border-blue-600 bg-blue-50/50 ring-2 ring-blue-600/20 shadow-sm'
                       : 'border-slate-200 hover:border-blue-400 hover:bg-slate-50/70'
                   }`}
                 >
                   {/* Icon Container */}
                   <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-200 ${
-                      isActive
+                    className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-colors duration-200 ${
+                      isSelected
                         ? 'bg-blue-100 text-blue-700'
                         : 'bg-slate-100 text-slate-500 group-hover:bg-blue-50 group-hover:text-blue-600'
                     }`}
@@ -180,86 +220,89 @@ export function GenderStep({
 
                   {/* Label */}
                   <span
-                    className={`text-base font-semibold transition-colors duration-200 ${
-                      isActive
-                        ? 'text-blue-700'
-                        : 'text-slate-800 group-hover:text-slate-900'
+                    className={`text-sm font-semibold transition-colors duration-200 ${
+                      isSelected ? 'text-blue-700' : 'text-slate-800'
                     }`}
                   >
                     <bdi>{isRtl ? card.labelAr : card.label}</bdi>
                   </span>
 
-                  {/* Checkmark Badge */}
+                  {/* Top-Right Indicator */}
                   <AnimatePresence>
-                    {isActive && (
+                    {isSelected && (
                       <motion.div
                         initial={{ opacity: 0, scale: 0.5 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.5 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute top-3.5 end-3.5"
+                        transition={{ duration: 0.15 }}
+                        className="absolute top-3 end-3"
                       >
                         <CheckCircle2 className="w-5 h-5 text-blue-600 fill-blue-100" />
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </motion.button>
+                </div>
               );
             })}
           </div>
 
           {/* ── Navigation Controls ── */}
           <div className="flex items-center justify-between mt-10 pt-6 border-t border-slate-100">
-            {/* Back */}
-            <motion.button
-              whileTap={tapScale.tap}
+            {/* Back Button */}
+            <button
               type="button"
               onClick={onBack}
-              className="inline-flex items-center gap-2 text-slate-600 border border-slate-200 hover:bg-slate-100 px-6 py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer active:scale-[0.98]"
+              className="inline-flex items-center gap-2 text-slate-600 border border-slate-200 hover:bg-slate-100 px-6 py-2.5 rounded-xl text-sm font-medium transition-colors cursor-pointer active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
             >
               {isRtl ? <ArrowRight className="w-4 h-4" /> : <ArrowLeft className="w-4 h-4" />}
               <bdi>{isRtl ? 'السابق' : 'Back'}</bdi>
-            </motion.button>
+            </button>
 
-            {/* Next */}
-            <motion.button
-              whileHover={selected ? tapScale.hover : undefined}
-              whileTap={selected ? tapScale.tap : undefined}
+            {/* Next Button */}
+            <button
               type="button"
               onClick={handleNext}
               disabled={!selected}
-              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-2.5 rounded-xl text-sm font-medium shadow-sm transition-all cursor-pointer active:scale-[0.98]"
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-8 py-2.5 rounded-xl text-sm font-medium shadow-sm transition-all cursor-pointer active:scale-[0.98] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
             >
               <bdi>{isRtl ? 'التالي' : 'Next'}</bdi>
               {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-            </motion.button>
+            </button>
           </div>
         </div>
       </motion.div>
 
-      {/* ── Page Footer ── */}
+      {/* ── Auxiliary Page Footer ── */}
       <footer className="w-full max-w-2xl mt-8 mb-3 flex flex-col sm:flex-row items-center justify-between gap-4 px-1">
-        {/* Language Switcher */}
+        {/* Language Switcher Dropdown */}
         <button
           type="button"
-          className="inline-flex items-center gap-1.5 text-xs text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-700 transition-colors cursor-pointer px-2 py-1 rounded-md hover:bg-slate-200/50"
         >
-          <Globe className="w-3.5 h-3.5" />
-          <span>{isRtl ? 'العربية' : 'English (United States)'}</span>
-          <ChevronDown className="w-3 h-3" />
+          <Globe className="w-3.5 h-3.5 text-slate-400" />
+          <span>{isRtl ? 'العربية' : 'English (US)'}</span>
+          <ChevronDown className="w-3 h-3 text-slate-400" />
         </button>
 
-        {/* Legal Links */}
-        <nav className="flex items-center gap-4 text-xs text-slate-400">
-          <a href="#" className="hover:text-slate-600 transition-colors">
+        {/* Auxiliary Links */}
+        <nav className="flex items-center gap-4 text-xs text-slate-500">
+          <button
+            type="button"
+            onClick={onNavigateLogin}
+            className="hover:text-blue-600 transition-colors cursor-pointer font-medium"
+          >
+            {isRtl ? 'تسجيل الدخول بدلاً من ذلك' : 'Sign in instead'}
+          </button>
+          <span className="w-0.5 h-0.5 rounded-full bg-slate-300" />
+          <a href="#" className="hover:text-slate-700 transition-colors">
             {isRtl ? 'المساعدة' : 'Help'}
           </a>
           <span className="w-0.5 h-0.5 rounded-full bg-slate-300" />
-          <a href="#" className="hover:text-slate-600 transition-colors">
+          <a href="#" className="hover:text-slate-700 transition-colors">
             {isRtl ? 'الخصوصية' : 'Privacy'}
           </a>
           <span className="w-0.5 h-0.5 rounded-full bg-slate-300" />
-          <a href="#" className="hover:text-slate-600 transition-colors">
+          <a href="#" className="hover:text-slate-700 transition-colors">
             {isRtl ? 'الشروط' : 'Terms'}
           </a>
         </nav>
