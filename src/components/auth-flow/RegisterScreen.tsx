@@ -1433,20 +1433,76 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
       const result = await createAccountAction(payload);
 
+      const resetRegistrationFormToStart = () => {
+        clearAllRegistrationDrafts();
+        setMainStepIndex(1);
+        setSubStepIndex(1);
+        setEnglishFullName('');
+        setArabicFullName('');
+        setDob('');
+        setGender('Male');
+        setNationalId('');
+        setAvatarFile(null);
+        setAvatarPreview(null);
+        setPhotoSkippedGracePeriod(false);
+        setPhoneNumber('');
+        setIsPhoneVerified(false);
+        setEmail('');
+        setIsEmailVerified(false);
+        setAdditionalPhones([]);
+        setAdditionalEmails([]);
+        setLandlineAreaCode('');
+        setLandlineNumber('');
+        setSocials({
+          whatsapp: { url: '' },
+          facebook: { url: '' },
+          instagram: { url: '' },
+          threads: { url: '' },
+          messenger: { url: '' },
+          tiktok: { url: '' },
+          snapchat: { url: '' },
+          x: { url: '' },
+          github: { url: '' },
+          linkedin: { url: '' },
+        });
+        setMaritalStatus('single');
+        setGuardianName('');
+        setGuardianPhone('');
+        setFamilyRelationType('Parent');
+        setFamilyMembers([
+          { id: 'father_default', relation: 'father', mode: 'search', isDeceased: false, countryCode: '+20' },
+          { id: 'mother_default', relation: 'mother', mode: 'search', isDeceased: false, countryCode: '+20' },
+        ]);
+        setStep4Payload(null);
+        setStep5Payload(null);
+        setStep6Payload(null);
+        setDiocese('');
+        setPrimaryChurch('');
+        setSecondaryChurch('');
+        setPriestId('');
+        setPriestName('');
+        setIsCustomPriest(false);
+        setSelectedHobbies(['hymns']);
+        setSelectedLanguages(['ar', 'en']);
+        setPassword('');
+        setConfirmPassword('');
+        setErrorMessage(null);
+      };
+
       if (!result.success) {
         setErrorMessage(result.error || (isRtl ? 'حدث خطأ أثناء إنشاء الحساب' : 'Failed to create account.'));
         setLoading(false);
         return;
       }
 
-      clearAllRegistrationDrafts();
-      setMainStepIndex(9); // Success
+      resetRegistrationFormToStart();
       setLoading(false);
 
-      setTimeout(() => {
-        router.push('/dashboard');
-        router.refresh();
-      }, 2400);
+      if (onNavigateLogin) {
+        onNavigateLogin();
+      } else {
+        router.push('/login');
+      }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'An unexpected error occurred.';
       setErrorMessage(msg);
@@ -1508,12 +1564,6 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
       return {
         title: isRtl ? 'تعيين كلمة المرور' : 'Create a Password',
         subtitle: isRtl ? 'أنشئ كلمة مرور قوية لحماية وتأمين حسابك الدائم' : 'Create a strong password to secure your permanent lifetime profile',
-      };
-    }
-    if (mainStepIndex === 9) {
-      return {
-        title: isRtl ? 'تم إنشاء الحساب بنجاح!' : 'Account Created Successfully!',
-        subtitle: isRtl ? 'جاري تجهيز لوحة التحكم ونقلك تلقائياً...' : 'Your universal lifetime profile is active. Redirecting to your dashboard...',
       };
     }
     return {
@@ -3016,35 +3066,6 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 </button>
               </div>
             </form>
-          )}
-
-          {/* Success Step 9 */}
-          {mainStepIndex === 9 && (
-            <div className="w-full flex flex-col items-center justify-center text-center space-y-5 py-4 animate-fadeIn">
-              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-3xl shadow-md">
-                ✓
-              </div>
-              <div className="space-y-1.5">
-                <h2 className="text-xl sm:text-2xl font-bold text-[#1F1F1F] dark:text-[#E3E3E3]">
-                  <bdi>{isRtl ? 'تم إنشاء الحساب بنجاح!' : 'Account Created Successfully!'}</bdi>
-                </h2>
-                <p className="text-xs sm:text-sm text-[#444746] dark:text-[#C4C7C5] max-w-sm mx-auto leading-relaxed">
-                  <bdi>
-                    {isRtl
-                      ? 'تم تسجيل ملفك الشخصي الشامل وجاري نقلك تلقائياً إلى لوحة التحكم...'
-                      : 'Your universal lifetime profile is active. Redirecting to your dashboard...'}
-                  </bdi>
-                </p>
-              </div>
-              <div className="pt-2">
-                <Link
-                  href="/dashboard"
-                  className="inline-flex items-center justify-center py-2.5 px-7 rounded-full text-xs sm:text-sm font-semibold bg-[#0B57D0] text-white hover:bg-[#0842A0] active:scale-95 transition shadow cursor-pointer"
-                >
-                  <bdi>{isRtl ? 'الانتقال إلى لوحة التحكم' : 'Go to Dashboard'}</bdi>
-                </Link>
-              </div>
-            </div>
           )}
         </div>
       </div>
