@@ -170,50 +170,23 @@ function setLocalItem(key: string, value: string | number | boolean | object | n
 
 function clearAllRegistrationDrafts() {
   if (typeof window === 'undefined') return;
-  const keysToRemove = [
-    'main_step',
-    'sub_step',
-    'full_name_en',
-    'full_name_ar',
-    'gender',
-    'dob',
-    'national_id',
-    'avatar_preview',
-    'photo_skipped',
-    'country_iso',
-    'country_code',
-    'phone_number',
-    'phone_verified',
-    'email',
-    'landline_area_code',
-    'landline_number',
-    'socials',
-    'marital_status',
-    'guardian_name',
-    'guardian_phone',
-    'family_relation_type',
-    'education_stage',
-    'faculty_or_school',
-    'step4_payload',
-    'governorate',
-    'city',
-    'street_address',
-    'building_number',
-    'floor_number',
-    'apartment_number',
-    'secondary_address',
-    'diocese',
-    'primary_church',
-    'secondary_church',
-    'priest_name',
-    'hobbies',
-    'languages',
-  ];
-  keysToRemove.forEach((k) => {
-    try {
-      localStorage.removeItem(`politia_reg_${k}`);
-    } catch {}
-  });
+  try {
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith('politia_') || key.startsWith('reg_') || key.includes('draft'))) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach((k) => {
+      try {
+        localStorage.removeItem(k);
+      } catch {}
+    });
+    sessionStorage.clear();
+  } catch (e) {
+    console.warn('Error clearing registration drafts:', e);
+  }
 }
 
 export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
