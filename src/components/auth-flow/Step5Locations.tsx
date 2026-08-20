@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { clsx } from 'clsx';
 import { MapPin, Building, Home, Crosshair, Loader2 } from 'lucide-react';
 import { Country, Governorate, City, Step5LocationPayload } from '@/types/database.types';
 import GooglePlacesAutocomplete from '@/components/ui/GooglePlacesAutocomplete';
 import { reverseGeocodeLocationAction } from '@/app/actions/places-search';
+import { fetchWorldLocationsAction } from '@/app/actions/location-data';
 
 export interface Step5LocationsProps {
   countries?: Country[];
@@ -76,17 +77,35 @@ const POPULAR_STREET_SUGGESTIONS: Record<string, { ar: string; en: string }[]> =
 };
 
 export default function Step5Locations({
-  countries = DEFAULT_COUNTRIES,
-  governorates = DEFAULT_GOVERNORATES,
-  cities = DEFAULT_CITIES,
+  countries,
+  governorates,
+  cities,
   defaultValues,
   isRtl = false,
   onNext,
   onBack,
 }: Step5LocationsProps) {
-  const allCountries = countries.length > 0 ? countries : DEFAULT_COUNTRIES;
-  const allGovernorates = governorates.length > 0 ? governorates : DEFAULT_GOVERNORATES;
-  const allCities = cities.length > 0 ? cities : DEFAULT_CITIES;
+  const [dbCountries, setDbCountries] = useState<Country[]>(countries || []);
+  const [dbGovernorates, setDbGovernorates] = useState<Governorate[]>(governorates || []);
+  const [dbCities, setDbCities] = useState<City[]>(cities || []);
+
+  useEffect(() => {
+    let isMounted = true;
+    fetchWorldLocationsAction().then((res) => {
+      if (isMounted && res.success && res.data) {
+        if (res.data.countries.length > 0) setDbCountries(res.data.countries);
+        if (res.data.governorates.length > 0) setDbGovernorates(res.data.governorates);
+        if (res.data.cities.length > 0) setDbCities(res.data.cities);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const allCountries = dbCountries.length > 0 ? dbCountries : DEFAULT_COUNTRIES;
+  const allGovernorates = dbGovernorates.length > 0 ? dbGovernorates : DEFAULT_GOVERNORATES;
+  const allCities = dbCities.length > 0 ? dbCities : DEFAULT_CITIES;
 
   const initialCountryId =
     defaultValues?.country_id ||
