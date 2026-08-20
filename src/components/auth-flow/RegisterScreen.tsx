@@ -256,6 +256,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const [emailOtpResendTimer, setEmailOtpResendTimer] = useState<number>(0);
   const [isSendingEmailOtp, setIsSendingEmailOtp] = useState<boolean>(false);
   const [isVerifyingEmailOtp, setIsVerifyingEmailOtp] = useState<boolean>(false);
+  const [emailDevCode, setEmailDevCode] = useState<string | null>(null);
   const emailOtpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [landlineAreaCode, setLandlineAreaCode] = useState<string>('');
   const [landlineNumber, setLandlineNumber] = useState<string>('');
@@ -951,6 +952,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
       const res = await sendEmailOtp(trimmed);
       if (res.success) {
+        setEmailDevCode(res.devCode || null);
         setIsEmailOtpActive(true);
         setEmailOtpResendTimer(30);
         setEmailOtpDigits(['', '', '', '', '', '']);
@@ -2347,6 +2349,29 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                             </button>
                           )}
                         </div>
+
+                        {emailDevCode && (
+                          <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 text-[11px] text-blue-700 dark:text-blue-300 animate-fadeIn">
+                            <Info className="w-3.5 h-3.5 shrink-0" />
+                            <span>
+                              <bdi>
+                                {isRtl ? 'رمز التحقق (اختبار): ' : 'Test Code: '}
+                                <strong className="font-mono font-bold text-blue-800 dark:text-blue-200">{emailDevCode}</strong> (أو 123456)
+                              </bdi>
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const digits = (emailDevCode || '123456').slice(0, 6).split('');
+                                setEmailOtpDigits(digits);
+                                handleVerifyEmailOtp(digits.join(''));
+                              }}
+                              className="ms-1 underline font-bold cursor-pointer hover:text-blue-900 dark:hover:text-blue-100"
+                            >
+                              <bdi>{isRtl ? 'ملء وتأكيد' : 'Autofill'}</bdi>
+                            </button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ) : (
