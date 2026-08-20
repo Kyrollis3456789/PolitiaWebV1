@@ -1,8 +1,8 @@
 'use server';
 
 /**
- * Server Action for Google Maps Places API Integration
- * Supports live Google Places API Autocomplete and Details with offline fallback.
+ * Server Action for Google Maps Places & Street Search API
+ * Specialized for searching street names, avenues, roads, and addresses in Arabic & English.
  */
 
 export interface PlacePrediction {
@@ -26,51 +26,73 @@ export interface PlaceDetails {
   lng?: number;
 }
 
-// Built-in offline fallback database of common Egyptian landmarks, churches, streets & districts
-const FALLBACK_PLACES: PlacePrediction[] = [
-  // Cairo
-  { placeId: 'eg_cairo_1', description: 'Nasr City, Cairo Governorate, Egypt', mainText: 'Nasr City', secondaryText: 'Cairo Governorate, Egypt', types: ['sublocality'] },
-  { placeId: 'eg_cairo_2', description: 'Heliopolis, Cairo Governorate, Egypt', mainText: 'Heliopolis', secondaryText: 'Cairo Governorate, Egypt', types: ['sublocality'] },
-  { placeId: 'eg_cairo_3', description: 'Maadi, Cairo Governorate, Egypt', mainText: 'Maadi', secondaryText: 'Cairo Governorate, Egypt', types: ['sublocality'] },
-  { placeId: 'eg_cairo_4', description: 'El Tahrir Square, Downtown, Cairo, Egypt', mainText: 'El Tahrir Square', secondaryText: 'Downtown, Cairo, Egypt', types: ['point_of_interest'] },
-  { placeId: 'eg_cairo_5', description: 'Abbassia, Cairo Governorate, Egypt', mainText: 'Abbassia', secondaryText: 'Cairo Governorate, Egypt', types: ['sublocality'] },
-  { placeId: 'eg_cairo_6', description: 'Shoubra, Cairo Governorate, Egypt', mainText: 'Shoubra', secondaryText: 'Cairo Governorate, Egypt', types: ['sublocality'] },
-  { placeId: 'eg_cairo_7', description: 'St. Mark Coptic Orthodox Cathedral, Abbassia, Cairo', mainText: 'St. Mark Cathedral', secondaryText: 'Abbassia, Cairo, Egypt', types: ['place_of_worship', 'church'] },
-  { placeId: 'eg_cairo_8', description: 'The Hanging Church, Old Cairo, Egypt', mainText: 'The Hanging Church', secondaryText: 'Old Cairo, Egypt', types: ['place_of_worship', 'church'] },
-  { placeId: 'eg_cairo_9', description: 'St. George Church, Old Cairo, Egypt', mainText: 'St. George Church', secondaryText: 'Old Cairo, Egypt', types: ['place_of_worship', 'church'] },
-  { placeId: 'eg_cairo_10', description: 'El Gomhoureya Street, Cairo, Egypt', mainText: 'El Gomhoureya Street', secondaryText: 'Cairo, Egypt', types: ['route'] },
-  { placeId: 'eg_cairo_11', description: 'Talaat Harb Street, Downtown, Cairo, Egypt', mainText: 'Talaat Harb Street', secondaryText: 'Downtown, Cairo, Egypt', types: ['route'] },
-  // Alexandria
-  { placeId: 'eg_alex_1', description: 'Sidi Gaber, Alexandria, Egypt', mainText: 'Sidi Gaber', secondaryText: 'Alexandria, Egypt', types: ['sublocality'] },
-  { placeId: 'eg_alex_2', description: 'Smouha, Alexandria, Egypt', mainText: 'Smouha', secondaryText: 'Alexandria, Egypt', types: ['sublocality'] },
-  { placeId: 'eg_alex_3', description: 'Montaza, Alexandria, Egypt', mainText: 'Montaza', secondaryText: 'Alexandria, Egypt', types: ['sublocality'] },
-  { placeId: 'eg_alex_4', description: 'St. Mark Coptic Orthodox Cathedral, Alexandria, Egypt', mainText: 'St. Mark Cathedral', secondaryText: 'Alexandria, Egypt', types: ['place_of_worship', 'church'] },
-  { placeId: 'eg_alex_5', description: 'Corniche El Nile, Alexandria, Egypt', mainText: 'Corniche El Nil', secondaryText: 'Alexandria, Egypt', types: ['route'] },
-  // Assiut
-  { placeId: 'eg_assiut_1', description: 'Assiut City, Assiut Governorate, Egypt', mainText: 'Assiut City', secondaryText: 'Assiut Governorate, Egypt', types: ['locality'] },
-  { placeId: 'eg_assiut_2', description: 'El Quseyya, Assiut Governorate, Egypt', mainText: 'El Quseyya', secondaryText: 'Assiut Governorate, Egypt', types: ['locality'] },
-  { placeId: 'eg_assiut_3', description: 'Manfalut, Assiut Governorate, Egypt', mainText: 'Manfalut', secondaryText: 'Assiut Governorate, Egypt', types: ['locality'] },
-  { placeId: 'eg_assiut_4', description: 'Dairut, Assiut Governorate, Egypt', mainText: 'Dairut', secondaryText: 'Assiut Governorate, Egypt', types: ['locality'] },
-  { placeId: 'eg_assiut_5', description: 'Al Muharraq Monastery, El Quseyya, Assiut, Egypt', mainText: 'Al Muharraq Monastery', secondaryText: 'El Quseyya, Assiut, Egypt', types: ['place_of_worship', 'church'] },
-  { placeId: 'eg_assiut_6', description: 'Virgin Mary Monastery (Dronka), Assiut, Egypt', mainText: 'Virgin Mary Monastery Dronka', secondaryText: 'Assiut, Egypt', types: ['place_of_worship', 'church'] },
-  { placeId: 'eg_assiut_7', description: 'El Gomhoureya Street, Assiut, Egypt', mainText: 'El Gomhoureya Street', secondaryText: 'Assiut, Egypt', types: ['route'] },
-  { placeId: 'eg_assiut_8', description: 'Yousri Ragheb Street, Assiut, Egypt', mainText: 'Yousri Ragheb Street', secondaryText: 'Assiut, Egypt', types: ['route'] },
+// Built-in offline database of famous streets and roads in Egypt (Cairo, Giza, Alexandria, Assiut, etc.)
+const EGYPT_STREETS_DATABASE: PlacePrediction[] = [
+  // Cairo Streets
+  { placeId: 'st_cairo_1', description: 'شارع الجمهورية، وسط البلد، القاهرة', mainText: 'شارع الجمهورية', secondaryText: 'وسط البلد، القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_2', description: 'شارع طلعت حرب، وسط البلد، القاهرة', mainText: 'شارع طلعت حرب', secondaryText: 'وسط البلد، القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_3', description: 'شارع قصر العيني، السيدة زينب، القاهرة', mainText: 'شارع قصر العيني', secondaryText: 'القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_4', description: 'شارع شبرا، شبرا مصر، القاهرة', mainText: 'شارع شبra', secondaryText: 'شبرا، القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_5', description: 'شارع عباس العقاد، مدينة نصر، القاهرة', mainText: 'شارع عباس العقاد', secondaryText: 'مدينة نصر، القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_6', description: 'شارع مكرم عبيد، مدينة نصر، القاهرة', mainText: 'شارع مكرم عبيد', secondaryText: 'مدينة نصر، القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_7', description: 'شارع النزهة، مصر الجديدة، القاهرة', mainText: 'شارع النزهة', secondaryText: 'مصر الجديدة، القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_8', description: 'شارع الميرغني، مصر الجديدة، القاهرة', mainText: 'شارع الميرغني', secondaryText: 'مصر الجديدة، القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_9', description: 'شارع رمسيس، غمرة والعباسية، القاهرة', mainText: 'شارع رمسيس', secondaryText: 'القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_10', description: 'شارع 9، المعادي، القاهرة', mainText: 'شارع 9 المعادي', secondaryText: 'المعادي، القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_11', description: 'شارع كورنيش النيل، القاهرة', mainText: 'شارع كورنيش النيل', secondaryText: 'القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_12', description: 'شارع أحمد فخري، مدينة نصر، القاهرة', mainText: 'شارع أحمد فخري', secondaryText: 'مدينة نصر، القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_13', description: 'شارع الطيران، مدينة نصر، القاهرة', mainText: 'شارع الطيران', secondaryText: 'مدينة نصر، القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_14', description: 'شارع مصطفى النحاس، مدينة نصر، القاهرة', mainText: 'شارع مصطفى النحاس', secondaryText: 'مدينة نصر، القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_15', description: 'شارع خلوصي، شبرا، القاهرة', mainText: 'شارع خلوصي', secondaryText: 'شبرا، القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_16', description: 'شارع روض الفرج، شبرا، القاهرة', mainText: 'شارع روض الفرج', secondaryText: 'شبرا، القاهرة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_cairo_17', description: 'شارع جسر السويس، عين شمس ومصر الجديدة، القاهرة', mainText: 'شارع جسر السويس', secondaryText: 'القاهرة، مصر', types: ['route', 'street_address'] },
+
+  // Giza Streets
+  { placeId: 'st_giza_1', description: 'شارع الهرم، الجيزة', mainText: 'شارع الهرم', secondaryText: 'الجيزة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_giza_2', description: 'شارع فيصل، الجيزة', mainText: 'شارع الملك فيصل', secondaryText: 'الجيزة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_giza_3', description: 'شارع جامعة الدول العربية، المهندسين، الجيزة', mainText: 'شارع جامعة الدول العربية', secondaryText: 'المهندسين، الجيزة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_giza_4', description: 'شارع البطل أحمد عبد العزيز، المهندسين، الجيزة', mainText: 'شارع البطل أحمد عبد العزيز', secondaryText: 'المهندسين، الجيزة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_giza_5', description: 'شارع التحرير، الدقي، الجيزة', mainText: 'شارع التحرير الدقي', secondaryText: 'الدقي، الجيزة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_giza_6', description: 'شارع مراد، الجيزة', mainText: 'شارع مراد', secondaryText: 'الجيزة، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_giza_7', description: 'شارع النيل، العجوزة والدقي، الجيزة', mainText: 'شارع النيل الجيزة', secondaryText: 'الدقي، الجيزة، مصر', types: ['route', 'street_address'] },
+
+  // Alexandria Streets
+  { placeId: 'st_alex_1', description: 'طريق الجيش (كورنيش الإسكندرية)، الإسكندرية', mainText: 'طريق الجيش كورنيش الإسكندرية', secondaryText: 'الإسكندرية، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_alex_2', description: 'شارع جمال عبد الناصر، ميامي والعصافرة، الإسكندرية', mainText: 'شارع جمال عبد الناصر', secondaryText: 'الإسكندرية، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_alex_3', description: 'شارع أبو قير (طريق الحرية)، الإسكندرية', mainText: 'شارع أبو قير (طريق الحرية)', secondaryText: 'الإسكندرية، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_alex_4', description: 'شارع فؤاد (شارع طارق بن زياد)، الإسكندرية', mainText: 'شارع فؤاد', secondaryText: 'وسط البلد، الإسكندرية، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_alex_5', description: 'شارع خالد بن الوليد، ميامي، الإسكندرية', mainText: 'شارع خالد بن الوليد', secondaryText: 'ميامي، الإسكندرية، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_alex_6', description: 'شارع بورسعيد، كليوباترا والإبراهيمية، الإسكندرية', mainText: 'شارع بورسعيد', secondaryText: 'الإسكندرية، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_alex_7', description: 'شارع مصطفى كامل، سموحة، الإسكندرية', mainText: 'شارع مصطفى كامل سموحة', secondaryText: 'سموحة، الإسكندرية، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_alex_8', description: 'شارع النبوي المهندس، المندرة، الإسكندرية', mainText: 'شارع النبوي المهندس', secondaryText: 'المندرة، الإسكندرية، مصر', types: ['route', 'street_address'] },
+
+  // Assiut Streets
+  { placeId: 'st_assiut_1', description: 'شارع الجمهورية، مدينة أسيوط، أسيوط', mainText: 'شارع الجمهورية أسيوط', secondaryText: 'مدينة أسيوط، أسيوط، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_assiut_2', description: 'شارع يسري راغب، مدينة أسيوط، أسيوط', mainText: 'شارع يسري راغب', secondaryText: 'مدينة أسيوط، أسيوط، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_assiut_3', description: 'شارع النميس، مدينة أسيوط، أسيوط', mainText: 'شارع النميس', secondaryText: 'مدينة أسيوط، أسيوط، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_assiut_4', description: 'شارع كورنيش الإبراهيمية، أسيوط', mainText: 'شارع كورنيش الإبراهيمية', secondaryText: 'أسيوط، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_assiut_5', description: 'شارع المحطة، مدينة أسيوط، أسيوط', mainText: 'شارع المحطة', secondaryText: 'أسيوط، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_assiut_6', description: 'شارع الجلاء، القوصية، أسيوط', mainText: 'شارع الجلاء', secondaryText: 'القوصية، أسيوط، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_assiut_7', description: 'شارع الرياح، القوصية، أسيوط', mainText: 'شارع الرياح', secondaryText: 'القوصية، أسيوط، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_assiut_8', description: 'شارع ترعة السنط، ديروط، أسيوط', mainText: 'شارع ترعة السنط', secondaryText: 'ديروط، أسيوط، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_assiut_9', description: 'شارع الجيش، منفلوط، أسيوط', mainText: 'شارع الجيش', secondaryText: 'منفلوط، أسيوط، مصر', types: ['route', 'street_address'] },
+  { placeId: 'st_assiut_10', description: 'شارع الثورة، ديروط، أسيوط', mainText: 'شارع الثورة', secondaryText: 'ديروط، أسيوط، مصر', types: ['route', 'street_address'] },
 ];
 
 /**
- * Searches places via Google Maps Places API Autocomplete.
+ * Searches places & streets via Google Maps Places API Autocomplete.
  */
 export async function searchGooglePlacesAction(
   query: string,
   options?: {
     language?: 'ar' | 'en';
     country?: string; // default 'eg'
-    types?: string; // e.g. 'address' | 'establishment' | 'geocode'
+    types?: string; // e.g. 'address' | 'geocode' | 'establishment'
   }
 ): Promise<{ success: boolean; predictions: PlacePrediction[]; source: 'google' | 'fallback' }> {
   try {
     const rawTrimmed = (query || '').trim();
-    if (!rawTrimmed || rawTrimmed.length < 2) {
+    if (!rawTrimmed || rawTrimmed.length < 1) {
       return { success: true, predictions: [], source: 'fallback' };
     }
 
@@ -78,7 +100,7 @@ export async function searchGooglePlacesAction(
     const lang = options?.language || 'ar';
     const country = options?.country || 'eg';
 
-    // 1. If Google Maps API key is configured, query Google Places API
+    // 1. If Google Maps API key is configured, query Google Places Autocomplete API
     if (apiKey) {
       try {
         let url = `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${encodeURIComponent(
@@ -113,15 +135,20 @@ export async function searchGooglePlacesAction(
     }
 
     // 2. Intelligent local fallback matching (Arabic + English normalized)
-    const qLower = rawTrimmed.toLowerCase();
-    const matched = FALLBACK_PLACES.filter((p) => {
+    const qClean = rawTrimmed
+      .toLowerCase()
+      .replace(/^(شارع|طريق|ميدان|ش|st|street|road|rd|avenue|ave)\s+/i, '')
+      .trim();
+
+    const matched = EGYPT_STREETS_DATABASE.filter((p) => {
       const descLower = p.description.toLowerCase();
       const mainLower = p.mainText.toLowerCase();
       const secLower = (p.secondaryText || '').toLowerCase();
       return (
-        descLower.includes(qLower) ||
-        mainLower.includes(qLower) ||
-        secLower.includes(qLower)
+        descLower.includes(rawTrimmed.toLowerCase()) ||
+        mainLower.includes(rawTrimmed.toLowerCase()) ||
+        secLower.includes(rawTrimmed.toLowerCase()) ||
+        (qClean.length >= 2 && (descLower.includes(qClean) || mainLower.includes(qClean)))
       );
     });
 
@@ -149,7 +176,7 @@ export async function getGooglePlaceDetailsAction(
   try {
     const apiKey = process.env.GOOGLE_MAPS_API_KEY || process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-    if (apiKey && !placeId.startsWith('eg_')) {
+    if (apiKey && !placeId.startsWith('st_') && !placeId.startsWith('eg_')) {
       const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${encodeURIComponent(
         placeId
       )}&key=${apiKey}&language=${language}&fields=formatted_address,name,address_components,geometry`;
@@ -183,7 +210,7 @@ export async function getGooglePlaceDetailsAction(
               formattedAddress: r.formatted_address || r.name,
               name: r.name,
               streetNumber,
-              route,
+              route: route || r.name,
               city,
               governorate,
               country,
@@ -196,7 +223,7 @@ export async function getGooglePlaceDetailsAction(
     }
 
     // Fallback place resolution
-    const fallback = FALLBACK_PLACES.find((p) => p.placeId === placeId);
+    const fallback = EGYPT_STREETS_DATABASE.find((p) => p.placeId === placeId);
     if (fallback) {
       return {
         success: true,

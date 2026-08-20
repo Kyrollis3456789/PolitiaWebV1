@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { clsx } from 'clsx';
-import { MapPin, Search, Loader2, X, Building2, Church } from 'lucide-react';
+import { MapPin, Search, Loader2, X, Building2, Church, Navigation } from 'lucide-react';
 import {
   searchGooglePlacesAction,
   getGooglePlaceDetailsAction,
@@ -177,6 +177,7 @@ export default function GooglePlacesAutocomplete({
 
           <ul className="divide-y divide-slate-100 dark:divide-slate-800/80">
             {predictions.map((p) => {
+              const isRoute = p.types?.includes('route') || p.types?.includes('street_address');
               const isChurch = p.types?.includes('church') || p.types?.includes('place_of_worship');
               const isBuilding = p.types?.includes('establishment') || p.types?.includes('point_of_interest');
 
@@ -190,6 +191,8 @@ export default function GooglePlacesAutocomplete({
                     <div className="p-1.5 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0">
                       {isChurch ? (
                         <Church className="w-3.5 h-3.5 text-rose-500" />
+                      ) : isRoute ? (
+                        <Navigation className="w-3.5 h-3.5 text-blue-600" />
                       ) : isBuilding ? (
                         <Building2 className="w-3.5 h-3.5 text-indigo-500" />
                       ) : (
