@@ -36,6 +36,7 @@ import Step5Locations from './Step5Locations';
 import Step6ChurchCommitment from './Step6ChurchCommitment';
 import FacebookHobbiesSelector from './FacebookHobbiesSelector';
 import LanguagesSelector from './LanguagesSelector';
+import AccountPickerPriestDropdown, { MOCK_PRIESTS } from './AccountPickerPriestDropdown';
 import PasswordStrengthMeter, { checkPasswordStrength } from '@/components/ui/PasswordStrengthMeter';
 import { Country, Step5LocationPayload, Step6ChurchPayload, Diocese, Church, Priest } from '@/types/database.types';
 import { fetchChurchesDataAction } from '@/app/actions/location-data';
@@ -310,7 +311,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const [step6Payload, setStep6Payload] = useState<Step6ChurchPayload | null>(null);
   const [diocesesList, setDiocesesList] = useState<Diocese[]>([]);
   const [churchesList, setChurchesList] = useState<Church[]>([]);
-  const [priestsList, setPriestsList] = useState<Priest[]>([]);
+  const [priestsList, setPriestsList] = useState<Priest[]>(MOCK_PRIESTS);
   const [diocese, setDiocese] = useState<string>('');
   const [primaryChurch, setPrimaryChurch] = useState<string>('');
   const [secondaryChurch, setSecondaryChurch] = useState<string>('');
@@ -324,7 +325,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
       if (res.success) {
         if (res.dioceses) setDiocesesList(res.dioceses);
         if (res.churches) setChurchesList(res.churches);
-        if (res.priests) setPriestsList(res.priests);
+        if (res.priests && res.priests.length > 0) setPriestsList(res.priests);
       }
     });
   }, []);
@@ -496,6 +497,8 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   useEffect(() => { if (isMounted) setLocalItem('guardian_name', guardianName); }, [guardianName, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('guardian_phone', guardianPhone); }, [guardianPhone, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('family_relation_type', familyRelationType); }, [familyRelationType, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('additional_phones', additionalPhones); }, [additionalPhones, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('additional_emails', additionalEmails); }, [additionalEmails, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('step4_payload', step4Payload); }, [step4Payload, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('step5_payload', step5Payload); }, [step5Payload, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('step6_payload', step6Payload); }, [step6Payload, isMounted]);
@@ -532,8 +535,12 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
       countryCode,
       phoneNumber,
       isPhoneVerified,
+      additionalPhones,
+      phoneNumbers: [phoneNumber, ...additionalPhones.map((p) => p.phone).filter(Boolean)],
       email,
       isEmailVerified,
+      additionalEmails,
+      emails: [email, ...additionalEmails.map((e) => e.email).filter(Boolean)],
       landlineAreaCode,
       landlineNumber,
       socials,
@@ -555,7 +562,8 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
       diocese,
       primaryChurch,
       secondaryChurch,
-      priestId,
+      priestId: isCustomPriest ? '__custom__' : priestId,
+      customPriestName: isCustomPriest ? priestName : undefined,
       priestName,
       isCustomPriest,
       selectedHobbies,
@@ -576,8 +584,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
     countryCode,
     phoneNumber,
     isPhoneVerified,
+    additionalPhones,
     email,
     isEmailVerified,
+    additionalEmails,
     landlineAreaCode,
     landlineNumber,
     socials,
@@ -2932,82 +2942,31 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                           )}
                         </div>
 
-                        {/* Priest Dropdown Selection */}
-                        <div>
-                          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                            {isRtl ? 'اختر أب الاعتراف من قائمة كهنة الكنيسة' : 'Select priest from church clergy'}
-                          </label>
-                          <select
-                            value={isCustomPriest ? '__custom__' : priestId}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              if (val === '__custom__') {
-                                setIsCustomPriest(true);
-                                setPriestId('');
-                                setPriestName('');
-                              } else if (val === '') {
-                                setIsCustomPriest(false);
-                                setPriestId('');
-                                setPriestName('');
-                              } else {
-                                setIsCustomPriest(false);
-                                setPriestId(val);
-                                const found = priestsList.find((p) => p.id === val);
-                                if (found) {
-                                  setPriestName(isRtl ? found.name_ar : found.name_en);
-                                }
-                              }
-                            }}
-                            className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all cursor-pointer"
-                          >
-                            <option value="" className="bg-white dark:bg-slate-900">
-                              {isRtl ? 'اختر أب الاعتراف (اختياري)...' : 'Select Father of Confession (optional)...'}
-                            </option>
-                            
-                            {/* Priests belonging to selected church */}
-                            {priestsList
-                              .filter((p) => !step6Payload?.primary_church_id || p.church_id === step6Payload?.primary_church_id)
-                              .map((p) => (
-                                <option key={p.id} value={p.id} className="bg-white dark:bg-slate-900">
-                                  {isRtl ? p.name_ar : p.name_en}
-                                </option>
-                              ))}
-
-                            {/* Other Priests in the Diocese / All */}
-                            {priestsList.filter((p) => step6Payload?.primary_church_id && p.church_id !== step6Payload?.primary_church_id).length > 0 && (
-                              <optgroup label={isRtl ? 'كهنة آخرون' : 'Other Clergy'}>
-                                {priestsList
-                                  .filter((p) => step6Payload?.primary_church_id && p.church_id !== step6Payload?.primary_church_id)
-                                  .map((p) => (
-                                    <option key={p.id} value={p.id} className="bg-white dark:bg-slate-900">
-                                      {isRtl ? p.name_ar : p.name_en}
-                                    </option>
-                                  ))}
-                              </optgroup>
-                            )}
-
-                            <option value="__custom__" className="bg-white dark:bg-slate-900 font-semibold text-blue-600">
-                              {isRtl ? '✍️ كتابة اسم كاهن آخر غير موجود بالقائمة...' : '✍️ Enter another priest name manually...'}
-                            </option>
-                          </select>
-                        </div>
-
-                        {/* Optional Custom Priest Name Input */}
-                        {isCustomPriest && (
-                          <div className="animate-fadeIn pt-1">
-                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-                              {isRtl ? 'اسم أب الاعتراف' : 'Priest Name'}
-                            </label>
-                            <input
-                              type="text"
-                              aria-label="Confession Father / Priest Name"
-                              placeholder={isRtl ? 'أدخل اسم أب الاعتراف...' : 'Enter priest name...'}
-                              value={priestName}
-                              onChange={(e) => setPriestName(e.target.value)}
-                              className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                            />
-                          </div>
-                        )}
+                        {/* Rich Account-Picker Priest Dropdown */}
+                        <AccountPickerPriestDropdown
+                          id="priest-account-picker"
+                          value={isCustomPriest ? '__custom__' : priestId}
+                          priestName={priestName}
+                          isCustomPriest={isCustomPriest}
+                          priests={priestsList}
+                          churchName={step6Payload?.primary_church_name}
+                          isRtl={isRtl}
+                          onChange={(pId, pName, isCustom) => {
+                            if (isCustom) {
+                              setIsCustomPriest(true);
+                              setPriestId('__custom__');
+                              setPriestName(pName);
+                            } else if (!pId) {
+                              setIsCustomPriest(false);
+                              setPriestId('');
+                              setPriestName('');
+                            } else {
+                              setIsCustomPriest(false);
+                              setPriestId(pId);
+                              setPriestName(pName);
+                            }
+                          }}
+                        />
 
                       </div>
                     </div>
