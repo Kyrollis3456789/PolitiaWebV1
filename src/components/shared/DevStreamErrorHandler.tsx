@@ -1,10 +1,11 @@
 'use client';
 
 /**
- * Suppresses harmless Turbopack HMR stream closure errors that occur during fast refresh,
- * route redirection, and hot reload over local network connections:
+ * Suppresses harmless Turbopack HMR stream closure errors and Google Maps RefererNotAllowedMapError
+ * during local development on http://localhost:3000:
  * - "Cannot write to a CLOSED writable stream"
  * - "Cannot close a CLOSED writable stream"
+ * - "Google Maps JavaScript API error: RefererNotAllowedMapError"
  */
 if (typeof window !== 'undefined') {
   const isIgnoredMessage = (msg: string) =>
@@ -12,7 +13,9 @@ if (typeof window !== 'undefined') {
     msg.includes('closed stream') ||
     msg.includes('writable stream') ||
     msg.includes('Cannot close a CLOSED') ||
-    msg.includes('Cannot write to a CLOSED');
+    msg.includes('Cannot write to a CLOSED') ||
+    msg.includes('RefererNotAllowedMapError') ||
+    msg.includes('gm_authFailure');
 
   // 1. Intercept console.error to prevent Next.js Turbopack dev overlay from triggering
   const origConsoleError = console.error;
