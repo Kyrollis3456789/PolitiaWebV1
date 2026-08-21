@@ -366,7 +366,7 @@ export function ForgotScreen() {
               width={48}
               height={48}
               priority
-              style={{ height: 'auto' }}
+              style={{ width: 'auto', height: 'auto' }}
               className="object-contain w-full h-full"
             />
           </div>

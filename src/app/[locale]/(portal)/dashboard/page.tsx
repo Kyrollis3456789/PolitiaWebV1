@@ -253,7 +253,7 @@ export default async function DashboardPage({
               width={34}
               height={34}
               priority
-              style={{ height: 'auto' }}
+              style={{ width: 'auto', height: 'auto' }}
               className="object-contain shrink-0"
             />
             <div>

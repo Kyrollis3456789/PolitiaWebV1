@@ -144,7 +144,7 @@ export function GenderStep({
                   width={28}
                   height={28}
                   priority
-                  style={{ height: 'auto' }}
+                  style={{ width: 'auto', height: 'auto' }}
                   className="object-contain"
                 />
               </div>
