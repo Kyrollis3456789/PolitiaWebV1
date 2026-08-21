@@ -87,6 +87,8 @@ export interface Church {
   city_id: string;
   name_en: string;
   name_ar: string;
+  denomination?: string | null;
+  image_url?: string | null;
 }
 
 export interface Priest {

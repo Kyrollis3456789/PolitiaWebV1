@@ -32,7 +32,9 @@ export interface Step6ChurchCommitmentProps {
 
 // Comprehensive offline fallback dataset for Dioceses across Egypt
 const DEFAULT_DIOCESES: Diocese[] = [
-  { id: 'dio-assiut-1', name_ar: 'إيبارشية أسيوط وساحل سليم والبداري', name_en: 'Diocese of Assiut & Dar El Salam' },
+  { id: 'dio-assiut-1', name_ar: 'إيبارشية أسيوط ودير درنكة للأقباط الأرثوذكس', name_en: 'Diocese of Assiut & Dronka (Coptic Orthodox)' },
+  { id: 'dio-evangelical-1', name_ar: 'سنودس النيل الإنجيلي (الكنيسة الإنجيلية المشيخية)', name_en: 'Evangelical Synod of the Nile (Presbyterian)' },
+  { id: 'dio-catholic-assiut-1', name_ar: 'إيبارشية أسيوط للأقباط الكاثوليك', name_en: 'Coptic Catholic Eparchy of Assiut' },
   { id: 'dio-assiut-2', name_ar: 'إيبارشية ديروط وصنبو', name_en: 'Diocese of Dairut & Sanabu' },
   { id: 'dio-assiut-3', name_ar: 'إيبارشية القوصية ومير', name_en: 'Diocese of El Quseyya & Meir' },
   { id: 'dio-cairo-1', name_ar: 'إيبارشية مصر الجديدة وشرق القاهرة', name_en: 'Diocese of Heliopolis & East Cairo' },
@@ -52,16 +54,31 @@ const DEFAULT_DIOCESES: Diocese[] = [
   { id: 'dio-dakahlia-1', name_ar: 'إيبارشية المنصورة وتوابعها', name_en: 'Diocese of Mansoura' },
 ];
 
-// Comprehensive offline fallback dataset for famous Coptic Churches in Egypt (Assiut, Cairo, Alexandria, Giza, Minya, Sohag, etc.)
+// Comprehensive offline fallback dataset for Coptic Orthodox, Evangelical, and Catholic Churches in Egypt
 const DEFAULT_CHURCHES: Church[] = [
-  // Assiut
-  { id: 'ch-assiut-1', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كاتدرائية رئيس الملائكة ميخائيل (الجمهورية)', name_en: 'Archangel Michael Cathedral (Al Gomhoureya)' },
-  { id: 'ch-assiut-2', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة الشهيد العظيم مارمرقس (حي السادات)', name_en: 'St. Mark Church (Nasser / Al Sadat)' },
-  { id: 'ch-assiut-3', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة الشهيد مارجرجس (يسري راغب والجلاء)', name_en: 'St. George Church (El Galaa / Yousri Ragheb)' },
-  { id: 'ch-assiut-4', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة الشهيد أبانوب النهيسي (حي النميس)', name_en: 'St. Abanoub Church (El Nemis)' },
-  { id: 'ch-new-assiut-1', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333322', name_ar: 'كاتدرائية السيدة العذراء وملاك ميخائيل (أسيوط الجديدة)', name_en: 'Virgin Mary & Archangel Michael Cathedral' },
-  { id: 'ch-dairut-1', diocese_id: 'dio-assiut-2', city_id: '33333333-3333-3333-3333-333333333323', name_ar: 'كنيسة السيدة العذراء بديروط', name_en: 'Virgin Mary Church (Dairut)' },
-  { id: 'ch-quseyya-1', diocese_id: 'dio-assiut-3', city_id: '33333333-3333-3333-3333-333333333324', name_ar: 'دير المحرق (السيدة العذراء مريم - القوصية)', name_en: 'Al-Muharraq Monastery (Virgin Mary - El Quseyya)' },
+  // --- Assiut Orthodox Churches ---
+  { id: 'ch-assiut-1', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كاتدرائية رئيس الملائكة ميخائيل (الجمهورية)', name_en: 'Archangel Michael Cathedral (Al Gomhoureya)', denomination: 'Coptic Orthodox' },
+  { id: 'ch-assiut-2', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة الشهيد مارمرقس الرسول (السادات / ناصر)', name_en: 'St. Mark Church (Nasser / Al Sadat)', denomination: 'Coptic Orthodox' },
+  { id: 'ch-assiut-3', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة الشهيد العظيم مارجرجس (يسري راغب)', name_en: 'St. George Church (Yousri Ragheb)', denomination: 'Coptic Orthodox' },
+  { id: 'ch-assiut-4', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة الشهيد أبانوب النهيسي والأنبا كاراس (النميس)', name_en: 'St. Abanoub & Anba Karas Church (El Nemis)', denomination: 'Coptic Orthodox' },
+  { id: 'ch-assiut-5', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة القديسة دميانة (البيسري)', name_en: 'St. Demiana Church (El-Besry)', denomination: 'Coptic Orthodox' },
+  { id: 'ch-assiut-6', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة السيدة العذراء مريم (المجذوب / القيسارية)', name_en: 'St. Mary Virgin Church (El-Magzoub)', denomination: 'Coptic Orthodox' },
+  { id: 'ch-assiut-7', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة الشهيد أبي سيفين والأنبا ونس (المعلمين)', name_en: 'St. Philopateer & Anba Wanas Church', denomination: 'Coptic Orthodox' },
+  { id: 'ch-new-assiut-1', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333322', name_ar: 'كاتدرائية القديس يوحنا المعمدان (أسيوط الجديدة)', name_en: 'St. John the Baptist Cathedral (New Assiut)', denomination: 'Coptic Orthodox' },
+  { id: 'ch-dronka-1', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'دير السيدة العذراء مريم (جبل درنكة)', name_en: 'Virgin Mary Monastery (Dronka Mountain)', denomination: 'Coptic Orthodox' },
+  { id: 'ch-dairut-1', diocese_id: 'dio-assiut-2', city_id: '33333333-3333-3333-3333-333333333323', name_ar: 'كنيسة السيدة العذراء بديروط', name_en: 'Virgin Mary Church (Dairut)', denomination: 'Coptic Orthodox' },
+  { id: 'ch-quseyya-1', diocese_id: 'dio-assiut-3', city_id: '33333333-3333-3333-3333-333333333324', name_ar: 'دير المحرق (السيدة العذراء مريم - القوصية)', name_en: 'Al-Muharraq Monastery (El Quseyya)', denomination: 'Coptic Orthodox' },
+
+  // --- Assiut Evangelical Churches ---
+  { id: 'ch-assiut-evang-1', diocese_id: 'dio-evangelical-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'الكنيسة الإنجيلية الأولى (يسري راغب)', name_en: 'First Evangelical Presbyterian Church', denomination: 'Presbyterian Evangelical' },
+  { id: 'ch-assiut-evang-2', diocese_id: 'dio-evangelical-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'الكنيسة الإنجيلية الثانية (القيسارية)', name_en: 'Second Evangelical Presbyterian Church', denomination: 'Presbyterian Evangelical' },
+  { id: 'ch-assiut-evang-3', diocese_id: 'dio-evangelical-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة الرجاء الإنجيلية (الحمراء)', name_en: 'El-Ragaa Evangelical Church (El-Hamraa)', denomination: 'Presbyterian Evangelical' },
+  { id: 'ch-new-assiut-evang-1', diocese_id: 'dio-evangelical-1', city_id: '33333333-3333-3333-3333-333333333322', name_ar: 'الكنيسة الإنجيلية بأسيوط الجديدة', name_en: 'New Assiut Evangelical Church', denomination: 'Presbyterian Evangelical' },
+
+  // --- Assiut Catholic Churches ---
+  { id: 'ch-assiut-catholic-1', diocese_id: 'dio-catholic-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كاتدرائية أم المحبة الإلهية للأقباط الكاثوليك', name_en: 'Cathedral of Our Lady of Divine Love', denomination: 'Coptic Catholic' },
+  { id: 'ch-assiut-catholic-2', diocese_id: 'dio-catholic-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة السيدة العذراء للأقباط الكاثوليك بالحمراء', name_en: 'Virgin Mary Catholic Church (El-Hamraa)', denomination: 'Coptic Catholic' },
+  { id: 'ch-assiut-catholic-3', diocese_id: 'dio-catholic-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة القديس جورج للأقباط الكاثوليك', name_en: 'St. George Coptic Catholic Church', denomination: 'Coptic Catholic' },
 
   // Cairo & Heliopolis
   { id: 'ch-cairo-1', diocese_id: 'dio-cairo-1', city_id: '11111111-1111-1111-1111-111133333301', name_ar: 'الكاتدرائية المرقسية بالعباسية (القاهرة)', name_en: 'St. Mark Coptic Orthodox Cathedral (Abbassia)' },
@@ -377,8 +394,13 @@ function AccountPickerChurchDropdown({
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-                            {isRtl ? ch.name_en : ch.name_ar}
+                          <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate flex items-center justify-between gap-1">
+                            <span className="truncate">{isRtl ? ch.name_en : ch.name_ar}</span>
+                            {ch.denomination && (
+                              <span className="text-[9px] font-medium text-slate-400 dark:text-slate-500 shrink-0 bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                                {ch.denomination}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
