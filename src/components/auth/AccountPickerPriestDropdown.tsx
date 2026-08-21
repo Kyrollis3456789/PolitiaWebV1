@@ -83,6 +83,8 @@ export function AccountPickerPriestDropdown({
       <button
         id={id}
         type="button"
+        data-testid="priest-select-dropdown"
+        aria-label={isRtl ? 'اختر أب الاعتراف' : 'Select Father of Confession'}
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}

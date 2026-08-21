@@ -349,10 +349,40 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [langSearch, setLangSearch] = useState('');
 
-  // Client-side Draft Hydration
+  // Reset handler via URL param ?reset=true or explicit reset button
+  const resetFormDrafts = useCallback(() => {
+    clearAllRegistrationDrafts();
+    setMainStepIndex(1);
+    setSubStepIndex(1);
+    setEnglishFullName('');
+    setArabicFullName('');
+    setGender('Male');
+    setDob('');
+    setNationalId('');
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    setPhotoSkippedGracePeriod(false);
+    setPhoneNumber('');
+    setIsPhoneVerified(false);
+    setEmail('');
+    setIsEmailVerified(false);
+    setAdditionalPhones([]);
+    setAdditionalEmails([]);
+    setStep4Payload(null);
+    setStep5Payload(null);
+    setStep6Payload(null);
+    setPriestId('');
+    setPriestName('');
+    setIsCustomPriest(false);
+  }, []);
+
   // Client-side Draft Hydration for Steps 1 through 7
   useEffect(() => {
     setIsMounted(true);
+    if (typeof window !== 'undefined' && window.location.search.includes('reset=true')) {
+      resetFormDrafts();
+      return;
+    }
     try {
       const masterDraft = getLocalJson<any>('registration_draft_v1', null);
 
@@ -623,9 +653,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const fullArabicName = arabicFullName.trim().replace(/\s+/g, ' ');
   const formattedDob = dob;
 
-  const calculateAge = (): number | null => {
-    if (!formattedDob) return null;
-    const birthDate = new Date(formattedDob + 'T00:00:00');
+  // Reactive derived values for age and national ID validation
+  const currentAge = useMemo((): number | null => {
+    if (!dob) return null;
+    const birthDate = new Date(dob + 'T00:00:00');
     if (isNaN(birthDate.getTime())) return null;
     const today = new Date();
     let age = today.getFullYear() - birthDate.getFullYear();
@@ -634,8 +665,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
       age--;
     }
     return age >= 0 ? age : null;
-  };
-  const currentAge = calculateAge();
+  }, [dob]);
 
   // DOB change protection: lock and reset to single if under 18
   useEffect(() => {
@@ -644,11 +674,13 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
     }
   }, [currentAge, maritalStatus]);
 
-  const nationalIdValidation = validateEgyptianNationalId(
-    nationalId,
-    formattedDob || undefined,
-    gender || undefined
-  );
+  const nationalIdValidation = useMemo(() => {
+    return validateEgyptianNationalId(
+      nationalId,
+      dob || undefined,
+      gender || undefined
+    );
+  }, [nationalId, dob, gender]);
 
   // Missing requirements and validity for Step 3 (Family Relations)
   const missingStep3Requirements = useMemo(() => {
@@ -1805,6 +1837,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   <div className="relative">
                     <input
                       id="reg-full-name-en"
+                      data-testid="input-fullname-en"
                       type="text"
                       dir="ltr"
                       autoFocus
@@ -1848,6 +1881,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   <div className="relative">
                     <input
                       id="reg-full-name-ar"
+                      data-testid="input-fullname-ar"
                       type="text"
                       dir="rtl"
                       autoFocus
@@ -1890,6 +1924,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 <div className="grid grid-cols-2 gap-3.5 py-2">
                   <button
                     type="button"
+                    data-testid="gender-option-male"
                     onClick={() => setGender('Male')}
                     className={`relative p-5 rounded-2xl border-2 flex flex-col items-center justify-center gap-2.5 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 ${
                       gender === 'Male'
@@ -1912,6 +1947,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
                   <button
                     type="button"
+                    data-testid="gender-option-female"
                     onClick={() => setGender('Female')}
                     className={`relative p-5 rounded-2xl border-2 flex flex-col items-center justify-center gap-2.5 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 ${
                       gender === 'Female'
@@ -1940,6 +1976,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   <div className="relative">
                     <input
                       id="reg-dob"
+                      data-testid="input-dob"
                       type="date"
                       autoFocus
                       value={dob}
@@ -1984,6 +2021,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   <div className="relative">
                     <input
                       id="reg-national-id"
+                      data-testid="input-national-id"
                       type="text"
                       dir="ltr"
                       maxLength={14}

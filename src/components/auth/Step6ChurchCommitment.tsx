@@ -163,6 +163,8 @@ function AccountPickerChurchDropdown({
       <button
         id={id}
         type="button"
+        data-testid="church-select-dropdown"
+        aria-label={isRtl ? labelAr : label}
         onClick={() => setIsOpen(!isOpen)}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
