@@ -145,14 +145,10 @@ export function validateEgyptianNationalId(
     }
   }
 
-  // Cross-verification with User-Provided Gender
-  if (expectedGender && expectedGender !== gender) {
-    return {
-      isValid: false,
-      error: `Gender in National ID (${gender}) does not match selected Gender (${expectedGender}).`,
-      parsedData,
-    };
-  }
+  // Keep the ID parser permissive for onboarding flows where the
+  // selected gender can be provided independently of the ID's parity.
+  // We still expose the parsed gender in case the UI wants to surface it,
+  // but it should not block the registration flow.
 
   return {
     isValid: true,

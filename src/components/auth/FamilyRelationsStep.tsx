@@ -1048,6 +1048,7 @@ export const FamilyRelationsStep: React.FC<FamilyRelationsStepProps> = ({
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
+                        data-testid={`family-card-${member.relation}-tab-search`}
                         onClick={() => handleUpdateCard(member.id, { mode: 'search' })}
                         className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer border ${
                           member.mode === 'search'
@@ -1061,6 +1062,7 @@ export const FamilyRelationsStep: React.FC<FamilyRelationsStepProps> = ({
 
                       <button
                         type="button"
+                        data-testid={`family-card-${member.relation}-tab-manual`}
                         onClick={() => handleUpdateCard(member.id, { mode: 'manual' })}
                         className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5 cursor-pointer border ${
                           member.mode === 'manual'
@@ -1079,6 +1081,7 @@ export const FamilyRelationsStep: React.FC<FamilyRelationsStepProps> = ({
                         <div className="relative flex items-center">
                           <input
                             type="text"
+                            data-testid={`family-card-${member.relation}-input-search`}
                             dir={isRtl ? 'rtl' : 'ltr'}
                             placeholder={
                               isRtl
