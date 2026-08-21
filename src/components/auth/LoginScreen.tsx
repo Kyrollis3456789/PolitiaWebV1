@@ -163,7 +163,7 @@ export function LoginScreen({
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
-      className="relative w-full min-h-[100dvh] sm:min-h-screen shared-bg flex flex-col justify-between items-center p-0 md:p-8 transition-colors duration-300 overflow-x-hidden"
+      className="relative w-full min-h-[100dvh] sm:min-h-screen bg-[#F0F4F9] dark:bg-[#0E121A] flex flex-col justify-between items-center p-0 md:p-8 transition-colors duration-300 overflow-x-hidden"
     >
       {/* Main Authentication Card Container */}
       <div className="relative z-20 w-full max-w-[1040px] bg-white/95 dark:bg-[#1B212D]/95 rounded-none md:rounded-[36px] p-5 sm:p-8 md:p-12 shadow-none md:shadow-2xl border-0 md:border md:border-white/60 dark:md:border-slate-800/80 flex flex-col md:flex-row gap-6 md:gap-14 min-h-[100dvh] md:min-h-fit h-auto items-stretch md:items-start transition-all duration-300 ease-in-out">
@@ -194,7 +194,7 @@ export function LoginScreen({
         {/* Right Column: Interactive Forms */}
         <div className="w-full md:w-1/2 flex-1 flex flex-col justify-between min-h-0 md:min-h-[320px] overflow-hidden transition-all duration-300 ease-in-out">
           {step === 1 ? (
-            <form onSubmit={handleEmailNext} className="w-full flex-1 flex flex-col justify-between">
+            <form onSubmit={handleEmailNext} className="w-full flex-1 flex flex-col justify-between overflow-y-auto min-h-0">
               <div className="my-auto space-y-4 w-full">
                 <div className="relative">
                   <input
@@ -202,7 +202,12 @@ export function LoginScreen({
                     type="text"
                     autoFocus
                     value={email}
-                    onFocus={() => setIsEmailFocused(true)}
+                    onFocus={(e) => {
+                      setIsEmailFocused(true);
+                      if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                        e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                      }
+                    }}
                     onBlur={() => setIsEmailFocused(false)}
                     onChange={(e) => {
                       setEmail(e.target.value);
@@ -315,7 +320,12 @@ export function LoginScreen({
                       autoFocus
                       disabled={loading}
                       value={password}
-                      onFocus={() => setIsPasswordFocused(true)}
+                      onFocus={(e) => {
+                        setIsPasswordFocused(true);
+                        if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                          e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                      }}
                       onBlur={() => setIsPasswordFocused(false)}
                       onChange={(e) => {
                         setPassword(e.target.value);
