@@ -90,10 +90,26 @@ export async function sendEmailOtp(email: string): Promise<SendEmailOtpResult> {
       });
       console.log('Payload:', signInPayload);
 
-      const { error: sbErr } = await supabase.auth.signInWithOtp({
-        email: signInPayload.email,
-        options: signInPayload.options,
+      let { error: sbErr } = await supabase.auth.signInWithOtp({
+        email: cleanEmail,
+        options: {
+          shouldCreateUser: false,
+          emailRedirectTo: undefined,
+        },
       });
+
+      // If user does not exist in auth.users yet during onboarding, retry with shouldCreateUser: true
+      if (sbErr && (sbErr.message.includes('User not found') || sbErr.message.includes('Signups not allowed') || sbErr.status === 422)) {
+        console.log('ℹ️ User not yet registered in Auth. Retrying signInWithOtp with shouldCreateUser: true...');
+        const retryRes = await supabase.auth.signInWithOtp({
+          email: cleanEmail,
+          options: {
+            shouldCreateUser: true,
+            emailRedirectTo: undefined,
+          },
+        });
+        sbErr = retryRes.error;
+      }
 
       if (!sbErr) {
         sentViaSupabase = true;
