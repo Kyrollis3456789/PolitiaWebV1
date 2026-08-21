@@ -13,6 +13,8 @@ import {
   Loader2,
   Search,
   X,
+  MapPin,
+  Sparkles,
 } from 'lucide-react';
 import { Diocese, Church, Step6ChurchPayload } from '@/types/database.types';
 import { searchChurchesDatabaseAction } from '@/app/actions/location-data';
@@ -28,32 +30,74 @@ export interface Step6ChurchCommitmentProps {
   onBack: () => void;
 }
 
-// Built-in offline fallback data
+// Comprehensive offline fallback dataset for Dioceses across Egypt
 const DEFAULT_DIOCESES: Diocese[] = [
   { id: 'dio-assiut-1', name_ar: 'إيبارشية أسيوط وساحل سليم والبداري', name_en: 'Diocese of Assiut & Dar El Salam' },
+  { id: 'dio-assiut-2', name_ar: 'إيبارشية ديروط وصنبو', name_en: 'Diocese of Dairut & Sanabu' },
+  { id: 'dio-assiut-3', name_ar: 'إيبارشية القوصية ومير', name_en: 'Diocese of El Quseyya & Meir' },
   { id: 'dio-cairo-1', name_ar: 'إيبارشية مصر الجديدة وشرق القاهرة', name_en: 'Diocese of Heliopolis & East Cairo' },
+  { id: 'dio-cairo-2', name_ar: 'إيبارشية شبرا الخيمة وتوابعها', name_en: 'Diocese of Shoubra El Kheima' },
+  { id: 'dio-cairo-3', name_ar: 'إيبارشية المعادي والبساتين', name_en: 'Diocese of Maadi & El Basateen' },
   { id: 'dio-alex-1', name_ar: 'بطريركية الإسكندرية للأقباط الأرثوذكس', name_en: 'Coptic Orthodox Patriarchate of Alexandria' },
   { id: 'dio-giza-1', name_ar: 'إيبارشية الجيزة وتوابعها', name_en: 'Diocese of Giza & Affiliates' },
+  { id: 'dio-giza-2', name_ar: 'إيبارشية 6 أكتوبر والشيخ زايد', name_en: 'Diocese of 6th October & Sheikh Zayed' },
+  { id: 'dio-minya-1', name_ar: 'إيبارشية المنيا وتوابعها', name_en: 'Diocese of Minya & Affiliates' },
+  { id: 'dio-sohag-1', name_ar: 'إيبارشية سوهاج والمنشاة والمراغة', name_en: 'Diocese of Sohag' },
+  { id: 'dio-qena-1', name_ar: 'إيبارشية قنا وتوابعها', name_en: 'Diocese of Qena & Affiliates' },
+  { id: 'dio-luxor-1', name_ar: 'إيبارشية الأقصر وتوابعها', name_en: 'Diocese of Luxor' },
+  { id: 'dio-aswan-1', name_ar: 'إيبارشية أسوان وتوابعها', name_en: 'Diocese of Aswan' },
+  { id: 'dio-redsea-1', name_ar: 'إيبارشية البحر الأحمر (الغردقة)', name_en: 'Diocese of Red Sea (Hurghada)' },
+  { id: 'dio-portsaid-1', name_ar: 'إيبارشية بورسعيد وتوابعها', name_en: 'Diocese of Port Said' },
+  { id: 'dio-gharbia-1', name_ar: 'إيبارشية طنطا وتوابعها', name_en: 'Diocese of Tanta & Gharbia' },
+  { id: 'dio-dakahlia-1', name_ar: 'إيبارشية المنصورة وتوابعها', name_en: 'Diocese of Mansoura' },
 ];
 
+// Comprehensive offline fallback dataset for famous Coptic Churches in Egypt
 const DEFAULT_CHURCHES: Church[] = [
+  // Assiut
   { id: 'ch-assiut-1', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كاتدرائية رئيس الملائكة ميخائيل (الجمهورية)', name_en: 'Archangel Michael Cathedral (Al Gomhoureya)' },
   { id: 'ch-assiut-2', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة الشهيد العظيم مارمرقس (حي السادات)', name_en: 'St. Mark Church (Nasser / Al Sadat)' },
   { id: 'ch-assiut-3', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة الشهيد مارجرجس (يسري راغب والجلاء)', name_en: 'St. George Church (El Galaa / Yousri Ragheb)' },
+  { id: 'ch-assiut-4', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة الشهيد أبانوب النهيسي (حي النميس)', name_en: 'St. Abanoub Church (El Nemis)' },
   { id: 'ch-new-assiut-1', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333322', name_ar: 'كاتدرائية السيدة العذراء وملاك ميخائيل (أسيوط الجديدة)', name_en: 'Virgin Mary & Archangel Michael Cathedral' },
+  { id: 'ch-dairut-1', diocese_id: 'dio-assiut-2', city_id: '33333333-3333-3333-3333-333333333323', name_ar: 'كنيسة السيدة العذراء بديروط', name_en: 'Virgin Mary Church (Dairut)' },
+  { id: 'ch-quseyya-1', diocese_id: 'dio-assiut-3', city_id: '33333333-3333-3333-3333-333333333324', name_ar: 'دير المحرق (السيدة العذراء مريم - القوصية)', name_en: 'Al-Muharraq Monastery (Virgin Mary - El Quseyya)' },
+
+  // Cairo & Heliopolis
   { id: 'ch-cairo-1', diocese_id: 'dio-cairo-1', city_id: '11111111-1111-1111-1111-111133333301', name_ar: 'الكاتدرائية المرقسية بالعباسية (القاهرة)', name_en: 'St. Mark Coptic Orthodox Cathedral (Abbassia)' },
   { id: 'ch-cairo-2', diocese_id: 'dio-cairo-1', city_id: '11111111-1111-1111-1111-111133333301', name_ar: 'كنيسة السيدة العذراء بالزيتون (القاهرة)', name_en: 'Virgin Mary Church (El Zeitoun)' },
   { id: 'ch-cairo-3', diocese_id: 'dio-cairo-1', city_id: '11111111-1111-1111-1111-111133333301', name_ar: 'كنيسة الشهيد مارجرجس بمصر الجديدة', name_en: 'St. George Church (Heliopolis)' },
   { id: 'ch-cairo-4', diocese_id: 'dio-cairo-1', city_id: '11111111-1111-1111-1111-111133333301', name_ar: 'كنيسة العذراء والقديس أثناسيوس بمدينة نصر', name_en: 'Virgin Mary & St. Athanasius (Nasr City)' },
-  { id: 'ch-alex-1', diocese_id: 'dio-alex-1', city_id: '22222222-2222-2222-2222-222233333301', name_ar: 'دير الشهيد العظيم مارمينا بالعجايبي (مريوط)', name_en: 'St. Mina Monastery Church (Mariout)' },
-  { id: 'ch-alex-2', diocese_id: 'dio-alex-1', city_id: '22222222-2222-2222-2222-222233333301', name_ar: 'كنيسة الشهيد العظيم مارمرقس بكليوباترا (الإسكندرية)', name_en: 'St. Mark Church (Cleopatra)' },
+  { id: 'ch-cairo-5', diocese_id: 'dio-cairo-3', city_id: '11111111-1111-1111-1111-111133333301', name_ar: 'كنيسة المعلقة (مصر القديمة)', name_en: 'The Hanging Church (Old Cairo)' },
+  { id: 'ch-cairo-6', diocese_id: 'dio-cairo-3', city_id: '11111111-1111-1111-1111-111133333301', name_ar: 'كنيسة السيدة العذراء بالمعادي', name_en: 'Virgin Mary Church (Maadi)' },
+
+  // Giza & 6th October
   { id: 'ch-giza-1', diocese_id: 'dio-giza-1', city_id: '44444444-4444-4444-4444-444433333301', name_ar: 'كنيسة الشهيد مارمينا بالدقي (الجيزة)', name_en: 'St. Mina Church (Dokki)' },
-  { id: 'ch-assiut-4', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة الشهيد أبانوب النهيسي (حي النميس)', name_en: 'St. Abanoub Church (El Nemis)' },
+  { id: 'ch-giza-2', diocese_id: 'dio-giza-1', city_id: '44444444-4444-4444-4444-444433333301', name_ar: 'كنيسة العذراء والملاك بالدقي', name_en: 'Virgin Mary & Archangel (Dokki)' },
+  { id: 'ch-october-1', diocese_id: 'dio-giza-2', city_id: '44444444-4444-4444-4444-444433333302', name_ar: 'كنيسة السيدة العذراء ومارمرقس (6 أكتوبر)', name_en: 'Virgin Mary & St. Mark (6th of October)' },
+
+  // Alexandria
+  { id: 'ch-alex-1', diocese_id: 'dio-alex-1', city_id: '22222222-2222-2222-2222-222233333301', name_ar: 'الكاتدرائية المرقسية بمحطة الرمل (الإسكندرية)', name_en: 'St. Mark Cathedral (Ramleh, Alexandria)' },
+  { id: 'ch-alex-2', diocese_id: 'dio-alex-1', city_id: '22222222-2222-2222-2222-222233333301', name_ar: 'كنيسة الشهيد العظيم مارمرقس بكليوباترا', name_en: 'St. Mark Church (Cleopatra, Alexandria)' },
+  { id: 'ch-alex-3', diocese_id: 'dio-alex-1', city_id: '22222222-2222-2222-2222-222233333301', name_ar: 'دير الشهيد العظيم مارمينا العجائبي (بمريوط)', name_en: 'St. Mina Monastery (Mariout, Alexandria)' },
+
+  // Upper Egypt (Minya, Sohag, Qena, Luxor, Aswan)
+  { id: 'ch-minya-1', diocese_id: 'dio-minya-1', city_id: '55555555-5555-5555-5555-555533333301', name_ar: 'كنيسة الام سارافيم والشهيد مارجرجس بالمنيا', name_en: 'St. George Cathedral (Minya)' },
+  { id: 'ch-sohag-1', diocese_id: 'dio-sohag-1', city_id: '66666666-6666-6666-6666-666633333301', name_ar: 'كنيسة السيدة العذراء بسوهاج', name_en: 'Virgin Mary Church (Sohag)' },
+  { id: 'ch-qena-1', diocese_id: 'dio-qena-1', city_id: '77777777-7777-7777-7777-777733333301', name_ar: 'كنيسة مارجرجس بقنا', name_en: 'St. George Church (Qena)' },
+  { id: 'ch-luxor-1', diocese_id: 'dio-luxor-1', city_id: '88888888-8888-8888-8888-888833333301', name_ar: 'كاتدرائية السيدة العذراء بالأقصر', name_en: 'Virgin Mary Cathedral (Luxor)' },
+  { id: 'ch-aswan-1', diocese_id: 'dio-aswan-1', city_id: '99999999-9999-9999-9999-999933333301', name_ar: 'كاتدرائية رئيس الملائكة ميخائيل بأسوان', name_en: 'Archangel Michael Cathedral (Aswan)' },
+
+  // Coastal & Canal (Red Sea, Port Said, Tanta, Mansoura)
+  { id: 'ch-redsea-1', diocese_id: 'dio-redsea-1', city_id: '10101010-1010-1010-1010-101033333301', name_ar: 'كنيسة الأنبا شنودة بالغردقة', name_en: 'St. Shenouda Church (Hurghada)' },
+  { id: 'ch-portsaid-1', diocese_id: 'dio-portsaid-1', city_id: '12121212-1212-1212-1212-121233333301', name_ar: 'كاتدرائية العذراء والملاك ببورسعيد', name_en: 'Virgin Mary & Archangel Cathedral (Port Said)' },
+  { id: 'ch-tanta-1', diocese_id: 'dio-gharbia-1', city_id: '13131313-1313-1313-1313-131333333301', name_ar: 'كنيسة الشهيد مارجرجس بطنطا', name_en: 'St. George Cathedral (Tanta)' },
+  { id: 'ch-mansoura-1', diocese_id: 'dio-dakahlia-1', city_id: '14141414-1414-1414-1414-141433333301', name_ar: 'كنيسة العذراء بالمنصورة', name_en: 'Virgin Mary Church (Mansoura)' },
 ];
 
 const MAX_SECONDARY_CHURCHES = 10;
 
-/* Custom Account-Picker Dropdown for Churches with Live Supabase DB Search */
+/* Custom Account-Picker Dropdown for Churches with Location-Priority Search */
 interface ChurchDropdownProps {
   id: string;
   label: string;
@@ -62,6 +106,8 @@ interface ChurchDropdownProps {
   value: string;
   onChange: (churchId: string) => void;
   churches: Church[];
+  primaryCityId?: string;
+  secondaryCityId?: string;
   isRtl?: boolean;
   placeholder?: string;
   placeholderAr?: string;
@@ -76,6 +122,8 @@ function AccountPickerChurchDropdown({
   value,
   onChange,
   churches,
+  primaryCityId,
+  secondaryCityId,
   isRtl = false,
   placeholder = 'Select church...',
   placeholderAr = 'اختر الكنيسة...',
@@ -134,13 +182,31 @@ function AccountPickerChurchDropdown({
     return combinedChurches.find((c) => c.id === value);
   }, [combinedChurches, value]);
 
-  const filteredChurches = useMemo(() => {
-    if (!searchQuery.trim()) return combinedChurches;
-    const q = searchQuery.toLowerCase().trim();
-    return combinedChurches.filter(
-      (c) => c.name_en.toLowerCase().includes(q) || c.name_ar.includes(q)
-    );
-  }, [combinedChurches, searchQuery]);
+  // Location-Priority Sorting & Query Filtering
+  const filteredAndSortedChurches = useMemo(() => {
+    let list = combinedChurches;
+
+    // 1. Text Search Filter
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      list = list.filter(
+        (c) => c.name_en.toLowerCase().includes(q) || c.name_ar.includes(q)
+      );
+    }
+
+    // 2. Priority Sorting by Location
+    return [...list].sort((a, b) => {
+      const aIsPrimary = primaryCityId && a.city_id === primaryCityId ? 1 : 0;
+      const bIsPrimary = primaryCityId && b.city_id === primaryCityId ? 1 : 0;
+      if (aIsPrimary !== bIsPrimary) return bIsPrimary - aIsPrimary;
+
+      const aIsSecondary = secondaryCityId && a.city_id === secondaryCityId ? 1 : 0;
+      const bIsSecondary = secondaryCityId && b.city_id === secondaryCityId ? 1 : 0;
+      if (aIsSecondary !== bIsSecondary) return bIsSecondary - aIsSecondary;
+
+      return (isRtl ? a.name_ar : a.name_en).localeCompare(isRtl ? b.name_ar : b.name_en);
+    });
+  }, [combinedChurches, searchQuery, primaryCityId, secondaryCityId, isRtl]);
 
   return (
     <div className="relative space-y-1.5" ref={containerRef}>
@@ -171,8 +237,14 @@ function AccountPickerChurchDropdown({
               <div className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate leading-snug">
                 {isRtl ? selectedChurch.name_ar : selectedChurch.name_en}
               </div>
-              <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate leading-snug">
-                {isRtl ? selectedChurch.name_en : selectedChurch.name_ar}
+              <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate leading-snug flex items-center gap-1.5">
+                <span>{isRtl ? selectedChurch.name_en : selectedChurch.name_ar}</span>
+                {primaryCityId && selectedChurch.city_id === primaryCityId && (
+                  <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/80 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800">
+                    <MapPin className="w-2.5 h-2.5" />
+                    <bdi>{isRtl ? 'الرئيسي' : 'Primary Area'}</bdi>
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -210,7 +282,7 @@ function AccountPickerChurchDropdown({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={isRtl ? 'ابحث في قاعدة البيانات عن الكنيسة...' : 'Search database for church...'}
+                  placeholder={isRtl ? 'ابحث في كافة كنائس مصر...' : 'Search all churches in Egypt...'}
                   autoFocus
                   className="w-full ps-8 pe-7 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
@@ -228,15 +300,18 @@ function AccountPickerChurchDropdown({
               </div>
             </div>
 
-            {/* Account-Picker Tile List */}
+            {/* Account-Picker Tile List with Location-Priority Badges */}
             <div className="overflow-y-auto p-1.5 space-y-1 flex-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-300 dark:[&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-full">
-              {filteredChurches.length === 0 ? (
+              {filteredAndSortedChurches.length === 0 ? (
                 <div className="p-4 text-center text-xs text-slate-400">
-                  {isRtl ? 'لم يتم العثور على كنائس في قاعدة البيانات' : 'No churches found in database'}
+                  {isRtl ? 'لم يتم العثور على كنائس بهذا الاسم' : 'No churches found'}
                 </div>
               ) : (
-                filteredChurches.map((ch) => {
+                filteredAndSortedChurches.map((ch) => {
                   const isSelected = ch.id === value;
+                  const isPrimaryMatch = primaryCityId && ch.city_id === primaryCityId;
+                  const isSecondaryMatch = secondaryCityId && ch.city_id === secondaryCityId;
+
                   return (
                     <button
                       key={ch.id}
@@ -260,6 +335,8 @@ function AccountPickerChurchDropdown({
                             "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors shadow-xs",
                             isSelected
                               ? "bg-blue-600 text-white"
+                              : isPrimaryMatch
+                              ? "bg-blue-100 dark:bg-blue-950 text-blue-600 dark:text-blue-400"
                               : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 group-hover:bg-blue-100 dark:group-hover:bg-blue-950 group-hover:text-blue-600 dark:group-hover:text-blue-400"
                           )}
                         >
@@ -267,8 +344,20 @@ function AccountPickerChurchDropdown({
                         </div>
 
                         <div className="min-w-0 flex-1">
-                          <div className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate">
-                            {isRtl ? ch.name_ar : ch.name_en}
+                          <div className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 truncate flex items-center gap-1.5">
+                            <span>{isRtl ? ch.name_ar : ch.name_en}</span>
+                            {isPrimaryMatch && (
+                              <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-950 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800">
+                                <Sparkles className="w-2.5 h-2.5 text-blue-500" />
+                                <bdi>{isRtl ? 'منطقتك الأساسية' : 'Primary Area'}</bdi>
+                              </span>
+                            )}
+                            {isSecondaryMatch && !isPrimaryMatch && (
+                              <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950 px-1.5 py-0.5 rounded border border-purple-200 dark:border-purple-800">
+                                <MapPin className="w-2.5 h-2.5 text-purple-500" />
+                                <bdi>{isRtl ? 'عنوانك الثانوي' : 'Secondary Area'}</bdi>
+                              </span>
+                            )}
                           </div>
                           <div className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
                             {isRtl ? ch.name_en : ch.name_ar}
@@ -327,7 +416,7 @@ export function Step6ChurchCommitment({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // Filter Primary Churches by primaryCityId
+  // Filter & Rank Primary Churches by Location
   const primaryFilteredChurches = useMemo(() => {
     if (showAllPrimaryChurches || !primaryCityId) {
       return allChurches;
@@ -336,7 +425,7 @@ export function Step6ChurchCommitment({
     return filtered.length > 0 ? filtered : allChurches;
   }, [allChurches, primaryCityId, showAllPrimaryChurches]);
 
-  // Filter Secondary Churches by secondaryCityId
+  // Filter & Rank Secondary Churches by Location
   const secondaryFilteredChurches = useMemo(() => {
     if (showAllSecondaryChurches || !secondaryCityId) {
       return allChurches;
@@ -496,6 +585,8 @@ export function Step6ChurchCommitment({
               value={primaryChurchId}
               onChange={handlePrimaryChurchChange}
               churches={primaryFilteredChurches}
+              primaryCityId={primaryCityId}
+              secondaryCityId={secondaryCityId}
               isRtl={isRtl}
               placeholder="Search database for primary church..."
               placeholderAr="ابحث في قاعدة البيانات عن الكنيسة..."
@@ -537,6 +628,8 @@ export function Step6ChurchCommitment({
                   value={secId}
                   onChange={(chId) => handleSecondaryChurchChangeAt(idx, chId)}
                   churches={secondaryFilteredChurches}
+                  primaryCityId={primaryCityId}
+                  secondaryCityId={secondaryCityId}
                   isRtl={isRtl}
                   placeholder="Search database for secondary church..."
                   placeholderAr="ابحث في قاعدة البيانات عن الكنيسة الثانوية..."
