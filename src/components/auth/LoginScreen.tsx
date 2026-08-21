@@ -128,12 +128,12 @@ export function LoginScreen({
 
   const filteredLocales = langSearch.trim()
     ? SUPPORTED_LOCALES.filter((loc) => {
-        const q = langSearch.toLowerCase();
-        return (
-          loc.toLowerCase().includes(q) ||
-          getLocaleDisplayName(loc).toLowerCase().includes(q)
-        );
-      })
+      const q = langSearch.toLowerCase();
+      return (
+        loc.toLowerCase().includes(q) ||
+        getLocaleDisplayName(loc).toLowerCase().includes(q)
+      );
+    })
     : SUPPORTED_LOCALES;
 
   const handleLanguageChange = (newLocale: string) => {
@@ -163,12 +163,12 @@ export function LoginScreen({
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
-      className="relative w-full min-h-[100dvh] sm:min-h-screen shared-bg flex flex-col justify-between items-center p-0 md:p-8 transition-colors duration-300 overflow-x-hidden"
+      className="relative w-full min-h-screen shared-bg flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 transition-colors duration-300 overflow-x-hidden"
     >
-      {/* Main Authentication Card Container */}
-      <div className="relative z-20 w-full max-w-[1040px] flex flex-col md:flex-row gap-0 md:gap-14 min-h-[100dvh] md:min-h-fit h-auto items-stretch md:items-start transition-all duration-300 ease-in-out md:bg-white/95 md:dark:bg-[#1B212D]/95 md:rounded-[36px] md:p-12 md:shadow-2xl md:border md:border-white/60 md:dark:border-slate-800/80">
-        {/* Top Section (Mobile Background / Desktop Left Column) */}
-        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start px-5 pt-6 pb-4 md:p-0 min-h-auto md:min-h-[320px]">
+      {/* Main Authentication Card */}
+      <div className="relative z-20 w-full max-w-[1040px] bg-white/95 dark:bg-[#1B212D]/95 rounded-[28px] sm:rounded-[36px] p-6 sm:p-8 md:p-12 shadow-2xl border border-white/60 dark:border-slate-800/80 flex flex-col md:flex-row gap-8 md:gap-14 min-h-fit h-auto items-start transition-all duration-300 ease-in-out">
+        {/* Left Column */}
+        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start min-h-auto md:min-h-[320px]">
           <div className="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800/90 p-2 shadow-sm border border-slate-200/60 dark:border-slate-700/80 flex items-center justify-center transition-all">
             <Image
               src="/logo.webp"
@@ -182,17 +182,17 @@ export function LoginScreen({
           </div>
 
           <div className="mt-6 space-y-2">
-            <h1 className="text-[34px] sm:text-[38px] font-normal text-[#1F1F1F] dark:text-[#E3E3E3] tracking-tight leading-[1.15]">
+            <h1 className="text-[34px] sm:text-[38px] font-bold md:font-normal text-white md:text-[#1F1F1F] dark:md:text-[#E3E3E3] tracking-tight leading-[1.15] drop-shadow-sm md:drop-shadow-none">
               <bdi>{t('title')}</bdi>
             </h1>
-            <p className="text-[16px] text-[#1F1F1F] dark:text-[#C4C7C5] font-normal leading-relaxed">
+            <p className="text-[16px] text-slate-100 md:text-[#1F1F1F] dark:md:text-[#C4C7C5] font-normal leading-relaxed drop-shadow-xs md:drop-shadow-none">
               <bdi>{t('subtitle')}</bdi>
             </p>
           </div>
         </div>
 
-        {/* Bottom Section (Mobile Bottom Sheet / Desktop Right Column) */}
-        <div className="w-full md:w-1/2 flex-1 flex flex-col justify-between bg-white/95 dark:bg-[#1B212D]/95 md:bg-transparent md:dark:bg-transparent rounded-t-[32px] md:rounded-none p-5 pt-6 sm:p-8 md:p-0 shadow-2xl md:shadow-none border-t border-white/60 dark:border-slate-800/80 md:border-0 min-h-[55vh] md:min-h-[320px] overflow-hidden transition-all duration-300 ease-in-out mt-auto md:mt-0">
+        {/* Right Column: Interactive Forms */}
+        <div className="w-full md:w-1/2 flex flex-col justify-between min-h-auto md:min-h-[320px] overflow-hidden transition-all duration-300 ease-in-out">
           {step === 1 ? (
             <form onSubmit={handleEmailNext} className="w-full flex-1 flex flex-col justify-between">
               <div className="my-auto space-y-4 w-full">
@@ -208,27 +208,24 @@ export function LoginScreen({
                       setEmail(e.target.value);
                       if (errorMessage) setErrorMessage(null);
                     }}
-                    className={`w-full h-[56px] px-4 text-[16px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
-                      errorMessage
+                    className={`w-full h-[56px] px-4 text-[16px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${errorMessage
                         ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
                         : isEmailFocused
-                        ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                        : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
-                    }`}
+                          ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                          : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                      }`}
                   />
                   <label
                     htmlFor="email-input"
-                    className={`absolute pointer-events-none transition-all duration-150 start-3 ${
-                      isEmailFloating
+                    className={`absolute pointer-events-none transition-all duration-150 start-3 ${isEmailFloating
                         ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
                         : 'top-4 text-[16px]'
-                    } ${
-                      errorMessage
+                      } ${errorMessage
                         ? 'text-[#B3261E] dark:text-[#F2B8B5]'
                         : isEmailFocused
-                        ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                        : 'text-[#444746] dark:text-[#8E918F]'
-                    }`}
+                          ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                          : 'text-[#444746] dark:text-[#8E918F]'
+                      }`}
                   >
                     <bdi>{t('identifierLabel')}</bdi>
                   </label>
@@ -324,27 +321,24 @@ export function LoginScreen({
                         setPassword(e.target.value);
                         if (errorMessage) setErrorMessage(null);
                       }}
-                      className={`w-full h-[56px] px-4 text-[16px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all disabled:opacity-50 box-border ${
-                        errorMessage
+                      className={`w-full h-[56px] px-4 text-[16px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all disabled:opacity-50 box-border ${errorMessage
                           ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
                           : isPasswordFocused
-                          ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                          : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
-                      }`}
+                            ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                            : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                        }`}
                     />
                     <label
                       htmlFor="password-input"
-                      className={`absolute pointer-events-none transition-all duration-150 start-3 ${
-                        isPasswordFloating
+                      className={`absolute pointer-events-none transition-all duration-150 start-3 ${isPasswordFloating
                           ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
                           : 'top-4 text-[16px]'
-                      } ${
-                        errorMessage
+                        } ${errorMessage
                           ? 'text-[#B3261E] dark:text-[#F2B8B5]'
                           : isPasswordFocused
-                          ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                          : 'text-[#444746] dark:text-[#8E918F]'
-                      }`}
+                            ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                            : 'text-[#444746] dark:text-[#8E918F]'
+                        }`}
                     >
                       <bdi>{t('passwordLabel')}</bdi>
                     </label>
@@ -441,11 +435,10 @@ export function LoginScreen({
                         key={loc}
                         type="button"
                         onClick={() => handleLanguageChange(loc)}
-                        className={`w-full text-start px-2.5 py-2 rounded-lg transition-colors cursor-pointer flex items-center justify-between gap-2 ${
-                          locale === loc
+                        className={`w-full text-start px-2.5 py-2 rounded-lg transition-colors cursor-pointer flex items-center justify-between gap-2 ${locale === loc
                             ? 'bg-[#E8F0FE] dark:bg-[#1E293B] text-[#0B57D0] dark:text-[#A8C7FA] font-medium'
                             : 'hover:bg-gray-100 dark:hover:bg-slate-800 text-[#1F1F1F] dark:text-[#E3E3E3]'
-                        }`}
+                          }`}
                       >
                         <span className="truncate">{getLocaleDisplayName(loc)}</span>
                         <span className="text-[10px] text-gray-400 font-mono shrink-0">{loc}</span>

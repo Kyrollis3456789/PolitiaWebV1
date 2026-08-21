@@ -185,7 +185,7 @@ function clearAllRegistrationDrafts() {
     keysToRemove.forEach((k) => {
       try {
         localStorage.removeItem(k);
-      } catch {}
+      } catch { }
     });
     sessionStorage.clear();
   } catch (e) {
@@ -392,7 +392,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
         setMainStepIndex(savedMain);
       } else {
         setMainStepIndex(1);
-        try { localStorage.removeItem('politia_reg_main_step'); } catch {}
+        try { localStorage.removeItem('politia_reg_main_step'); } catch { }
       }
       if (savedSub >= 1) setSubStepIndex(savedSub);
 
@@ -480,7 +480,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
       if (hob) setSelectedHobbies(hob);
       const langList = masterDraft?.selectedLanguages ?? getLocalJson('languages', null);
       if (langList) setSelectedLanguages(langList);
-    } catch {}
+    } catch { }
   }, []);
 
   // OTP Countdown timer
@@ -918,12 +918,12 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   // Language changer
   const filteredLocales = langSearch.trim()
     ? SUPPORTED_LOCALES.filter((loc: string) => {
-        const q = langSearch.toLowerCase();
-        return (
-          loc.toLowerCase().includes(q) ||
-          getLocaleDisplayName(loc).toLowerCase().includes(q)
-        );
-      })
+      const q = langSearch.toLowerCase();
+      return (
+        loc.toLowerCase().includes(q) ||
+        getLocaleDisplayName(loc).toLowerCase().includes(q)
+      );
+    })
     : SUPPORTED_LOCALES;
 
   const handleLanguageChange = (newLocale: string) => {
@@ -1238,7 +1238,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
           if (!nationalIdValidation.isValid) {
             setErrorMessage(
               nationalIdValidation.error ||
-                (isRtl ? 'الرقم القومي غير صحيح (14 رقماً)' : 'Invalid National ID number (must be 14 digits).')
+              (isRtl ? 'الرقم القومي غير صحيح (14 رقماً)' : 'Invalid National ID number (must be 14 digits).')
             );
             return;
           }
@@ -1255,7 +1255,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
           if (!nationalIdValidation.isValid) {
             setErrorMessage(
               nationalIdValidation.error ||
-                (isRtl ? 'الرقم القومي غير صحيح (14 رقماً)' : 'Invalid National ID number (must be 14 digits).')
+              (isRtl ? 'الرقم القومي غير صحيح (14 رقماً)' : 'Invalid National ID number (must be 14 digits).')
             );
             return;
           }
@@ -1773,8 +1773,8 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
     >
       {/* Main Authentication Card Container */}
       <div className="relative z-20 w-full max-w-[1040px] flex flex-col md:flex-row gap-0 md:gap-14 min-h-[100dvh] md:min-h-fit h-auto items-stretch md:items-start transition-all duration-300 ease-in-out md:bg-white/95 md:dark:bg-[#1B212D]/95 md:rounded-[36px] md:p-12 md:shadow-2xl md:border md:border-white/60 md:dark:border-slate-800/80">
-        {/* Top Section (Mobile Background / Desktop Left Column) */}
-        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start px-5 pt-6 pb-4 md:p-0 min-h-0 md:min-h-[420px]">
+        {/* Top Section (Mobile Photo Header / Desktop Left Column) */}
+        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start px-5 pt-6 pb-6 md:p-0 min-h-0 md:min-h-[420px]">
           <div className="space-y-3 w-full">
             {/* Integrated Unified Step Progress Bar & Milestone Indicator */}
             {mainStepIndex <= 8 && (
@@ -1791,31 +1791,31 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       style={{ width: 'auto', height: 'auto' }}
                       className="object-contain shrink-0"
                     />
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#0B57D0] dark:text-[#93C5FD] border border-blue-200/80 dark:border-blue-800 text-xs font-bold shadow-xs">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#0B57D0] dark:bg-[#60A5FA] animate-pulse" />
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 md:bg-blue-50 dark:md:bg-blue-950/60 text-white md:text-[#0B57D0] dark:md:text-[#93C5FD] border border-white/30 md:border-blue-200/80 dark:md:border-blue-800 text-xs font-bold shadow-xs backdrop-blur-md">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white md:bg-[#0B57D0] dark:md:bg-[#60A5FA] animate-pulse" />
                       <span>
                         <bdi suppressHydrationWarning>
                           {mainStepIndex === 8
                             ? isRtl ? 'الخطوة الأخيرة: كلمة المرور' : 'Final Step: Password'
                             : isRtl
-                            ? `الخطوة ${mainStepIndex} من 7 • ${currentMainConfig?.titleAr}`
-                            : `Step ${mainStepIndex} of 7 • ${currentMainConfig?.titleEn}`}
+                              ? `الخطوة ${mainStepIndex} من 7 • ${currentMainConfig?.titleAr}`
+                              : `Step ${mainStepIndex} of 7 • ${currentMainConfig?.titleEn}`}
                         </bdi>
                       </span>
                     </span>
                   </div>
 
                   {/* Real-Time Local Draft Saved Visual Cue */}
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 text-[11px] font-semibold">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/25 md:bg-emerald-50 dark:md:bg-emerald-950/40 text-emerald-100 md:text-emerald-700 dark:md:text-emerald-300 border border-emerald-400/40 md:border-emerald-200 dark:md:border-emerald-800/60 text-[11px] font-semibold backdrop-blur-md">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300 md:text-emerald-500 shrink-0" />
                     <span><bdi>{isRtl ? 'المسودة محفوظة' : 'Draft saved'}</bdi></span>
                   </span>
                 </div>
 
                 {/* Smooth Animated Progress Bar */}
-                <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden relative">
+                <div className="w-full h-1.5 rounded-full bg-white/30 md:bg-slate-100 dark:md:bg-slate-800 overflow-hidden relative backdrop-blur-xs">
                   <div
-                    className="h-full bg-gradient-to-r from-[#0B57D0] to-[#3B82F6] dark:from-[#3B82F6] dark:to-[#60A5FA] rounded-full transition-all duration-300 shadow-xs"
+                    className="h-full bg-gradient-to-r from-white to-blue-200 md:from-[#0B57D0] md:to-[#3B82F6] dark:md:from-[#3B82F6] dark:md:to-[#60A5FA] rounded-full transition-all duration-300 shadow-xs"
                     style={{ width: `${progressPercentage}%` }}
                   />
                 </div>
@@ -1823,10 +1823,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
             )}
 
             {/* Dynamic Step Title & Subtitle */}
-            <h1 className="text-[28px] sm:text-[34px] font-normal text-[#1F1F1F] dark:text-[#E3E3E3] tracking-tight leading-[1.15] pt-1">
+            <h1 className="text-[28px] sm:text-[34px] font-bold md:font-normal text-white md:text-[#1F1F1F] dark:md:text-[#E3E3E3] tracking-tight leading-[1.15] pt-1 drop-shadow-sm md:drop-shadow-none">
               <bdi suppressHydrationWarning>{header.title}</bdi>
             </h1>
-            <p className="text-[14px] sm:text-[16px] text-[#1F1F1F] dark:text-[#C4C7C5] font-normal leading-relaxed">
+            <p className="text-[14px] sm:text-[16px] text-slate-100 md:text-[#1F1F1F] dark:md:text-[#C4C7C5] font-normal leading-relaxed drop-shadow-xs md:drop-shadow-none">
               <bdi suppressHydrationWarning>{header.subtitle}</bdi>
             </p>
           </div>
@@ -1842,343 +1842,328 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 className={`w-full flex-1 flex flex-col justify-center py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
               >
                 {/* 1.1: English Full Name */}
-              {subStepIndex === 1 && (
-                <div className="space-y-3 py-2">
-                  <div className="relative">
-                    <input
-                      id="reg-full-name-en"
-                      data-testid="input-fullname-en"
-                      type="text"
-                      dir="ltr"
-                      autoFocus
-                      value={englishFullName}
-                      onFocus={() => setIsEnglishFullNameFocused(true)}
-                      onBlur={() => setIsEnglishFullNameFocused(false)}
-                      onChange={(e) => {
-                        setEnglishFullName(autoCapitalizeEnglishName(e.target.value));
-                      }}
-                      className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
-                        errorMessage
-                          ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                          : isEnglishFullNameFocused
-                          ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                          : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
-                      }`}
-                    />
-                    <label
-                      htmlFor="reg-full-name-en"
-                      className={`absolute pointer-events-none transition-all duration-150 start-3 ${
-                        isEnglishFullNameFloating
-                          ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
-                          : 'top-4 text-[15px]'
-                      } ${
-                        errorMessage
-                          ? 'text-[#B3261E] dark:text-[#F2B8B5]'
-                          : isEnglishFullNameFocused
-                          ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                          : 'text-[#444746] dark:text-[#8E918F]'
-                      }`}
-                    >
-                      <bdi>{isRtl ? 'الاسم الرباعي بالإنجليزية' : 'Full Name (English)'}</bdi>
-                    </label>
+                {subStepIndex === 1 && (
+                  <div className="space-y-3 py-2">
+                    <div className="relative">
+                      <input
+                        id="reg-full-name-en"
+                        data-testid="input-fullname-en"
+                        type="text"
+                        dir="ltr"
+                        autoFocus
+                        value={englishFullName}
+                        onFocus={() => setIsEnglishFullNameFocused(true)}
+                        onBlur={() => setIsEnglishFullNameFocused(false)}
+                        onChange={(e) => {
+                          setEnglishFullName(autoCapitalizeEnglishName(e.target.value));
+                        }}
+                        className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${errorMessage
+                            ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                            : isEnglishFullNameFocused
+                              ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                              : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                          }`}
+                      />
+                      <label
+                        htmlFor="reg-full-name-en"
+                        className={`absolute pointer-events-none transition-all duration-150 start-3 ${isEnglishFullNameFloating
+                            ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
+                            : 'top-4 text-[15px]'
+                          } ${errorMessage
+                            ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                            : isEnglishFullNameFocused
+                              ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                              : 'text-[#444746] dark:text-[#8E918F]'
+                          }`}
+                      >
+                        <bdi>{isRtl ? 'الاسم الرباعي بالإنجليزية' : 'Full Name (English)'}</bdi>
+                      </label>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* 1.2: Arabic Full Name */}
-              {subStepIndex === 2 && (
-                <div className="space-y-3 py-2">
-                  <div className="relative">
-                    <input
-                      id="reg-full-name-ar"
-                      data-testid="input-fullname-ar"
-                      type="text"
-                      dir="rtl"
-                      autoFocus
-                      value={arabicFullName}
-                      onFocus={() => setIsArabicFullNameFocused(true)}
-                      onBlur={() => setIsArabicFullNameFocused(false)}
-                      onChange={(e) => {
-                        setArabicFullName(e.target.value);
-                      }}
-                      className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border text-right ${
-                        errorMessage
-                          ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                          : isArabicFullNameFocused
-                          ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                          : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
-                      }`}
-                    />
-                    <label
-                      htmlFor="reg-full-name-ar"
-                      className={`absolute pointer-events-none transition-all duration-150 start-3 ${
-                        isArabicFullNameFloating
-                          ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
-                          : 'top-4 text-[15px]'
-                      } ${
-                        errorMessage
-                          ? 'text-[#B3261E] dark:text-[#F2B8B5]'
-                          : isArabicFullNameFocused
-                          ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                          : 'text-[#444746] dark:text-[#8E918F]'
-                      }`}
-                    >
-                      <bdi>{isRtl ? 'الاسم الرباعي باللغة العربية' : 'Full Name (Arabic)'}</bdi>
-                    </label>
+                {/* 1.2: Arabic Full Name */}
+                {subStepIndex === 2 && (
+                  <div className="space-y-3 py-2">
+                    <div className="relative">
+                      <input
+                        id="reg-full-name-ar"
+                        data-testid="input-fullname-ar"
+                        type="text"
+                        dir="rtl"
+                        autoFocus
+                        value={arabicFullName}
+                        onFocus={() => setIsArabicFullNameFocused(true)}
+                        onBlur={() => setIsArabicFullNameFocused(false)}
+                        onChange={(e) => {
+                          setArabicFullName(e.target.value);
+                        }}
+                        className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border text-right ${errorMessage
+                            ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                            : isArabicFullNameFocused
+                              ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                              : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                          }`}
+                      />
+                      <label
+                        htmlFor="reg-full-name-ar"
+                        className={`absolute pointer-events-none transition-all duration-150 start-3 ${isArabicFullNameFloating
+                            ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
+                            : 'top-4 text-[15px]'
+                          } ${errorMessage
+                            ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                            : isArabicFullNameFocused
+                              ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                              : 'text-[#444746] dark:text-[#8E918F]'
+                          }`}
+                      >
+                        <bdi>{isRtl ? 'الاسم الرباعي باللغة العربية' : 'Full Name (Arabic)'}</bdi>
+                      </label>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* 1.3: Gender */}
-              {subStepIndex === 3 && (
-                <div className="grid grid-cols-2 gap-3.5 py-2">
-                  <button
-                    type="button"
-                    data-testid="gender-option-male"
-                    onClick={() => setGender('Male')}
-                    className={`relative p-5 rounded-2xl border-2 flex flex-col items-center justify-center gap-2.5 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 ${
-                      gender === 'Male'
-                        ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/80 dark:bg-blue-950/40 font-semibold text-[#0B57D0] dark:text-[#A8C7FA] shadow-xs'
-                        : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    {gender === 'Male' && (
-                      <span className="absolute top-2.5 end-2.5 w-5 h-5 rounded-full bg-[#0B57D0] text-white flex items-center justify-center text-[10px] shadow-xs">
-                        <Check className="w-3 h-3 stroke-[2.5]" />
+                {/* 1.3: Gender */}
+                {subStepIndex === 3 && (
+                  <div className="grid grid-cols-2 gap-3.5 py-2">
+                    <button
+                      type="button"
+                      data-testid="gender-option-male"
+                      onClick={() => setGender('Male')}
+                      className={`relative p-5 rounded-2xl border-2 flex flex-col items-center justify-center gap-2.5 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 ${gender === 'Male'
+                          ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/80 dark:bg-blue-950/40 font-semibold text-[#0B57D0] dark:text-[#A8C7FA] shadow-xs'
+                          : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-300'
+                        }`}
+                    >
+                      {gender === 'Male' && (
+                        <span className="absolute top-2.5 end-2.5 w-5 h-5 rounded-full bg-[#0B57D0] text-white flex items-center justify-center text-[10px] shadow-xs">
+                          <Check className="w-3 h-3 stroke-[2.5]" />
+                        </span>
+                      )}
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${gender === 'Male' ? 'bg-blue-100 dark:bg-blue-900/60 text-[#0B57D0] dark:text-[#A8C7FA]' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                        }`}>
+                        <User className="w-5 h-5" strokeWidth={1.75} />
+                      </div>
+                      <span className="text-xs sm:text-sm font-bold"><bdi>{isRtl ? 'ذكر' : 'Male'}</bdi></span>
+                    </button>
+
+                    <button
+                      type="button"
+                      data-testid="gender-option-female"
+                      onClick={() => setGender('Female')}
+                      className={`relative p-5 rounded-2xl border-2 flex flex-col items-center justify-center gap-2.5 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 ${gender === 'Female'
+                          ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-purple-50/80 dark:bg-purple-950/40 font-semibold text-purple-700 dark:text-purple-300 shadow-xs'
+                          : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-300'
+                        }`}
+                    >
+                      {gender === 'Female' && (
+                        <span className="absolute top-2.5 end-2.5 w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px] shadow-xs">
+                          <Check className="w-3 h-3 stroke-[2.5]" />
+                        </span>
+                      )}
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${gender === 'Female' ? 'bg-purple-100 dark:bg-purple-900/60 text-purple-600 dark:text-purple-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                        }`}>
+                        <UserCheck className="w-5 h-5" strokeWidth={1.75} />
+                      </div>
+                      <span className="text-xs sm:text-sm font-bold"><bdi>{isRtl ? 'أنثى' : 'Female'}</bdi></span>
+                    </button>
+                  </div>
+                )}
+
+                {/* 1.4: Date of Birth */}
+                {subStepIndex === 4 && (
+                  <div className="space-y-3 py-2">
+                    <div className="relative">
+                      <input
+                        id="reg-dob"
+                        data-testid="input-dob"
+                        type="date"
+                        autoFocus
+                        min="1920-01-01"
+                        max={new Date().toISOString().split('T')[0]}
+                        value={dob || ''}
+                        onFocus={() => setIsDobFocused(true)}
+                        onBlur={() => setIsDobFocused(false)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setDob(val);
+                          if (errorMessage) setErrorMessage(null);
+                        }}
+                        onInput={(e: React.FormEvent<HTMLInputElement>) => {
+                          const val = (e.target as HTMLInputElement).value;
+                          setDob(val);
+                          if (errorMessage) setErrorMessage(null);
+                        }}
+                        className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${errorMessage
+                            ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                            : isDobFocused
+                              ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                              : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                          }`}
+                      />
+                      <label
+                        htmlFor="reg-dob"
+                        className={`absolute pointer-events-none transition-all duration-150 start-3 -top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D] ${errorMessage
+                            ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                            : isDobFocused
+                              ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                              : 'text-[#444746] dark:text-[#8E918F]'
+                          }`}
+                      >
+                        <bdi>{isRtl ? 'تاريخ الميلاد' : 'Date of Birth'}</bdi>
+                      </label>
+                    </div>
+                    {currentAge !== null && (
+                      <span className="inline-flex items-center text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold">
+                        <bdi>{isRtl ? `العمر: ${currentAge} سنة` : `Age: ${currentAge} years old`}</bdi>
                       </span>
                     )}
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
-                      gender === 'Male' ? 'bg-blue-100 dark:bg-blue-900/60 text-[#0B57D0] dark:text-[#A8C7FA]' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
-                    }`}>
-                      <User className="w-5 h-5" strokeWidth={1.75} />
-                    </div>
-                    <span className="text-xs sm:text-sm font-bold"><bdi>{isRtl ? 'ذكر' : 'Male'}</bdi></span>
-                  </button>
+                  </div>
+                )}
 
-                  <button
-                    type="button"
-                    data-testid="gender-option-female"
-                    onClick={() => setGender('Female')}
-                    className={`relative p-5 rounded-2xl border-2 flex flex-col items-center justify-center gap-2.5 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 ${
-                      gender === 'Female'
-                        ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-purple-50/80 dark:bg-purple-950/40 font-semibold text-purple-700 dark:text-purple-300 shadow-xs'
-                        : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-300'
-                    }`}
-                  >
-                    {gender === 'Female' && (
-                      <span className="absolute top-2.5 end-2.5 w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px] shadow-xs">
-                        <Check className="w-3 h-3 stroke-[2.5]" />
+                {/* 1.5: Egyptian National ID */}
+                {subStepIndex === 5 && (
+                  <div className="space-y-3 py-2">
+                    <div className="relative">
+                      <input
+                        id="reg-national-id"
+                        data-testid="input-national-id"
+                        type="text"
+                        dir="ltr"
+                        maxLength={14}
+                        autoFocus
+                        value={nationalId}
+                        onFocus={() => setIsNationalIdFocused(true)}
+                        onBlur={() => setIsNationalIdFocused(false)}
+                        onChange={(e) => {
+                          setNationalId(normalizeDigits(e.target.value).replace(/\D/g, ''));
+                          if (errorMessage) setErrorMessage(null);
+                        }}
+                        className={`w-full h-[56px] px-4 text-[16px] font-mono tracking-widest text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${errorMessage
+                            ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                            : isNationalIdFocused
+                              ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                              : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                          }`}
+                      />
+                      <label
+                        htmlFor="reg-national-id"
+                        className={`absolute pointer-events-none transition-all duration-150 start-3 ${isNationalIdFloating
+                            ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
+                            : 'top-4 text-[15px]'
+                          } ${errorMessage
+                            ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                            : isNationalIdFocused
+                              ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                              : 'text-[#444746] dark:text-[#8E918F]'
+                          }`}
+                      >
+                        <bdi>{isRtl ? 'الرقم القومي (14 رقماً)' : 'National ID (14 Digits)'}</bdi>
+                      </label>
+                    </div>
+                    <p className="text-[12px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 pt-0.5">
+                      <Info className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                      <span>
+                        <bdi>
+                          {isRtl
+                            ? 'يجب أن يتكون من 14 رقماً ويطابق تاريخ ميلادك المسجل'
+                            : 'Must contain 14 digits and match your registered date of birth'}
+                        </bdi>
+                      </span>
+                    </p>
+                    {nationalIdValidation.parsedData && (
+                      <span className="inline-flex items-center text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold">
+                        <bdi>
+                          {isRtl
+                            ? `📍 المحافظة: ${nationalIdValidation.parsedData.provinceNameAr}`
+                            : `📍 Governorate: ${nationalIdValidation.parsedData.provinceNameEn}`}
+                        </bdi>
                       </span>
                     )}
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
-                      gender === 'Female' ? 'bg-purple-100 dark:bg-purple-900/60 text-purple-600 dark:text-purple-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
-                    }`}>
-                      <UserCheck className="w-5 h-5" strokeWidth={1.75} />
-                    </div>
-                    <span className="text-xs sm:text-sm font-bold"><bdi>{isRtl ? 'أنثى' : 'Female'}</bdi></span>
-                  </button>
-                </div>
-              )}
-
-              {/* 1.4: Date of Birth */}
-              {subStepIndex === 4 && (
-                <div className="space-y-3 py-2">
-                  <div className="relative">
-                    <input
-                      id="reg-dob"
-                      data-testid="input-dob"
-                      type="date"
-                      autoFocus
-                      min="1920-01-01"
-                      max={new Date().toISOString().split('T')[0]}
-                      value={dob || ''}
-                      onFocus={() => setIsDobFocused(true)}
-                      onBlur={() => setIsDobFocused(false)}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        setDob(val);
-                        if (errorMessage) setErrorMessage(null);
-                      }}
-                      onInput={(e: React.FormEvent<HTMLInputElement>) => {
-                        const val = (e.target as HTMLInputElement).value;
-                        setDob(val);
-                        if (errorMessage) setErrorMessage(null);
-                      }}
-                      className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
-                        errorMessage
-                          ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                          : isDobFocused
-                          ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                          : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
-                      }`}
-                    />
-                    <label
-                      htmlFor="reg-dob"
-                      className={`absolute pointer-events-none transition-all duration-150 start-3 -top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D] ${
-                        errorMessage
-                          ? 'text-[#B3261E] dark:text-[#F2B8B5]'
-                          : isDobFocused
-                          ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                          : 'text-[#444746] dark:text-[#8E918F]'
-                      }`}
-                    >
-                      <bdi>{isRtl ? 'تاريخ الميلاد' : 'Date of Birth'}</bdi>
-                    </label>
                   </div>
-                  {currentAge !== null && (
-                    <span className="inline-flex items-center text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold">
-                      <bdi>{isRtl ? `العمر: ${currentAge} سنة` : `Age: ${currentAge} years old`}</bdi>
-                    </span>
-                  )}
-                </div>
-              )}
+                )}
 
-              {/* 1.5: Egyptian National ID */}
-              {subStepIndex === 5 && (
-                <div className="space-y-3 py-2">
-                  <div className="relative">
+                {/* 1.6: Profile Picture */}
+                {subStepIndex === 6 && (
+                  <div className="flex flex-col items-center justify-center text-center space-y-4 py-2">
                     <input
-                      id="reg-national-id"
-                      data-testid="input-national-id"
-                      type="text"
-                      dir="ltr"
-                      maxLength={14}
-                      autoFocus
-                      value={nationalId}
-                      onFocus={() => setIsNationalIdFocused(true)}
-                      onBlur={() => setIsNationalIdFocused(false)}
-                      onChange={(e) => {
-                        setNationalId(normalizeDigits(e.target.value).replace(/\D/g, ''));
-                        if (errorMessage) setErrorMessage(null);
-                      }}
-                      className={`w-full h-[56px] px-4 text-[16px] font-mono tracking-widest text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
-                        errorMessage
-                          ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                          : isNationalIdFocused
-                          ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                          : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
-                      }`}
+                      type="file"
+                      ref={fileInputRef}
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                      className="hidden"
                     />
-                    <label
-                      htmlFor="reg-national-id"
-                      className={`absolute pointer-events-none transition-all duration-150 start-3 ${
-                        isNationalIdFloating
-                          ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
-                          : 'top-4 text-[15px]'
-                      } ${
-                        errorMessage
-                          ? 'text-[#B3261E] dark:text-[#F2B8B5]'
-                          : isNationalIdFocused
-                          ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                          : 'text-[#444746] dark:text-[#8E918F]'
-                      }`}
-                    >
-                      <bdi>{isRtl ? 'الرقم القومي (14 رقماً)' : 'National ID (14 Digits)'}</bdi>
-                    </label>
-                  </div>
-                  <p className="text-[12px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 pt-0.5">
-                    <Info className="w-3.5 h-3.5 text-blue-500 shrink-0" />
-                    <span>
-                      <bdi>
-                        {isRtl
-                          ? 'يجب أن يتكون من 14 رقماً ويطابق تاريخ ميلادك المسجل'
-                          : 'Must contain 14 digits and match your registered date of birth'}
-                      </bdi>
-                    </span>
-                  </p>
-                  {nationalIdValidation.parsedData && (
-                    <span className="inline-flex items-center text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold">
-                      <bdi>
-                        {isRtl
-                          ? `📍 المحافظة: ${nationalIdValidation.parsedData.provinceNameAr}`
-                          : `📍 Governorate: ${nationalIdValidation.parsedData.provinceNameEn}`}
-                      </bdi>
-                    </span>
-                  )}
-                </div>
-              )}
 
-              {/* 1.6: Profile Picture */}
-              {subStepIndex === 6 && (
-                <div className="flex flex-col items-center justify-center text-center space-y-4 py-2">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    accept="image/*"
-                    onChange={handlePhotoUpload}
-                    className="hidden"
-                  />
+                    <div className="relative group">
+                      <div className="w-28 h-28 rounded-full border-2 border-dashed border-slate-400 dark:border-slate-600 flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 shadow-inner">
+                        {avatarPreview ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={avatarPreview} alt="Profile" className="w-full h-full object-cover" />
+                        ) : (
+                          <User className="w-14 h-14 text-gray-400" />
+                        )}
+                      </div>
 
-                  <div className="relative group">
-                    <div className="w-28 h-28 rounded-full border-2 border-dashed border-slate-400 dark:border-slate-600 flex items-center justify-center overflow-hidden bg-slate-50 dark:bg-slate-800 shadow-inner">
-                      {avatarPreview ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={avatarPreview} alt="Profile" className="w-full h-full object-cover" />
-                      ) : (
-                        <User className="w-14 h-14 text-gray-400" />
+                      {avatarPreview && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRawImageToEdit(avatarPreview);
+                              setIsEditorOpen(true);
+                            }}
+                            title={isRtl ? 'تعديل وقص' : 'Edit & Crop'}
+                            className="absolute bottom-0 start-0 p-1.5 rounded-full bg-[#0B57D0] text-white shadow hover:bg-[#0842A0] cursor-pointer"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setAvatarFile(null);
+                              setAvatarPreview(null);
+                            }}
+                            title={isRtl ? 'حذف' : 'Remove'}
+                            className="absolute bottom-0 end-0 p-1.5 rounded-full bg-red-600 text-white shadow hover:bg-red-700 cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </>
                       )}
                     </div>
 
-                    {avatarPreview && (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setRawImageToEdit(avatarPreview);
-                            setIsEditorOpen(true);
-                          }}
-                          title={isRtl ? 'تعديل وقص' : 'Edit & Crop'}
-                          className="absolute bottom-0 start-0 p-1.5 rounded-full bg-[#0B57D0] text-white shadow hover:bg-[#0842A0] cursor-pointer"
-                        >
-                          <Pencil className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setAvatarFile(null);
-                            setAvatarPreview(null);
-                          }}
-                          title={isRtl ? 'حذف' : 'Remove'}
-                          className="absolute bottom-0 end-0 p-1.5 rounded-full bg-red-600 text-white shadow hover:bg-red-700 cursor-pointer"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </>
-                    )}
+                    <div className="flex items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer text-slate-700 dark:text-slate-200"
+                      >
+                        <Upload className="w-3.5 h-3.5 text-[#0B57D0] dark:text-[#A8C7FA]" />
+                        <span><bdi>{isRtl ? 'رفع ملف' : 'Upload'}</bdi></span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setIsCameraOpen(true)}
+                        className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer text-slate-700 dark:text-slate-200"
+                      >
+                        <Camera className="w-3.5 h-3.5 text-[#0B57D0] dark:text-[#A8C7FA]" />
+                        <span><bdi>{isRtl ? 'التقاط بالكاميرا' : 'Take photo'}</bdi></span>
+                      </button>
+                    </div>
                   </div>
+                )}
 
-                  <div className="flex items-center gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer text-slate-700 dark:text-slate-200"
-                    >
-                      <Upload className="w-3.5 h-3.5 text-[#0B57D0] dark:text-[#A8C7FA]" />
-                      <span><bdi>{isRtl ? 'رفع ملف' : 'Upload'}</bdi></span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setIsCameraOpen(true)}
-                      className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer text-slate-700 dark:text-slate-200"
-                    >
-                      <Camera className="w-3.5 h-3.5 text-[#0B57D0] dark:text-[#A8C7FA]" />
-                      <span><bdi>{isRtl ? 'التقاط بالكاميرا' : 'Take photo'}</bdi></span>
-                    </button>
+                {/* Error Alert */}
+                {errorMessage && (
+                  <div id="register-error-alert" className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5] mt-3">
+                    <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#B3261E] dark:bg-[#F2B8B5] text-white dark:text-[#601410] text-[11px] font-bold select-none leading-none pb-[1px]">
+                      !
+                    </span>
+                    <bdi id="error-message-text">{errorMessage}</bdi>
                   </div>
-                </div>
-              )}
-
-              {/* Error Alert */}
-              {errorMessage && (
-                <div id="register-error-alert" className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5] mt-3">
-                  <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#B3261E] dark:bg-[#F2B8B5] text-white dark:text-[#601410] text-[11px] font-bold select-none leading-none pb-[1px]">
-                    !
-                  </span>
-                  <bdi id="error-message-text">{errorMessage}</bdi>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
 
               {/* Navigation Action Buttons */}
               <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
@@ -2210,13 +2195,12 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       (subStepIndex === 1 && hasNameCollision && countWords(englishFullName) < 5) ||
                       (subStepIndex === 2 && hasArabicNameCollision && countWords(arabicFullName) < 5)
                     }
-                    className={`text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full transition-colors flex items-center justify-center gap-2 shadow-sm ${
-                      checkingCollision ||
-                      (subStepIndex === 1 && hasNameCollision && countWords(englishFullName) < 5) ||
-                      (subStepIndex === 2 && hasArabicNameCollision && countWords(arabicFullName) < 5)
+                    className={`text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full transition-colors flex items-center justify-center gap-2 shadow-sm ${checkingCollision ||
+                        (subStepIndex === 1 && hasNameCollision && countWords(englishFullName) < 5) ||
+                        (subStepIndex === 2 && hasArabicNameCollision && countWords(arabicFullName) < 5)
                         ? 'bg-[#0B57D0]/50 cursor-not-allowed opacity-60'
                         : 'bg-[#0B57D0] hover:bg-[#0842A0] active:bg-[#06337E] cursor-pointer'
-                    }`}
+                      }`}
                   >
                     {checkingCollision ? (
                       <>
@@ -2240,529 +2224,522 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 className={`w-full flex-1 flex flex-col justify-center py-2 ${slideDirection === 'forward' ? 'animate-slide-forward' : 'animate-slide-backward'}`}
               >
                 {/* 2.1: Phone Number & OTP Verification */}
-              {subStepIndex === 1 && (
-                <div className="space-y-4 py-2">
-                  {isPhoneOtpActive ? (
-                    /* 6-Digit OTP Verification View */
-                    <div className="space-y-5 animate-fadeIn">
-                      {/* Active Phone Chip */}
-                      <div className="flex items-center justify-between p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
-                        <div className="flex items-center gap-2 text-xs font-mono font-semibold text-slate-800 dark:text-slate-200">
-                          <span className="text-base">{getCountryByIso(countryIso)?.flag || '🌐'}</span>
-                          <span>{countryCode} {phoneNumber}</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsPhoneOtpActive(false);
-                            if (errorMessage) setErrorMessage(null);
-                          }}
-                          className="text-xs font-semibold text-[#0B57D0] dark:text-[#93C5FD] hover:underline cursor-pointer flex items-center gap-1"
-                        >
-                          <Pencil className="w-3 h-3" />
-                          <span><bdi>{isRtl ? 'تعديل الرقم' : 'Edit Number'}</bdi></span>
-                        </button>
-                      </div>
-
-                      {/* 6-Box Segmented OTP Inputs */}
-                      <div className="space-y-2">
-                        <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 text-center">
-                          <bdi>{isRtl ? 'أدخل رمز التحقق المرسل عبر واتساب (6 أرقام)' : 'Enter 6-digit code sent via WhatsApp'}</bdi>
-                        </label>
-                        <div className="flex items-center justify-center gap-2 sm:gap-2.5" dir="ltr">
-                          {otpDigits.map((digit, index) => (
-                            <input
-                              key={index}
-                              ref={(el) => { otpInputRefs.current[index] = el; }}
-                              type="text"
-                              inputMode="numeric"
-                              pattern="\d*"
-                              maxLength={1}
-                              value={digit}
-                              autoFocus={index === 0}
-                              onChange={(e) => handleOtpDigitChange(index, e.target.value)}
-                              onKeyDown={(e) => handleOtpKeyDown(index, e)}
-                              className={`w-11 sm:w-12 h-13 sm:h-14 text-center font-mono text-xl sm:text-2xl font-bold rounded-lg border bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3] focus:outline-none transition-all box-border ${
-                                digit
-                                  ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/20 dark:bg-blue-900/10'
-                                  : 'border-[#747775] dark:border-[#8E918F]'
-                              } focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] shadow-sm`}
-                            />
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Resend Timer & Demo Code Badge */}
-                      <div className="flex flex-col items-center gap-2 pt-1">
-                        <div className="flex items-center justify-center gap-2 text-xs">
-                          {otpResendTimer > 0 ? (
-                            <span className="text-slate-500 dark:text-slate-400">
-                              <bdi>
-                                {isRtl
-                                  ? `إعادة إرسال الرمز خلال 0:${otpResendTimer < 10 ? '0' : ''}${otpResendTimer}`
-                                  : `Resend code in 0:${otpResendTimer < 10 ? '0' : ''}${otpResendTimer}`}
-                              </bdi>
-                            </span>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={handleSendPhoneOtp}
-                              disabled={isSendingOtp}
-                              className="text-[#0B57D0] dark:text-[#93C5FD] font-semibold hover:underline cursor-pointer flex items-center gap-1.5"
-                            >
-                              <RotateCw className={`w-3 h-3 ${isSendingOtp ? 'animate-spin' : ''}`} />
-                              <span><bdi>{isRtl ? 'إعادة إرسال الرمز' : 'Resend Code'}</bdi></span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    /* Phone Number & Country Code View */
-                    <div className="space-y-4">
-                      {/* Country Selector */}
-                      <div className="relative">
-                        <select
-                          id="reg-country"
-                          value={countryIso}
-                          onChange={(e) => {
-                            const iso = e.target.value;
-                            setCountryIso(iso);
-                            const found = getCountryByIso(iso);
-                            if (found) setCountryCode(found.dialCode);
-                            setIsPhoneVerified(false);
-                          }}
-                          className="w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] border border-[#747775] dark:border-[#8E918F] focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] focus:outline-none transition-all box-border cursor-pointer appearance-none"
-                        >
-                          {ALL_COUNTRIES.map((c: CountryInfo) => (
-                            <option
-                              key={c.iso}
-                              value={c.iso}
-                              className="bg-white dark:bg-[#1B212D] text-[#1F1F1F] dark:text-[#E3E3E3]"
-                            >
-                              {c.flag} {getLocalizedCountryName(c.iso, locale)} ({c.dialCode})
-                            </option>
-                          ))}
-                        </select>
-                        <label
-                          htmlFor="reg-country"
-                          className="absolute -top-2.5 px-1.5 text-xs bg-white dark:bg-[#1B212D] text-[#0B57D0] dark:text-[#A8C7FA] start-3 pointer-events-none z-10"
-                        >
-                          <bdi>{isRtl ? 'الدولة' : 'Country'}</bdi>
-                        </label>
-                        <div className="absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 dark:text-slate-400">
-                          <ChevronDown className="w-4 h-4" />
-                        </div>
-                      </div>
-
-                      {/* Unified Material 3 Outlined Phone Number Input */}
-                      <div className="relative">
-                        <div
-                          className={`w-full h-[56px] px-3.5 flex items-center bg-transparent rounded-[4px] border transition-all box-border ${
-                            errorMessage
-                              ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                              : isPhoneFocused
-                              ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                              : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
-                          }`}
-                        >
-                          {/* Dial Code Prefix */}
-                          <span
-                            className="font-mono text-sm font-semibold text-[#1F1F1F] dark:text-[#E3E3E3] shrink-0 select-none pe-3 border-e border-slate-300 dark:border-slate-700"
-                            dir="ltr"
-                          >
-                            {countryCode}
-                          </span>
-
-                          {/* Numeric Phone Input */}
-                          <input
-                            id="reg-phone"
-                            type="tel"
-                            dir="ltr"
-                            autoFocus
-                            placeholder={
-                              getCountryByIso(countryIso)?.placeholder ||
-                              COUNTRY_PHONE_RULES[countryIso.toUpperCase()]?.example ||
-                              '010 1234 5678'
-                            }
-                            value={phoneNumber}
-                            onFocus={() => setIsPhoneFocused(true)}
-                            onBlur={() => setIsPhoneFocused(false)}
-                            onChange={(e) => {
-                              setPhoneNumber(normalizeDigits(e.target.value));
-                              setIsPhoneVerified(false);
-                              if (errorMessage) setErrorMessage(null);
-                            }}
-                            className="flex-1 h-full ps-3 text-[15px] font-mono text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
-                          />
-                        </div>
-
-                        {/* Persistent Top Border Floating Label matching Country Selector */}
-                        <label
-                          htmlFor="reg-phone"
-                          className={`absolute -top-2.5 px-1.5 text-xs bg-white dark:bg-[#1B212D] start-3 pointer-events-none z-10 transition-colors ${
-                            errorMessage
-                              ? 'text-[#B3261E] dark:text-[#F2B8B5]'
-                              : isPhoneFocused
-                              ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                              : 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                          }`}
-                        >
-                          <bdi>{isRtl ? 'رقم الهاتف المحمول' : 'Mobile Phone Number'}</bdi>
-                        </label>
-                      </div>
-
-                      {/* Verified Badge */}
-                      {isPhoneVerified && (
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 animate-fadeIn">
-                          <div className="flex items-center gap-2 text-xs font-semibold">
-                            <CheckCircle2 className="w-4 h-4" />
-                            <span><bdi>{isRtl ? 'تم تأكيد رقم الهاتف بنجاح ✓' : 'Phone Number Verified ✓'}</bdi></span>
+                {subStepIndex === 1 && (
+                  <div className="space-y-4 py-2">
+                    {isPhoneOtpActive ? (
+                      /* 6-Digit OTP Verification View */
+                      <div className="space-y-5 animate-fadeIn">
+                        {/* Active Phone Chip */}
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+                          <div className="flex items-center gap-2 text-xs font-mono font-semibold text-slate-800 dark:text-slate-200">
+                            <span className="text-base">{getCountryByIso(countryIso)?.flag || '🌐'}</span>
+                            <span>{countryCode} {phoneNumber}</span>
                           </div>
                           <button
                             type="button"
                             onClick={() => {
-                              setIsPhoneVerified(false);
                               setIsPhoneOtpActive(false);
+                              if (errorMessage) setErrorMessage(null);
                             }}
-                            className="text-xs text-slate-500 dark:text-slate-400 hover:underline cursor-pointer"
+                            className="text-xs font-semibold text-[#0B57D0] dark:text-[#93C5FD] hover:underline cursor-pointer flex items-center gap-1"
                           >
-                            <bdi>{isRtl ? 'تغيير' : 'Change'}</bdi>
+                            <Pencil className="w-3 h-3" />
+                            <span><bdi>{isRtl ? 'تعديل الرقم' : 'Edit Number'}</bdi></span>
                           </button>
                         </div>
-                      )}
 
-                      {/* Secondary Phone Numbers (Max 10 total) */}
-                      {isPhoneVerified && (
-                        <div className="space-y-3 pt-2">
-                          {additionalPhones.map((ap, idx) => (
-                            <div key={ap.id} className="flex items-center gap-2 animate-fadeIn">
-                              <div className="flex-1 flex items-center h-[48px] px-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
-                                <span className="text-xs font-mono text-slate-500 pe-2 border-e border-slate-200 dark:border-slate-700 select-none">
-                                  {ap.countryCode}
-                                </span>
-                                <input
-                                  type="tel"
-                                  dir="ltr"
-                                  placeholder="010XXXXXXXX"
-                                  value={ap.phone}
-                                  onChange={(e) => {
-                                    const updated = [...additionalPhones];
-                                    updated[idx].phone = normalizeDigits(e.target.value);
-                                    setAdditionalPhones(updated);
-                                  }}
-                                  className="w-full h-full ps-2 text-xs font-mono bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3] focus:outline-none"
-                                />
-                              </div>
+                        {/* 6-Box Segmented OTP Inputs */}
+                        <div className="space-y-2">
+                          <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 text-center">
+                            <bdi>{isRtl ? 'أدخل رمز التحقق المرسل عبر واتساب (6 أرقام)' : 'Enter 6-digit code sent via WhatsApp'}</bdi>
+                          </label>
+                          <div className="flex items-center justify-center gap-2 sm:gap-2.5" dir="ltr">
+                            {otpDigits.map((digit, index) => (
+                              <input
+                                key={index}
+                                ref={(el) => { otpInputRefs.current[index] = el; }}
+                                type="text"
+                                inputMode="numeric"
+                                pattern="\d*"
+                                maxLength={1}
+                                value={digit}
+                                autoFocus={index === 0}
+                                onChange={(e) => handleOtpDigitChange(index, e.target.value)}
+                                onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                                className={`w-11 sm:w-12 h-13 sm:h-14 text-center font-mono text-xl sm:text-2xl font-bold rounded-lg border bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3] focus:outline-none transition-all box-border ${digit
+                                    ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/20 dark:bg-blue-900/10'
+                                    : 'border-[#747775] dark:border-[#8E918F]'
+                                  } focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] shadow-sm`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Resend Timer & Demo Code Badge */}
+                        <div className="flex flex-col items-center gap-2 pt-1">
+                          <div className="flex items-center justify-center gap-2 text-xs">
+                            {otpResendTimer > 0 ? (
+                              <span className="text-slate-500 dark:text-slate-400">
+                                <bdi>
+                                  {isRtl
+                                    ? `إعادة إرسال الرمز خلال 0:${otpResendTimer < 10 ? '0' : ''}${otpResendTimer}`
+                                    : `Resend code in 0:${otpResendTimer < 10 ? '0' : ''}${otpResendTimer}`}
+                                </bdi>
+                              </span>
+                            ) : (
                               <button
                                 type="button"
-                                onClick={() => {
-                                  setAdditionalPhones(additionalPhones.filter((_, i) => i !== idx));
-                                }}
-                                className="p-2.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-500 transition cursor-pointer"
+                                onClick={handleSendPhoneOtp}
+                                disabled={isSendingOtp}
+                                className="text-[#0B57D0] dark:text-[#93C5FD] font-semibold hover:underline cursor-pointer flex items-center gap-1.5"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <RotateCw className={`w-3 h-3 ${isSendingOtp ? 'animate-spin' : ''}`} />
+                                <span><bdi>{isRtl ? 'إعادة إرسال الرمز' : 'Resend Code'}</bdi></span>
                               </button>
-                            </div>
-                          ))}
-
-                          {additionalPhones.length < 9 && (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setAdditionalPhones([
-                                  ...additionalPhones,
-                                  { id: `phone_${Date.now()}`, countryIso: 'EG', countryCode: '+20', phone: '', isVerified: false },
-                                ]);
-                              }}
-                              className="w-full py-2.5 border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#0B57D0] dark:hover:border-[#A8C7FA] rounded-xl text-xs font-semibold text-[#0B57D0] dark:text-[#A8C7FA] transition flex items-center justify-center gap-1.5 cursor-pointer"
-                            >
-                              <span>+ <bdi>{isRtl ? 'إضافة رقم هاتف إضافي (حتى 10 أرقام)' : 'Add Secondary Phone (Up to 10)'}</bdi></span>
-                            </button>
-                          )}
+                            )}
+                          </div>
                         </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* 2.2: Email & Email OTP */}
-              {subStepIndex === 2 && (
-                <div className="space-y-4 py-2">
-                  {isEmailOtpActive ? (
-                    /* 6-Digit Email OTP Verification View */
-                    <div className="space-y-5 animate-fadeIn">
-                      {/* Active Email Chip */}
-                      <div className="flex items-center justify-between p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
-                        <div className="flex items-center gap-2 text-xs font-mono font-semibold text-slate-800 dark:text-slate-200">
-                          <span className="text-base">📧</span>
-                          <span className="truncate max-w-[200px] sm:max-w-none">{email}</span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsEmailOtpActive(false);
-                            if (errorMessage) setErrorMessage(null);
-                          }}
-                          className="text-xs font-semibold text-[#0B57D0] dark:text-[#93C5FD] hover:underline cursor-pointer flex items-center gap-1 shrink-0"
-                        >
-                          <Pencil className="w-3 h-3" />
-                          <span><bdi>{isRtl ? 'تعديل البريد' : 'Edit Email'}</bdi></span>
-                        </button>
                       </div>
+                    ) : (
+                      /* Phone Number & Country Code View */
+                      <div className="space-y-4">
+                        {/* Country Selector */}
+                        <div className="relative">
+                          <select
+                            id="reg-country"
+                            value={countryIso}
+                            onChange={(e) => {
+                              const iso = e.target.value;
+                              setCountryIso(iso);
+                              const found = getCountryByIso(iso);
+                              if (found) setCountryCode(found.dialCode);
+                              setIsPhoneVerified(false);
+                            }}
+                            className="w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] border border-[#747775] dark:border-[#8E918F] focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] focus:outline-none transition-all box-border cursor-pointer appearance-none"
+                          >
+                            {ALL_COUNTRIES.map((c: CountryInfo) => (
+                              <option
+                                key={c.iso}
+                                value={c.iso}
+                                className="bg-white dark:bg-[#1B212D] text-[#1F1F1F] dark:text-[#E3E3E3]"
+                              >
+                                {c.flag} {getLocalizedCountryName(c.iso, locale)} ({c.dialCode})
+                              </option>
+                            ))}
+                          </select>
+                          <label
+                            htmlFor="reg-country"
+                            className="absolute -top-2.5 px-1.5 text-xs bg-white dark:bg-[#1B212D] text-[#0B57D0] dark:text-[#A8C7FA] start-3 pointer-events-none z-10"
+                          >
+                            <bdi>{isRtl ? 'الدولة' : 'Country'}</bdi>
+                          </label>
+                          <div className="absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500 dark:text-slate-400">
+                            <ChevronDown className="w-4 h-4" />
+                          </div>
+                        </div>
 
-                      {/* 6-Box Segmented OTP Inputs */}
-                      <div className="space-y-2">
-                        <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 text-center">
-                          <bdi>{isRtl ? 'أدخل رمز تأكيد البريد (6 أرقام)' : 'Enter email verification code (6 digits)'}</bdi>
-                        </label>
-                        <div className="flex items-center justify-center gap-2 sm:gap-2.5" dir="ltr">
-                          {emailOtpDigits.map((digit, index) => (
+                        {/* Unified Material 3 Outlined Phone Number Input */}
+                        <div className="relative">
+                          <div
+                            className={`w-full h-[56px] px-3.5 flex items-center bg-transparent rounded-[4px] border transition-all box-border ${errorMessage
+                                ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                                : isPhoneFocused
+                                  ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                                  : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                              }`}
+                          >
+                            {/* Dial Code Prefix */}
+                            <span
+                              className="font-mono text-sm font-semibold text-[#1F1F1F] dark:text-[#E3E3E3] shrink-0 select-none pe-3 border-e border-slate-300 dark:border-slate-700"
+                              dir="ltr"
+                            >
+                              {countryCode}
+                            </span>
+
+                            {/* Numeric Phone Input */}
                             <input
-                              key={index}
-                              ref={(el) => { emailOtpInputRefs.current[index] = el; }}
-                              type="text"
-                              inputMode="numeric"
-                              pattern="\d*"
-                              maxLength={1}
-                              value={digit}
-                              autoFocus={index === 0}
-                              onChange={(e) => handleEmailOtpDigitChange(index, e.target.value)}
-                              onKeyDown={(e) => handleEmailOtpKeyDown(index, e)}
-                              className={`w-11 sm:w-12 h-13 sm:h-14 text-center font-mono text-xl sm:text-2xl font-bold rounded-lg border bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3] focus:outline-none transition-all box-border ${
-                                digit
-                                  ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/20 dark:bg-blue-900/10'
-                                  : 'border-[#747775] dark:border-[#8E918F]'
-                              } focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] shadow-sm`}
+                              id="reg-phone"
+                              type="tel"
+                              dir="ltr"
+                              autoFocus
+                              placeholder={
+                                getCountryByIso(countryIso)?.placeholder ||
+                                COUNTRY_PHONE_RULES[countryIso.toUpperCase()]?.example ||
+                                '010 1234 5678'
+                              }
+                              value={phoneNumber}
+                              onFocus={() => setIsPhoneFocused(true)}
+                              onBlur={() => setIsPhoneFocused(false)}
+                              onChange={(e) => {
+                                setPhoneNumber(normalizeDigits(e.target.value));
+                                setIsPhoneVerified(false);
+                                if (errorMessage) setErrorMessage(null);
+                              }}
+                              className="flex-1 h-full ps-3 text-[15px] font-mono text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
                             />
-                          ))}
-                        </div>
-                      </div>
+                          </div>
 
-                      {/* Resend Timer & Actions */}
-                      <div className="flex flex-col items-center gap-2 pt-1">
-                        <div className="flex items-center justify-center gap-2 text-xs">
-                          {emailOtpResendTimer > 0 ? (
-                            <span className="text-slate-500 dark:text-slate-400">
-                              <bdi>
-                                {isRtl
-                                  ? `إعادة إرسال الرمز خلال 0:${emailOtpResendTimer < 10 ? '0' : ''}${emailOtpResendTimer}`
-                                  : `Resend code in 0:${emailOtpResendTimer < 10 ? '0' : ''}${emailOtpResendTimer}`}
-                              </bdi>
-                            </span>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={handleSendEmailOtp}
-                              disabled={isSendingEmailOtp}
-                              className="text-[#0B57D0] dark:text-[#93C5FD] font-semibold hover:underline cursor-pointer flex items-center gap-1.5"
-                            >
-                              <RotateCw className={`w-3 h-3 ${isSendingEmailOtp ? 'animate-spin' : ''}`} />
-                              <span><bdi>{isRtl ? 'إعادة إرسال الرمز' : 'Resend Code'}</bdi></span>
-                            </button>
-                          )}
+                          {/* Persistent Top Border Floating Label matching Country Selector */}
+                          <label
+                            htmlFor="reg-phone"
+                            className={`absolute -top-2.5 px-1.5 text-xs bg-white dark:bg-[#1B212D] start-3 pointer-events-none z-10 transition-colors ${errorMessage
+                                ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                                : isPhoneFocused
+                                  ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                                  : 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                              }`}
+                          >
+                            <bdi>{isRtl ? 'رقم الهاتف المحمول' : 'Mobile Phone Number'}</bdi>
+                          </label>
                         </div>
 
-                        {emailDevCode && (
-                          <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 text-[11px] text-blue-700 dark:text-blue-300 animate-fadeIn">
-                            <Info className="w-3.5 h-3.5 shrink-0" />
-                            <span>
-                              <bdi>
-                                {isRtl ? 'رمز التحقق (اختبار): ' : 'Test Code: '}
-                                <strong className="font-mono font-bold text-blue-800 dark:text-blue-200">{emailDevCode}</strong> (أو 123456)
-                              </bdi>
-                            </span>
+                        {/* Verified Badge */}
+                        {isPhoneVerified && (
+                          <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 animate-fadeIn">
+                            <div className="flex items-center gap-2 text-xs font-semibold">
+                              <CheckCircle2 className="w-4 h-4" />
+                              <span><bdi>{isRtl ? 'تم تأكيد رقم الهاتف بنجاح ✓' : 'Phone Number Verified ✓'}</bdi></span>
+                            </div>
                             <button
                               type="button"
                               onClick={() => {
-                                const digits = (emailDevCode || '123456').slice(0, 6).split('');
-                                setEmailOtpDigits(digits);
-                                handleVerifyEmailOtp(digits.join(''));
+                                setIsPhoneVerified(false);
+                                setIsPhoneOtpActive(false);
                               }}
-                              className="ms-1 underline font-bold cursor-pointer hover:text-blue-900 dark:hover:text-blue-100"
+                              className="text-xs text-slate-500 dark:text-slate-400 hover:underline cursor-pointer"
                             >
-                              <bdi>{isRtl ? 'ملء وتأكيد' : 'Autofill'}</bdi>
+                              <bdi>{isRtl ? 'تغيير' : 'Change'}</bdi>
                             </button>
                           </div>
                         )}
-                      </div>
-                    </div>
-                  ) : (
-                    /* Normal Email Input View */
-                    <div className="space-y-3">
-                      <div className="relative">
-                        <input
-                          id="reg-email"
-                          type="email"
-                          dir="ltr"
-                          autoFocus
-                          value={email}
-                          onFocus={() => setIsEmailFocused(true)}
-                          onBlur={() => setIsEmailFocused(false)}
-                          onChange={(e) => {
-                            setEmail(e.target.value);
-                            setIsEmailVerified(false);
-                            if (errorMessage) setErrorMessage(null);
-                          }}
-                          className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
-                            errorMessage
-                              ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                              : isEmailFocused
-                              ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                              : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
-                          }`}
-                        />
-                        <label
-                          htmlFor="reg-email"
-                          className={`absolute pointer-events-none transition-all duration-150 start-3 ${
-                            isEmailFloating ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]' : 'top-4 text-[15px]'
-                          } ${
-                            errorMessage
-                              ? 'text-[#B3261E] dark:text-[#F2B8B5]'
-                              : 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                          }`}
-                        >
-                          <bdi>{isRtl ? 'البريد الإلكتروني (اختياري)' : 'Email Address (Optional)'}</bdi>
-                        </label>
-                      </div>
 
-                      {/* Verified Badge */}
-                      {isEmailVerified && email.trim() && (
-                        <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 animate-fadeIn">
-                          <div className="flex items-center gap-2 text-xs font-semibold">
-                            <CheckCircle2 className="w-4 h-4" />
-                            <span><bdi>{isRtl ? 'تم تأكيد البريد الإلكتروني بنجاح ✓' : 'Email Address Verified ✓'}</bdi></span>
+                        {/* Secondary Phone Numbers (Max 10 total) */}
+                        {isPhoneVerified && (
+                          <div className="space-y-3 pt-2">
+                            {additionalPhones.map((ap, idx) => (
+                              <div key={ap.id} className="flex items-center gap-2 animate-fadeIn">
+                                <div className="flex-1 flex items-center h-[48px] px-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+                                  <span className="text-xs font-mono text-slate-500 pe-2 border-e border-slate-200 dark:border-slate-700 select-none">
+                                    {ap.countryCode}
+                                  </span>
+                                  <input
+                                    type="tel"
+                                    dir="ltr"
+                                    placeholder="010XXXXXXXX"
+                                    value={ap.phone}
+                                    onChange={(e) => {
+                                      const updated = [...additionalPhones];
+                                      updated[idx].phone = normalizeDigits(e.target.value);
+                                      setAdditionalPhones(updated);
+                                    }}
+                                    className="w-full h-full ps-2 text-xs font-mono bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3] focus:outline-none"
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setAdditionalPhones(additionalPhones.filter((_, i) => i !== idx));
+                                  }}
+                                  className="p-2.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-500 transition cursor-pointer"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+
+                            {additionalPhones.length < 9 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setAdditionalPhones([
+                                    ...additionalPhones,
+                                    { id: `phone_${Date.now()}`, countryIso: 'EG', countryCode: '+20', phone: '', isVerified: false },
+                                  ]);
+                                }}
+                                className="w-full py-2.5 border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#0B57D0] dark:hover:border-[#A8C7FA] rounded-xl text-xs font-semibold text-[#0B57D0] dark:text-[#A8C7FA] transition flex items-center justify-center gap-1.5 cursor-pointer"
+                              >
+                                <span>+ <bdi>{isRtl ? 'إضافة رقم هاتف إضافي (حتى 10 أرقام)' : 'Add Secondary Phone (Up to 10)'}</bdi></span>
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 2.2: Email & Email OTP */}
+                {subStepIndex === 2 && (
+                  <div className="space-y-4 py-2">
+                    {isEmailOtpActive ? (
+                      /* 6-Digit Email OTP Verification View */
+                      <div className="space-y-5 animate-fadeIn">
+                        {/* Active Email Chip */}
+                        <div className="flex items-center justify-between p-3 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
+                          <div className="flex items-center gap-2 text-xs font-mono font-semibold text-slate-800 dark:text-slate-200">
+                            <span className="text-base">📧</span>
+                            <span className="truncate max-w-[200px] sm:max-w-none">{email}</span>
                           </div>
                           <button
                             type="button"
                             onClick={() => {
-                              setIsEmailVerified(false);
                               setIsEmailOtpActive(false);
+                              if (errorMessage) setErrorMessage(null);
                             }}
-                            className="text-xs text-slate-500 dark:text-slate-400 hover:underline cursor-pointer"
+                            className="text-xs font-semibold text-[#0B57D0] dark:text-[#93C5FD] hover:underline cursor-pointer flex items-center gap-1 shrink-0"
                           >
-                            <bdi>{isRtl ? 'تغيير' : 'Change'}</bdi>
+                            <Pencil className="w-3 h-3" />
+                            <span><bdi>{isRtl ? 'تعديل البريد' : 'Edit Email'}</bdi></span>
                           </button>
                         </div>
-                      )}
 
-                      {/* Secondary Emails (Max 10 total) */}
-                      {isEmailVerified && (
-                        <div className="space-y-3 pt-2">
-                          {additionalEmails.map((ae, idx) => (
-                            <div key={ae.id} className="flex items-center gap-2 animate-fadeIn">
-                              <div className="flex-1 flex items-center h-[48px] px-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
-                                <input
-                                  type="email"
-                                  dir="ltr"
-                                  placeholder="secondary@example.com"
-                                  value={ae.email}
-                                  onChange={(e) => {
-                                    const updated = [...additionalEmails];
-                                    updated[idx].email = e.target.value.trim();
-                                    setAdditionalEmails(updated);
-                                  }}
-                                  className="w-full h-full text-xs font-mono bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3] focus:outline-none"
-                                />
-                              </div>
+                        {/* 6-Box Segmented OTP Inputs */}
+                        <div className="space-y-2">
+                          <label className="block text-xs font-medium text-slate-600 dark:text-slate-400 text-center">
+                            <bdi>{isRtl ? 'أدخل رمز تأكيد البريد (6 أرقام)' : 'Enter email verification code (6 digits)'}</bdi>
+                          </label>
+                          <div className="flex items-center justify-center gap-2 sm:gap-2.5" dir="ltr">
+                            {emailOtpDigits.map((digit, index) => (
+                              <input
+                                key={index}
+                                ref={(el) => { emailOtpInputRefs.current[index] = el; }}
+                                type="text"
+                                inputMode="numeric"
+                                pattern="\d*"
+                                maxLength={1}
+                                value={digit}
+                                autoFocus={index === 0}
+                                onChange={(e) => handleEmailOtpDigitChange(index, e.target.value)}
+                                onKeyDown={(e) => handleEmailOtpKeyDown(index, e)}
+                                className={`w-11 sm:w-12 h-13 sm:h-14 text-center font-mono text-xl sm:text-2xl font-bold rounded-lg border bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3] focus:outline-none transition-all box-border ${digit
+                                    ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/20 dark:bg-blue-900/10'
+                                    : 'border-[#747775] dark:border-[#8E918F]'
+                                  } focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] shadow-sm`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Resend Timer & Actions */}
+                        <div className="flex flex-col items-center gap-2 pt-1">
+                          <div className="flex items-center justify-center gap-2 text-xs">
+                            {emailOtpResendTimer > 0 ? (
+                              <span className="text-slate-500 dark:text-slate-400">
+                                <bdi>
+                                  {isRtl
+                                    ? `إعادة إرسال الرمز خلال 0:${emailOtpResendTimer < 10 ? '0' : ''}${emailOtpResendTimer}`
+                                    : `Resend code in 0:${emailOtpResendTimer < 10 ? '0' : ''}${emailOtpResendTimer}`}
+                                </bdi>
+                              </span>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={handleSendEmailOtp}
+                                disabled={isSendingEmailOtp}
+                                className="text-[#0B57D0] dark:text-[#93C5FD] font-semibold hover:underline cursor-pointer flex items-center gap-1.5"
+                              >
+                                <RotateCw className={`w-3 h-3 ${isSendingEmailOtp ? 'animate-spin' : ''}`} />
+                                <span><bdi>{isRtl ? 'إعادة إرسال الرمز' : 'Resend Code'}</bdi></span>
+                              </button>
+                            )}
+                          </div>
+
+                          {emailDevCode && (
+                            <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 text-[11px] text-blue-700 dark:text-blue-300 animate-fadeIn">
+                              <Info className="w-3.5 h-3.5 shrink-0" />
+                              <span>
+                                <bdi>
+                                  {isRtl ? 'رمز التحقق (اختبار): ' : 'Test Code: '}
+                                  <strong className="font-mono font-bold text-blue-800 dark:text-blue-200">{emailDevCode}</strong> (أو 123456)
+                                </bdi>
+                              </span>
                               <button
                                 type="button"
                                 onClick={() => {
-                                  setAdditionalEmails(additionalEmails.filter((_, i) => i !== idx));
+                                  const digits = (emailDevCode || '123456').slice(0, 6).split('');
+                                  setEmailOtpDigits(digits);
+                                  handleVerifyEmailOtp(digits.join(''));
                                 }}
-                                className="p-2.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-500 transition cursor-pointer"
+                                className="ms-1 underline font-bold cursor-pointer hover:text-blue-900 dark:hover:text-blue-100"
                               >
-                                <Trash2 className="w-4 h-4" />
+                                <bdi>{isRtl ? 'ملء وتأكيد' : 'Autofill'}</bdi>
                               </button>
                             </div>
-                          ))}
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      /* Normal Email Input View */
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <input
+                            id="reg-email"
+                            type="email"
+                            dir="ltr"
+                            autoFocus
+                            value={email}
+                            onFocus={() => setIsEmailFocused(true)}
+                            onBlur={() => setIsEmailFocused(false)}
+                            onChange={(e) => {
+                              setEmail(e.target.value);
+                              setIsEmailVerified(false);
+                              if (errorMessage) setErrorMessage(null);
+                            }}
+                            className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${errorMessage
+                                ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                                : isEmailFocused
+                                  ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                                  : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                              }`}
+                          />
+                          <label
+                            htmlFor="reg-email"
+                            className={`absolute pointer-events-none transition-all duration-150 start-3 ${isEmailFloating ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]' : 'top-4 text-[15px]'
+                              } ${errorMessage
+                                ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                                : 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                              }`}
+                          >
+                            <bdi>{isRtl ? 'البريد الإلكتروني (اختياري)' : 'Email Address (Optional)'}</bdi>
+                          </label>
+                        </div>
 
-                          {additionalEmails.length < 9 && (
+                        {/* Verified Badge */}
+                        {isEmailVerified && email.trim() && (
+                          <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 animate-fadeIn">
+                            <div className="flex items-center gap-2 text-xs font-semibold">
+                              <CheckCircle2 className="w-4 h-4" />
+                              <span><bdi>{isRtl ? 'تم تأكيد البريد الإلكتروني بنجاح ✓' : 'Email Address Verified ✓'}</bdi></span>
+                            </div>
                             <button
                               type="button"
                               onClick={() => {
-                                setAdditionalEmails([
-                                  ...additionalEmails,
-                                  { id: `email_${Date.now()}`, email: '', isVerified: false },
-                                ]);
+                                setIsEmailVerified(false);
+                                setIsEmailOtpActive(false);
                               }}
-                              className="w-full py-2.5 border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#0B57D0] dark:hover:border-[#A8C7FA] rounded-xl text-xs font-semibold text-[#0B57D0] dark:text-[#A8C7FA] transition flex items-center justify-center gap-1.5 cursor-pointer"
+                              className="text-xs text-slate-500 dark:text-slate-400 hover:underline cursor-pointer"
                             >
-                              <span>+ <bdi>{isRtl ? 'إضافة بريد إلكتروني إضافي (حتى 10 حسابات)' : 'Add Secondary Email (Up to 10)'}</bdi></span>
+                              <bdi>{isRtl ? 'تغيير' : 'Change'}</bdi>
                             </button>
-                          )}
-                        </div>
-                      )}
+                          </div>
+                        )}
+
+                        {/* Secondary Emails (Max 10 total) */}
+                        {isEmailVerified && (
+                          <div className="space-y-3 pt-2">
+                            {additionalEmails.map((ae, idx) => (
+                              <div key={ae.id} className="flex items-center gap-2 animate-fadeIn">
+                                <div className="flex-1 flex items-center h-[48px] px-3 bg-slate-50 dark:bg-slate-800/60 rounded-xl border border-slate-200 dark:border-slate-700">
+                                  <input
+                                    type="email"
+                                    dir="ltr"
+                                    placeholder="secondary@example.com"
+                                    value={ae.email}
+                                    onChange={(e) => {
+                                      const updated = [...additionalEmails];
+                                      updated[idx].email = e.target.value.trim();
+                                      setAdditionalEmails(updated);
+                                    }}
+                                    className="w-full h-full text-xs font-mono bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3] focus:outline-none"
+                                  />
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setAdditionalEmails(additionalEmails.filter((_, i) => i !== idx));
+                                  }}
+                                  className="p-2.5 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-500 transition cursor-pointer"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </button>
+                              </div>
+                            ))}
+
+                            {additionalEmails.length < 9 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setAdditionalEmails([
+                                    ...additionalEmails,
+                                    { id: `email_${Date.now()}`, email: '', isVerified: false },
+                                  ]);
+                                }}
+                                className="w-full py-2.5 border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#0B57D0] dark:hover:border-[#A8C7FA] rounded-xl text-xs font-semibold text-[#0B57D0] dark:text-[#A8C7FA] transition flex items-center justify-center gap-1.5 cursor-pointer"
+                              >
+                                <span>+ <bdi>{isRtl ? 'إضافة بريد إلكتروني إضافي (حتى 10 حسابات)' : 'Add Secondary Email (Up to 10)'}</bdi></span>
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* 2.3: Landline */}
+                {subStepIndex === 3 && (
+                  <div className="flex gap-2 py-2">
+                    <div className="w-[110px] shrink-0 relative">
+                      <input
+                        id="reg-landline-code"
+                        type="text"
+                        dir="ltr"
+                        maxLength={4}
+                        value={landlineAreaCode}
+                        onChange={(e) => {
+                          setLandlineAreaCode(e.target.value.replace(/\D/g, ''));
+                          if (errorMessage) setErrorMessage(null);
+                        }}
+                        className="w-full h-[56px] px-3 text-sm font-mono text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] border border-[#747775] dark:border-[#8E918F] focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] focus:outline-none transition-all box-border"
+                      />
+                      <label htmlFor="reg-landline-code" className="absolute -top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D] text-[#0B57D0] dark:text-[#A8C7FA] start-2 pointer-events-none">
+                        <bdi>{isRtl ? 'كود المحافظة' : 'Area Code'}</bdi>
+                      </label>
                     </div>
-                  )}
-                </div>
-              )}
 
-              {/* 2.3: Landline */}
-              {subStepIndex === 3 && (
-                <div className="flex gap-2 py-2">
-                  <div className="w-[110px] shrink-0 relative">
-                    <input
-                      id="reg-landline-code"
-                      type="text"
-                      dir="ltr"
-                      maxLength={4}
-                      value={landlineAreaCode}
-                      onChange={(e) => {
-                        setLandlineAreaCode(e.target.value.replace(/\D/g, ''));
-                        if (errorMessage) setErrorMessage(null);
-                      }}
-                      className="w-full h-[56px] px-3 text-sm font-mono text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] border border-[#747775] dark:border-[#8E918F] focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] focus:outline-none transition-all box-border"
-                    />
-                    <label htmlFor="reg-landline-code" className="absolute -top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D] text-[#0B57D0] dark:text-[#A8C7FA] start-2 pointer-events-none">
-                      <bdi>{isRtl ? 'كود المحافظة' : 'Area Code'}</bdi>
-                    </label>
+                    <div className="flex-1 relative">
+                      <input
+                        id="reg-landline-num"
+                        type="text"
+                        dir="ltr"
+                        maxLength={10}
+                        autoFocus
+                        value={landlineNumber}
+                        onChange={(e) => {
+                          setLandlineNumber(e.target.value.replace(/\D/g, ''));
+                          if (errorMessage) setErrorMessage(null);
+                        }}
+                        className="w-full h-[56px] px-4 text-sm font-mono text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] border border-[#747775] dark:border-[#8E918F] focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] focus:outline-none transition-all box-border"
+                      />
+                      <label htmlFor="reg-landline-num" className="absolute -top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D] text-[#0B57D0] dark:text-[#A8C7FA] start-3 pointer-events-none">
+                        <bdi>{isRtl ? 'رقم التليفون الأرضي (اختياري)' : 'Landline Number (Optional)'}</bdi>
+                      </label>
+                    </div>
                   </div>
+                )}
 
-                  <div className="flex-1 relative">
-                    <input
-                      id="reg-landline-num"
-                      type="text"
-                      dir="ltr"
-                      maxLength={10}
-                      autoFocus
-                      value={landlineNumber}
-                      onChange={(e) => {
-                        setLandlineNumber(e.target.value.replace(/\D/g, ''));
-                        if (errorMessage) setErrorMessage(null);
-                      }}
-                      className="w-full h-[56px] px-4 text-sm font-mono text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] border border-[#747775] dark:border-[#8E918F] focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] focus:outline-none transition-all box-border"
-                    />
-                    <label htmlFor="reg-landline-num" className="absolute -top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D] text-[#0B57D0] dark:text-[#A8C7FA] start-3 pointer-events-none">
-                      <bdi>{isRtl ? 'رقم التليفون الأرضي (اختياري)' : 'Landline Number (Optional)'}</bdi>
-                    </label>
+                {/* 2.4: Social Links (Interactive Grid & Subscreens) */}
+                {subStepIndex === 4 && (
+                  <SocialMediaStep
+                    isRtl={isRtl}
+                    socials={socials}
+                    setSocials={setSocials}
+                    registeredPhone={`${countryCode}${phoneNumber}`}
+                    registeredEmail={email}
+                    fullName={isRtl ? arabicFullName : englishFullName}
+                  />
+                )}
+
+                {/* Error Alert */}
+                {errorMessage && (
+                  <div id="register-error-alert" className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5] mt-3">
+                    <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#B3261E] dark:bg-[#F2B8B5] text-white dark:text-[#601410] text-[11px] font-bold select-none leading-none pb-[1px]">
+                      !
+                    </span>
+                    <bdi id="error-message-text">{errorMessage}</bdi>
                   </div>
-                </div>
-              )}
-
-              {/* 2.4: Social Links (Interactive Grid & Subscreens) */}
-              {subStepIndex === 4 && (
-                <SocialMediaStep
-                  isRtl={isRtl}
-                  socials={socials}
-                  setSocials={setSocials}
-                  registeredPhone={`${countryCode}${phoneNumber}`}
-                  registeredEmail={email}
-                  fullName={isRtl ? arabicFullName : englishFullName}
-                />
-              )}
-
-              {/* Error Alert */}
-              {errorMessage && (
-                <div id="register-error-alert" className="flex items-center gap-2 text-xs text-[#B3261E] dark:text-[#F2B8B5] mt-3">
-                  <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[#B3261E] dark:bg-[#F2B8B5] text-white dark:text-[#601410] text-[11px] font-bold select-none leading-none pb-[1px]">
-                    !
-                  </span>
-                  <bdi id="error-message-text">{errorMessage}</bdi>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
 
               {/* Navigation Action Buttons */}
               <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
@@ -2798,27 +2775,27 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                             ? 'تحقق ومتابعة'
                             : 'Verify & Continue'
                           : !isPhoneVerified
-                          ? isRtl
-                            ? 'إرسال الرمز عبر واتساب'
-                            : 'Send WhatsApp Code'
-                          : isRtl
-                          ? 'التالي'
-                          : 'Next'
+                            ? isRtl
+                              ? 'إرسال الرمز عبر واتساب'
+                              : 'Send WhatsApp Code'
+                            : isRtl
+                              ? 'التالي'
+                              : 'Next'
                         : subStepIndex === 2
-                        ? isEmailOtpActive
-                          ? isRtl
-                            ? 'تحقق ومتابعة'
-                            : 'Verify & Continue'
-                          : email.trim() && !isEmailVerified
-                          ? isRtl
-                            ? 'إرسال رمز التحقق'
-                            : 'Send Verification Code'
+                          ? isEmailOtpActive
+                            ? isRtl
+                              ? 'تحقق ومتابعة'
+                              : 'Verify & Continue'
+                            : email.trim() && !isEmailVerified
+                              ? isRtl
+                                ? 'إرسال رمز التحقق'
+                                : 'Send Verification Code'
+                              : isRtl
+                                ? 'التالي'
+                                : 'Next'
                           : isRtl
-                          ? 'التالي'
-                          : 'Next'
-                        : isRtl
-                        ? 'التالي'
-                        : 'Next'}
+                            ? 'التالي'
+                            : 'Next'}
                     </bdi>
                   </button>
                 </div>
@@ -2878,9 +2855,8 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   {!isStep3Valid && showStep3Tooltip && (
                     <div
                       role="tooltip"
-                      className={`absolute bottom-full right-0 mb-3 z-50 w-max max-w-[280px] sm:max-w-[320px] p-3 rounded-2xl shadow-xl border bg-slate-900 text-slate-50 border-slate-800 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:shadow-2xl text-xs leading-relaxed animate-fadeIn transition-all pointer-events-none whitespace-normal break-words ${
-                        isRtl ? 'text-right' : 'text-left'
-                      }`}
+                      className={`absolute bottom-full right-0 mb-3 z-50 w-max max-w-[280px] sm:max-w-[320px] p-3 rounded-2xl shadow-xl border bg-slate-900 text-slate-50 border-slate-800 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 dark:shadow-2xl text-xs leading-relaxed animate-fadeIn transition-all pointer-events-none whitespace-normal break-words ${isRtl ? 'text-right' : 'text-left'
+                        }`}
                     >
                       <div className="flex items-center gap-1.5 font-semibold pb-1.5 mb-1.5 border-b border-slate-800/80 dark:border-slate-700/80 text-amber-500 dark:text-amber-400">
                         <Info className="w-3.5 h-3.5 shrink-0" />
@@ -2917,11 +2893,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                     <button
                       type="submit"
                       disabled={!isStep3Valid}
-                      className={`text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full transition-all flex items-center justify-center gap-2 shadow-sm ${
-                        isStep3Valid
+                      className={`text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full transition-all flex items-center justify-center gap-2 shadow-sm ${isStep3Valid
                           ? 'bg-[#0B57D0] hover:bg-[#0842A0] active:bg-[#06337E] text-white cursor-pointer'
                           : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-80 pointer-events-none'
-                      }`}
+                        }`}
                     >
                       <bdi>{isRtl ? 'التالي' : 'Next'}</bdi>
                     </button>
@@ -3000,7 +2975,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   <div className="flex-grow flex flex-col justify-center min-h-[300px] w-full py-2 animate-fadeIn">
                     <div className="space-y-4 max-w-xl mx-auto w-full">
                       <div className="bg-white dark:bg-slate-900/60 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-xs space-y-3.5">
-                        
+
                         {/* Header */}
                         <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-slate-800/80">
                           <span className="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
@@ -3156,25 +3131,22 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       setPassword(e.target.value);
                       if (errorMessage) setErrorMessage(null);
                     }}
-                    className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
-                      errorMessage
+                    className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${errorMessage
                         ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
                         : isPasswordFocused
-                        ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                        : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
-                    }`}
+                          ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                          : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                      }`}
                   />
                   <label
                     htmlFor="reg-pass"
-                    className={`absolute pointer-events-none transition-all duration-150 start-3 ${
-                      isPasswordFloating ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]' : 'top-4 text-[15px]'
-                    } ${
-                      errorMessage
+                    className={`absolute pointer-events-none transition-all duration-150 start-3 ${isPasswordFloating ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]' : 'top-4 text-[15px]'
+                      } ${errorMessage
                         ? 'text-[#B3261E] dark:text-[#F2B8B5]'
                         : isPasswordFocused
-                        ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                        : 'text-[#444746] dark:text-[#8E918F]'
-                    }`}
+                          ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                          : 'text-[#444746] dark:text-[#8E918F]'
+                      }`}
                   >
                     <bdi>{isRtl ? 'كلمة المرور (يجب أن تكون قوية ومحمية)' : 'Password (Must be strong & secure)'}</bdi>
                   </label>
@@ -3199,25 +3171,22 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       setConfirmPassword(e.target.value);
                       if (errorMessage) setErrorMessage(null);
                     }}
-                    className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
-                      errorMessage
+                    className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${errorMessage
                         ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
                         : isConfirmPasswordFocused
-                        ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                        : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
-                    }`}
+                          ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                          : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                      }`}
                   />
                   <label
                     htmlFor="reg-pass-confirm"
-                    className={`absolute pointer-events-none transition-all duration-150 start-3 ${
-                      isConfirmPasswordFloating ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]' : 'top-4 text-[15px]'
-                    } ${
-                      errorMessage
+                    className={`absolute pointer-events-none transition-all duration-150 start-3 ${isConfirmPasswordFloating ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]' : 'top-4 text-[15px]'
+                      } ${errorMessage
                         ? 'text-[#B3261E] dark:text-[#F2B8B5]'
                         : isConfirmPasswordFocused
-                        ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                        : 'text-[#444746] dark:text-[#8E918F]'
-                    }`}
+                          ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                          : 'text-[#444746] dark:text-[#8E918F]'
+                      }`}
                   >
                     <bdi>{isRtl ? 'تأكيد كلمة المرور' : 'Confirm Password'}</bdi>
                   </label>
@@ -3305,11 +3274,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       key={loc}
                       type="button"
                       onClick={() => handleLanguageChange(loc)}
-                      className={`w-full text-start px-3 py-2 rounded-xl text-xs flex items-center justify-between cursor-pointer transition ${
-                        loc === locale
+                      className={`w-full text-start px-3 py-2 rounded-xl text-xs flex items-center justify-between cursor-pointer transition ${loc === locale
                           ? 'bg-blue-50 dark:bg-blue-950/50 text-[#0B57D0] dark:text-[#A8C7FA] font-semibold'
                           : 'hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300'
-                      }`}
+                        }`}
                     >
                       <span>{getLocaleDisplayName(loc)}</span>
                       <span className="text-[10px] text-slate-400 font-mono">{loc}</span>
