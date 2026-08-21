@@ -10,7 +10,7 @@ export interface LocationLookupResult {
 }
 
 /**
- * Fetches all world location data (countries, governorates, cities, streets) from Supabase.
+ * Fetches all world location data (countries, governorates, cities, streets) strictly from Supabase.
  */
 export async function fetchWorldLocationsAction(): Promise<{
   success: boolean;
@@ -82,12 +82,12 @@ export async function fetchStreetsByCityAction(cityId: string): Promise<{
 }
 
 /**
- * Fetches all Dioceses, Churches, and Priests from Supabase database.
+ * Fetches all Dioceses, Churches, and Priests strictly from Supabase database (single source of truth).
  */
 export async function fetchChurchesDataAction(): Promise<{
   success: boolean;
   dioceses: { id: string; name_en: string; name_ar: string; governorate_id?: string }[];
-  churches: { id: string; diocese_id: string; city_id: string; name_en: string; name_ar: string }[];
+  churches: { id: string; diocese_id: string; city_id: string; name_en: string; name_ar: string; denomination?: string; image_url?: string }[];
   priests: { id: string; church_id?: string; diocese_id?: string; name_en: string; name_ar: string; title_en?: string; title_ar?: string }[];
   error?: string;
 }> {
@@ -96,7 +96,7 @@ export async function fetchChurchesDataAction(): Promise<{
 
     const [dioRes, churchRes, priestRes] = await Promise.all([
       supabase.from('dioceses').select('id, name_en, name_ar, governorate_id').order('name_ar', { ascending: true }),
-      supabase.from('churches').select('id, diocese_id, city_id, name_en, name_ar').order('name_ar', { ascending: true }),
+      supabase.from('churches').select('id, diocese_id, city_id, name_en, name_ar, denomination, image_url').order('name_ar', { ascending: true }),
       supabase.from('priests').select('id, church_id, diocese_id, name_en, name_ar, title_en, title_ar').order('name_ar', { ascending: true }),
     ]);
 
@@ -110,13 +110,13 @@ export async function fetchChurchesDataAction(): Promise<{
       priests: (priestRes.data as any[]) || [],
     };
   } catch (err: any) {
-    console.error('Error fetching churches data:', err);
+    console.error('Error fetching churches data strictly from Supabase:', err);
     return {
       success: false,
       dioceses: [],
       churches: [],
       priests: [],
-      error: err.message || 'Failed to load churches',
+      error: err.message || 'Failed to load churches from database',
     };
   }
 }
@@ -126,7 +126,7 @@ export async function fetchChurchesDataAction(): Promise<{
  */
 export async function searchChurchesDatabaseAction(query: string): Promise<{
   success: boolean;
-  churches: { id: string; diocese_id: string; city_id: string; name_en: string; name_ar: string }[];
+  churches: { id: string; diocese_id: string; city_id: string; name_en: string; name_ar: string; denomination?: string; image_url?: string }[];
   error?: string;
 }> {
   const trimmed = query.trim();
@@ -138,7 +138,7 @@ export async function searchChurchesDatabaseAction(query: string): Promise<{
     const supabase = await createClient();
     const { data, error } = await supabase
       .from('churches')
-      .select('id, diocese_id, city_id, name_en, name_ar')
+      .select('id, diocese_id, city_id, name_en, name_ar, denomination, image_url')
       .or(`name_en.ilike.%${trimmed}%,name_ar.ilike.%${trimmed}%`)
       .limit(50);
 
