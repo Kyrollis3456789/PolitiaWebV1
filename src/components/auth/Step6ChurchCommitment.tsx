@@ -13,7 +13,6 @@ import {
   Loader2,
   Search,
   X,
-  Shield,
 } from 'lucide-react';
 import { Diocese, Church, Step6ChurchPayload } from '@/types/database.types';
 
@@ -33,6 +32,7 @@ const DEFAULT_DIOCESES: Diocese[] = [
   { id: 'dio-assiut-1', name_ar: 'إيبارشية أسيوط وساحل سليم والبداري', name_en: 'Diocese of Assiut & Dar El Salam' },
   { id: 'dio-cairo-1', name_ar: 'إيبارشية مصر الجديدة وشرق القاهرة', name_en: 'Diocese of Heliopolis & East Cairo' },
   { id: 'dio-alex-1', name_ar: 'بطريركية الإسكندرية للأقباط الأرثوذكس', name_en: 'Coptic Orthodox Patriarchate of Alexandria' },
+  { id: 'dio-giza-1', name_ar: 'إيبارشية الجيزة وتوابعها', name_en: 'Diocese of Giza & Affiliates' },
 ];
 
 const DEFAULT_CHURCHES: Church[] = [
@@ -40,7 +40,17 @@ const DEFAULT_CHURCHES: Church[] = [
   { id: 'ch-assiut-2', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة الشهيد العظيم مارمرقس (حي السادات)', name_en: 'St. Mark Church (Nasser / Al Sadat)' },
   { id: 'ch-assiut-3', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة الشهيد مارجرجس (يسري راغب والجلاء)', name_en: 'St. George Church (El Galaa / Yousri Ragheb)' },
   { id: 'ch-new-assiut-1', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333322', name_ar: 'كاتدرائية السيدة العذراء وملاك ميخائيل (أسيوط الجديدة)', name_en: 'Virgin Mary & Archangel Michael Cathedral' },
+  { id: 'ch-cairo-1', diocese_id: 'dio-cairo-1', city_id: '11111111-1111-1111-1111-111133333301', name_ar: 'الكاتدرائية المرقسية بالعباسية (القاهرة)', name_en: 'St. Mark Coptic Orthodox Cathedral (Abbassia)' },
+  { id: 'ch-cairo-2', diocese_id: 'dio-cairo-1', city_id: '11111111-1111-1111-1111-111133333301', name_ar: 'كنيسة السيدة العذراء بالزيتون (القاهرة)', name_en: 'Virgin Mary Church (El Zeitoun)' },
+  { id: 'ch-cairo-3', diocese_id: 'dio-cairo-1', city_id: '11111111-1111-1111-1111-111133333301', name_ar: 'كنيسة الشهيد مارجرجس بمصر الجديدة', name_en: 'St. George Church (Heliopolis)' },
+  { id: 'ch-cairo-4', diocese_id: 'dio-cairo-1', city_id: '11111111-1111-1111-1111-111133333301', name_ar: 'كنيسة العذراء والقديس أثناسيوس بمدينة نصر', name_en: 'Virgin Mary & St. Athanasius (Nasr City)' },
+  { id: 'ch-alex-1', diocese_id: 'dio-alex-1', city_id: '22222222-2222-2222-2222-222233333301', name_ar: 'دير الشهيد العظيم مارمينا بالعجايبي (مريوط)', name_en: 'St. Mina Monastery Church (Mariout)' },
+  { id: 'ch-alex-2', diocese_id: 'dio-alex-1', city_id: '22222222-2222-2222-2222-222233333301', name_ar: 'كنيسة الشهيد العظيم مارمرقس بكليوباترا (الإسكندرية)', name_en: 'St. Mark Church (Cleopatra)' },
+  { id: 'ch-giza-1', diocese_id: 'dio-giza-1', city_id: '44444444-4444-4444-4444-444433333301', name_ar: 'كنيسة الشهيد مارمينا بالدقي (الجيزة)', name_en: 'St. Mina Church (Dokki)' },
+  { id: 'ch-assiut-4', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كنيسة الشهيد أبانوب النهيسي (حي النميس)', name_en: 'St. Abanoub Church (El Nemis)' },
 ];
+
+const MAX_SECONDARY_CHURCHES = 10;
 
 /* Custom Account-Picker Dropdown for Churches */
 interface ChurchDropdownProps {
@@ -263,12 +273,18 @@ export function Step6ChurchCommitment({
   const [primaryDioceseId, setPrimaryDioceseId] = useState<string>(defaultValues?.primary_diocese_id || '');
   const [showAllPrimaryChurches, setShowAllPrimaryChurches] = useState<boolean>(false);
 
-  // --- Secondary Church State ---
-  const [hasSecondaryChurch, setHasSecondaryChurch] = useState<boolean>(
-    Boolean(defaultValues?.secondary_church_id) || Boolean(secondaryCityId)
-  );
-  const [secondaryChurchId, setSecondaryChurchId] = useState<string>(defaultValues?.secondary_church_id || '');
-  const [secondaryDioceseId, setSecondaryDioceseId] = useState<string>(defaultValues?.secondary_diocese_id || '');
+  // --- Secondary Churches List State (up to 10) ---
+  const initialSecondaryList: string[] = useMemo(() => {
+    if (defaultValues?.additional_churches && defaultValues.additional_churches.length > 0) {
+      return defaultValues.additional_churches.map((c) => c.id).slice(0, MAX_SECONDARY_CHURCHES);
+    }
+    if (defaultValues?.secondary_church_id) {
+      return [defaultValues.secondary_church_id];
+    }
+    return [];
+  }, [defaultValues]);
+
+  const [secondaryChurchIds, setSecondaryChurchIds] = useState<string[]>(initialSecondaryList);
   const [showAllSecondaryChurches, setShowAllSecondaryChurches] = useState<boolean>(false);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -303,14 +319,25 @@ export function Step6ChurchCommitment({
     }
   };
 
-  // Auto-detect & sync Diocese when Secondary Church changes
-  const handleSecondaryChurchChange = (churchId: string) => {
-    setSecondaryChurchId(churchId);
-
-    const selectedChurch = allChurches.find((c) => c.id === churchId);
-    if (selectedChurch && selectedChurch.diocese_id) {
-      setSecondaryDioceseId(selectedChurch.diocese_id);
+  // Add Secondary Church Entry (up to 10)
+  const handleAddSecondaryChurch = () => {
+    if (secondaryChurchIds.length < MAX_SECONDARY_CHURCHES) {
+      setSecondaryChurchIds([...secondaryChurchIds, '']);
     }
+  };
+
+  // Update Secondary Church Entry by Index
+  const handleSecondaryChurchChangeAt = (index: number, churchId: string) => {
+    setSecondaryChurchIds((prev) => {
+      const copy = [...prev];
+      copy[index] = churchId;
+      return copy;
+    });
+  };
+
+  // Remove Secondary Church Entry by Index
+  const handleRemoveSecondaryChurchAt = (index: number) => {
+    setSecondaryChurchIds((prev) => prev.filter((_, i) => i !== index));
   };
 
   // Lookup Diocese objects for display
@@ -318,18 +345,10 @@ export function Step6ChurchCommitment({
     return allDioceses.find((d) => d.id === primaryDioceseId);
   }, [allDioceses, primaryDioceseId]);
 
-  const secondaryDioceseObj = useMemo(() => {
-    return allDioceses.find((d) => d.id === secondaryDioceseId);
-  }, [allDioceses, secondaryDioceseId]);
-
-  // Selected Church objects for descriptive payload
+  // Selected Primary Church object
   const selectedPrimaryChurchObj = useMemo(() => {
     return allChurches.find((c) => c.id === primaryChurchId);
   }, [allChurches, primaryChurchId]);
-
-  const selectedSecondaryChurchObj = useMemo(() => {
-    return allChurches.find((c) => c.id === secondaryChurchId);
-  }, [allChurches, secondaryChurchId]);
 
   const handleNext = async (e?: React.MouseEvent) => {
     if (e) {
@@ -347,6 +366,21 @@ export function Step6ChurchCommitment({
     setErrors({});
     setIsSubmitting(true);
 
+    const validSecondaryIds = secondaryChurchIds.filter((id) => Boolean(id.trim()));
+    const firstSecondaryId = validSecondaryIds[0];
+    const firstSecondaryChurchObj = allChurches.find((c) => c.id === firstSecondaryId);
+    const firstSecondaryDioceseObj = firstSecondaryChurchObj?.diocese_id
+      ? allDioceses.find((d) => d.id === firstSecondaryChurchObj.diocese_id)
+      : undefined;
+
+    const additionalChurchesPayload = validSecondaryIds.map((id) => {
+      const ch = allChurches.find((c) => c.id === id);
+      return {
+        id,
+        name: ch ? (isRtl ? ch.name_ar : ch.name_en) : undefined,
+      };
+    });
+
     const payload: Step6ChurchPayload = {
       primary_church_id: primaryChurchId,
       primary_diocese_id: primaryDioceseId || undefined,
@@ -361,20 +395,19 @@ export function Step6ChurchCommitment({
           : primaryDioceseObj.name_en
         : undefined,
 
-      secondary_church_id: hasSecondaryChurch && secondaryChurchId ? secondaryChurchId : undefined,
-      secondary_diocese_id: hasSecondaryChurch && secondaryDioceseId ? secondaryDioceseId : undefined,
-      secondary_church_name:
-        hasSecondaryChurch && selectedSecondaryChurchObj
-          ? isRtl
-            ? selectedSecondaryChurchObj.name_ar
-            : selectedSecondaryChurchObj.name_en
-          : undefined,
-      secondary_diocese_name:
-        hasSecondaryChurch && secondaryDioceseObj
-          ? isRtl
-            ? secondaryDioceseObj.name_ar
-            : secondaryDioceseObj.name_en
-          : undefined,
+      secondary_church_id: firstSecondaryId || undefined,
+      secondary_diocese_id: firstSecondaryDioceseObj?.id || undefined,
+      secondary_church_name: firstSecondaryChurchObj
+        ? isRtl
+          ? firstSecondaryChurchObj.name_ar
+          : firstSecondaryChurchObj.name_en
+        : undefined,
+      secondary_diocese_name: firstSecondaryDioceseObj
+        ? isRtl
+          ? firstSecondaryDioceseObj.name_ar
+          : firstSecondaryDioceseObj.name_en
+        : undefined,
+      additional_churches: additionalChurchesPayload,
     };
 
     try {
@@ -433,71 +466,63 @@ export function Step6ChurchCommitment({
             />
           </div>
 
-          {/* SECONDARY CHURCH SECTION */}
-          {!hasSecondaryChurch ? (
-            <button
-              type="button"
-              onClick={() => setHasSecondaryChurch(true)}
-              className="w-full py-2.5 px-4 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700/80 hover:border-blue-400 dark:hover:border-blue-500/50 bg-slate-50/50 dark:bg-slate-900/30 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 text-xs font-semibold text-blue-600 dark:text-blue-400 transition flex items-center justify-center gap-2 cursor-pointer group"
-            >
-              <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
-              <span>{isRtl ? 'إضافة كنيسة ثانوية (كنيسة العمل / كنيسة أخرى تتردد عليها)' : '+ Add Secondary Church (Workplace / Vacation Parish)'}</span>
-            </button>
-          ) : (
-            <div className="bg-slate-50/80 dark:bg-slate-900/40 rounded-2xl border border-blue-200 dark:border-blue-900/40 p-4 shadow-xs space-y-3.5 animate-fadeIn">
-              {/* Header */}
-              <div className="flex items-center justify-between pb-1 border-b border-slate-200/80 dark:border-slate-800">
-                <span className="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
-                  <ChurchIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  <span>{isRtl ? 'الكنيسة الثانوية (اختياري)' : 'Secondary Church (Optional)'}</span>
-                </span>
-
-                <div className="flex items-center gap-3">
-                  {secondaryCityId && (
-                    <button
-                      type="button"
-                      onClick={() => setShowAllSecondaryChurches(!showAllSecondaryChurches)}
-                      className="text-[11px] font-medium text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
-                    >
-                      {showAllSecondaryChurches
-                        ? isRtl
-                          ? 'عرض كنائس العنوان الثانوي'
-                          : 'Secondary area only'
-                        : isRtl
-                        ? 'عرض كل الكنائس'
-                        : 'Show all'}
-                    </button>
-                  )}
+          {/* SECONDARY CHURCHES LIST SECTION (UP TO 10) */}
+          <div className="space-y-3">
+            {secondaryChurchIds.map((secId, idx) => (
+              <div
+                key={`secondary-church-${idx}`}
+                className="bg-slate-50/80 dark:bg-slate-900/40 rounded-2xl border border-blue-200 dark:border-blue-900/40 p-4 shadow-xs space-y-3.5 animate-fadeIn"
+              >
+                <div className="flex items-center justify-between pb-1 border-b border-slate-200/80 dark:border-slate-800">
+                  <span className="text-xs font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+                    <ChurchIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    <span>
+                      {isRtl
+                        ? `الكنيسة الثانوية ${idx + 1} (اختياري)`
+                        : `Secondary Church ${idx + 1} (Optional)`}
+                    </span>
+                  </span>
 
                   <button
                     type="button"
-                    onClick={() => {
-                      setHasSecondaryChurch(false);
-                      setSecondaryChurchId('');
-                      setSecondaryDioceseId('');
-                    }}
+                    onClick={() => handleRemoveSecondaryChurchAt(idx)}
                     className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 dark:text-rose-400 hover:text-rose-700 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/40 px-2 py-1 rounded-lg transition cursor-pointer"
                   >
                     <Trash2 className="w-3 h-3" />
-                    <span>{isRtl ? 'إلغاء' : 'Remove'}</span>
+                    <span>{isRtl ? 'حذف' : 'Remove'}</span>
                   </button>
                 </div>
-              </div>
 
-              {/* Secondary Church Account-Picker Custom Dropdown */}
-              <AccountPickerChurchDropdown
-                id="secondary-church-select"
-                label="Select Secondary Church"
-                labelAr="اختر الكنيسة الثانوية"
-                value={secondaryChurchId}
-                onChange={handleSecondaryChurchChange}
-                churches={secondaryFilteredChurches}
-                isRtl={isRtl}
-                placeholder="Select another church you attend (optional)..."
-                placeholderAr="اختر كنيسة أخرى تتردد عليها (اختياري)..."
-              />
-            </div>
-          )}
+                <AccountPickerChurchDropdown
+                  id={`secondary-church-select-${idx}`}
+                  label={`Select Secondary Church ${idx + 1}`}
+                  labelAr={`اختر الكنيسة الثانوية ${idx + 1}`}
+                  value={secId}
+                  onChange={(chId) => handleSecondaryChurchChangeAt(idx, chId)}
+                  churches={secondaryFilteredChurches}
+                  isRtl={isRtl}
+                  placeholder="Select another church you attend..."
+                  placeholderAr="اختر كنيسة أخرى تتردد عليها..."
+                />
+              </div>
+            ))}
+
+            {/* Add Secondary Church Button (Max 10) */}
+            {secondaryChurchIds.length < MAX_SECONDARY_CHURCHES && (
+              <button
+                type="button"
+                onClick={handleAddSecondaryChurch}
+                className="w-full py-2.5 px-4 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700/80 hover:border-blue-400 dark:hover:border-blue-500/50 bg-slate-50/50 dark:bg-slate-900/30 hover:bg-blue-50/30 dark:hover:bg-blue-900/10 text-xs font-semibold text-blue-600 dark:text-blue-400 transition flex items-center justify-center gap-2 cursor-pointer group"
+              >
+                <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                <span>
+                  {isRtl
+                    ? `+ إضافة كنيسة ثانوية أخرى (${secondaryChurchIds.length} من ${MAX_SECONDARY_CHURCHES})`
+                    : `+ Add Secondary Church (${secondaryChurchIds.length} of ${MAX_SECONDARY_CHURCHES})`}
+                </span>
+              </button>
+            )}
+          </div>
 
         </div>
       </div>

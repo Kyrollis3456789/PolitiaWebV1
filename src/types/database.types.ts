@@ -108,6 +108,7 @@ export interface Step6ChurchPayload {
   primary_church_name?: string;
   secondary_diocese_name?: string;
   secondary_church_name?: string;
+  additional_churches?: Array<{ id: string; name?: string }>;
   priest_id?: string;
   priest_name?: string;
 }
