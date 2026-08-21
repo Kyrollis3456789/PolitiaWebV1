@@ -127,6 +127,81 @@ export interface SearchedMember {
   gender?: 'Male' | 'Female';
 }
 
+export interface University {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  logo_url?: string | null;
+  country_id?: string | null;
+  governorate_id?: string | null;
+  created_at?: string;
+}
+
+export interface Faculty {
+  id: string;
+  university_id: string;
+  name_ar: string;
+  name_en: string;
+  logo_url?: string | null;
+  created_at?: string;
+}
+
+export interface School {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  logo_url?: string | null;
+  education_stage?: string | null;
+  education_system?: string | null;
+  governorate_id?: string | null;
+  city_id?: string | null;
+  created_at?: string;
+}
+
+export interface UserAddress {
+  id: string;
+  user_id: string;
+  address_type: string; // 'primary' | 'work' | 'summer_house' | 'other'
+  country_id?: string | null;
+  governorate_id?: string | null;
+  city_id?: string | null;
+  street_address?: string | null;
+  building_no?: string | null;
+  floor_no?: string | null;
+  apartment?: string | null;
+  created_at?: string;
+}
+
+export interface Hobby {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  created_at?: string;
+}
+
+export interface Language {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  created_at?: string;
+}
+
+export interface UserHobby {
+  id: string;
+  user_id: string;
+  hobby_id?: string | null;
+  custom_name?: string | null;
+  created_at?: string;
+}
+
+export interface UserLanguage {
+  id: string;
+  user_id: string;
+  language_id?: string | null;
+  custom_name?: string | null;
+  created_at?: string;
+}
+
 export interface Profile {
   id: string; // references auth.users.id
   username?: string | null;
@@ -149,6 +224,12 @@ export interface Profile {
   guardian_phone?: string | null;
   education_stage?: string | null;
   faculty_or_school?: string | null;
+  university_id?: string | null;
+  faculty_id?: string | null;
+  school_id?: string | null;
+  university_custom_name?: string | null;
+  faculty_custom_name?: string | null;
+  school_custom_name?: string | null;
   profession?: string | null;
   address_governorate?: string | null;
   address_city?: string | null;
