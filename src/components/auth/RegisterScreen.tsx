@@ -347,11 +347,14 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const [langSearch, setLangSearch] = useState('');
 
   // Client-side Draft Hydration
+  // Client-side Draft Hydration for Steps 1 through 7
   useEffect(() => {
     setIsMounted(true);
     try {
-      const savedMain = getLocalNumber('main_step', 1);
-      const savedSub = getLocalNumber('sub_step', 1);
+      const masterDraft = getLocalJson<any>('registration_draft_v1', null);
+
+      const savedMain = masterDraft?.mainStepIndex ?? getLocalNumber('main_step', 1);
+      const savedSub = masterDraft?.subStepIndex ?? getLocalNumber('sub_step', 1);
       if (savedMain >= 1 && savedMain <= 8) {
         setMainStepIndex(savedMain);
       } else {
@@ -360,75 +363,89 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
       }
       if (savedSub >= 1) setSubStepIndex(savedSub);
 
-      const fnEn = getLocalItem('full_name_en', '');
+      const fnEn = masterDraft?.englishFullName ?? getLocalItem('full_name_en', '');
       if (fnEn) setEnglishFullName(fnEn);
-      const fnAr = getLocalItem('full_name_ar', '');
+      const fnAr = masterDraft?.arabicFullName ?? getLocalItem('full_name_ar', '');
       if (fnAr) setArabicFullName(fnAr);
-      const g = getLocalItem('gender', '');
+      const g = masterDraft?.gender ?? getLocalItem('gender', '');
       if (g) setGender(g as GenderType);
-      const d = getLocalItem('dob', '');
+      const d = masterDraft?.dob ?? getLocalItem('dob', '');
       if (d) setDob(d);
-      const nid = getLocalItem('national_id', '');
+      const nid = masterDraft?.nationalId ?? getLocalItem('national_id', '');
       if (nid) setNationalId(nid);
-      const av = getLocalItem('avatar_preview', '');
+      const av = masterDraft?.avatarPreview ?? getLocalItem('avatar_preview', '');
       if (av) setAvatarPreview(av);
-      const pskip = getLocalItem('photo_skipped', '');
-      if (pskip === 'true') setPhotoSkippedGracePeriod(true);
-      const cIso = getLocalItem('country_iso', '');
+      const pskip = masterDraft?.photoSkippedGracePeriod ?? (getLocalItem('photo_skipped', '') === 'true');
+      if (pskip) setPhotoSkippedGracePeriod(true);
+      const cIso = masterDraft?.countryIso ?? getLocalItem('country_iso', '');
       if (cIso) setCountryIso(cIso);
-      const cCode = getLocalItem('country_code', '');
+      const cCode = masterDraft?.countryCode ?? getLocalItem('country_code', '');
       if (cCode) setCountryCode(cCode);
-      const ph = getLocalItem('phone_number', '');
+      const ph = masterDraft?.phoneNumber ?? getLocalItem('phone_number', '');
       if (ph) setPhoneNumber(ph);
-      const pv = getLocalItem('phone_verified', '');
-      if (pv === 'true') setIsPhoneVerified(true);
-      const em = getLocalItem('email', '');
+      const pv = masterDraft?.isPhoneVerified ?? (getLocalItem('phone_verified', '') === 'true');
+      if (pv) setIsPhoneVerified(true);
+      const em = masterDraft?.email ?? getLocalItem('email', '');
       if (em) setEmail(em);
-      const ev = getLocalItem('email_verified', '');
-      if (ev === 'true') setIsEmailVerified(true);
-      const lAc = getLocalItem('landline_area_code', '');
+      const ev = masterDraft?.isEmailVerified ?? (getLocalItem('email_verified', '') === 'true');
+      if (ev) setIsEmailVerified(true);
+      const lAc = masterDraft?.landlineAreaCode ?? getLocalItem('landline_area_code', '');
       if (lAc) setLandlineAreaCode(lAc);
-      const lNum = getLocalItem('landline_number', '');
+      const lNum = masterDraft?.landlineNumber ?? getLocalItem('landline_number', '');
       if (lNum) setLandlineNumber(lNum);
-      const soc = getLocalJson('socials', null);
+      const soc = masterDraft?.socials ?? getLocalJson('socials', null);
       if (soc) setSocials(soc);
-      const ms = getLocalItem('marital_status', '');
+      const ms = masterDraft?.maritalStatus ?? getLocalItem('marital_status', '');
       if (ms) setMaritalStatus(ms);
-      const fam = getLocalJson('family_members', null);
+      const fam = masterDraft?.familyMembers ?? getLocalJson('family_members', null);
       if (fam) setFamilyMembers(fam);
-      const gn = getLocalItem('guardian_name', '');
+      const gn = masterDraft?.guardianName ?? getLocalItem('guardian_name', '');
       if (gn) setGuardianName(gn);
-      const gp = getLocalItem('guardian_phone', '');
+      const gp = masterDraft?.guardianPhone ?? getLocalItem('guardian_phone', '');
       if (gp) setGuardianPhone(gp);
-      const frt = getLocalItem('family_relation_type', '');
+      const frt = masterDraft?.familyRelationType ?? getLocalItem('family_relation_type', '');
       if (frt) setFamilyRelationType(frt);
-      const s4 = getLocalJson('step4_payload', null);
+      const s4 = masterDraft?.step4Payload ?? getLocalJson('step4_payload', null);
       if (s4) setStep4Payload(s4);
-      const gov = getLocalItem('governorate', '');
+
+      // Hydrate Step 5 Location Payload
+      const s5 = masterDraft?.step5Payload ?? getLocalJson('step5_payload', null);
+      if (s5) setStep5Payload(s5);
+      const gov = masterDraft?.governorate ?? getLocalItem('governorate', '');
       if (gov) setGovernorate(gov);
-      const cit = getLocalItem('city', '');
+      const cit = masterDraft?.city ?? getLocalItem('city', '');
       if (cit) setCity(cit);
-      const sa = getLocalItem('street_address', '');
+      const sa = masterDraft?.streetAddress ?? getLocalItem('street_address', '');
       if (sa) setStreetAddress(sa);
-      const bn = getLocalItem('building_number', '');
+      const bn = masterDraft?.buildingNumber ?? getLocalItem('building_number', '');
       if (bn) setBuildingNumber(bn);
-      const fln = getLocalItem('floor_number', '');
+      const fln = masterDraft?.floorNumber ?? getLocalItem('floor_number', '');
       if (fln) setFloorNumber(fln);
-      const an = getLocalItem('apartment_number', '');
+      const an = masterDraft?.apartmentNumber ?? getLocalItem('apartment_number', '');
       if (an) setApartmentNumber(an);
-      const secAddr = getLocalItem('secondary_address', '');
+      const secAddr = masterDraft?.secondaryAddress ?? getLocalItem('secondary_address', '');
       if (secAddr) setSecondaryAddress(secAddr);
-      const dio = getLocalItem('diocese', '');
+
+      // Hydrate Step 6 Church Payload
+      const s6 = masterDraft?.step6Payload ?? getLocalJson('step6_payload', null);
+      if (s6) setStep6Payload(s6);
+      const dio = masterDraft?.diocese ?? getLocalItem('diocese', '');
       if (dio) setDiocese(dio);
-      const pc = getLocalItem('primary_church', '');
+      const pc = masterDraft?.primaryChurch ?? getLocalItem('primary_church', '');
       if (pc) setPrimaryChurch(pc);
-      const sc = getLocalItem('secondary_church', '');
+      const sc = masterDraft?.secondaryChurch ?? getLocalItem('secondary_church', '');
       if (sc) setSecondaryChurch(sc);
-      const pn = getLocalItem('priest_name', '');
+
+      // Hydrate Step 7 Priest & Preferences
+      const pId = masterDraft?.priestId ?? getLocalItem('priest_id', '');
+      if (pId) setPriestId(pId);
+      const pn = masterDraft?.priestName ?? getLocalItem('priest_name', '');
       if (pn) setPriestName(pn);
-      const hob = getLocalJson('hobbies', null);
+      const isCustomP = masterDraft?.isCustomPriest ?? (getLocalItem('is_custom_priest', '') === 'true');
+      if (isCustomP) setIsCustomPriest(isCustomP);
+      const hob = masterDraft?.selectedHobbies ?? getLocalJson('hobbies', null);
       if (hob) setSelectedHobbies(hob);
-      const langList = getLocalJson('languages', null);
+      const langList = masterDraft?.selectedLanguages ?? getLocalJson('languages', null);
       if (langList) setSelectedLanguages(langList);
     } catch {}
   }, []);
@@ -480,6 +497,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   useEffect(() => { if (isMounted) setLocalItem('guardian_phone', guardianPhone); }, [guardianPhone, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('family_relation_type', familyRelationType); }, [familyRelationType, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('step4_payload', step4Payload); }, [step4Payload, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('step5_payload', step5Payload); }, [step5Payload, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('step6_payload', step6Payload); }, [step6Payload, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('priest_id', priestId); }, [priestId, isMounted]);
+  useEffect(() => { if (isMounted) setLocalItem('is_custom_priest', isCustomPriest); }, [isCustomPriest, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('governorate', governorate); }, [governorate, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('city', city); }, [city, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('street_address', streetAddress); }, [streetAddress, isMounted]);
@@ -493,6 +514,97 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   useEffect(() => { if (isMounted) setLocalItem('priest_name', priestName); }, [priestName, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('hobbies', selectedHobbies); }, [selectedHobbies, isMounted]);
   useEffect(() => { if (isMounted) setLocalItem('languages', selectedLanguages); }, [selectedLanguages, isMounted]);
+
+  // Unified master draft auto-save for Steps 1 through 7
+  useEffect(() => {
+    if (!isMounted) return;
+    setLocalItem('registration_draft_v1', {
+      mainStepIndex,
+      subStepIndex,
+      englishFullName,
+      arabicFullName,
+      gender,
+      dob,
+      nationalId,
+      avatarPreview,
+      photoSkippedGracePeriod,
+      countryIso,
+      countryCode,
+      phoneNumber,
+      isPhoneVerified,
+      email,
+      isEmailVerified,
+      landlineAreaCode,
+      landlineNumber,
+      socials,
+      maritalStatus,
+      familyMembers,
+      guardianName,
+      guardianPhone,
+      familyRelationType,
+      step4Payload,
+      step5Payload,
+      governorate,
+      city,
+      streetAddress,
+      buildingNumber,
+      floorNumber,
+      apartmentNumber,
+      secondaryAddress,
+      step6Payload,
+      diocese,
+      primaryChurch,
+      secondaryChurch,
+      priestId,
+      priestName,
+      isCustomPriest,
+      selectedHobbies,
+      selectedLanguages,
+    });
+  }, [
+    isMounted,
+    mainStepIndex,
+    subStepIndex,
+    englishFullName,
+    arabicFullName,
+    gender,
+    dob,
+    nationalId,
+    avatarPreview,
+    photoSkippedGracePeriod,
+    countryIso,
+    countryCode,
+    phoneNumber,
+    isPhoneVerified,
+    email,
+    isEmailVerified,
+    landlineAreaCode,
+    landlineNumber,
+    socials,
+    maritalStatus,
+    familyMembers,
+    guardianName,
+    guardianPhone,
+    familyRelationType,
+    step4Payload,
+    step5Payload,
+    governorate,
+    city,
+    streetAddress,
+    buildingNumber,
+    floorNumber,
+    apartmentNumber,
+    secondaryAddress,
+    step6Payload,
+    diocese,
+    primaryChurch,
+    secondaryChurch,
+    priestId,
+    priestName,
+    isCustomPriest,
+    selectedHobbies,
+    selectedLanguages,
+  ]);
 
   // Names cleanup & derived values
   const fullEnglishName = englishFullName.trim().replace(/\s+/g, ' ');
