@@ -1772,13 +1772,13 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
       className="relative w-full min-h-[100dvh] sm:min-h-screen shared-bg flex flex-col justify-between items-center p-0 md:p-8 transition-colors duration-300 overflow-x-hidden"
     >
       {/* Main Authentication Card Container */}
-      <div className="relative z-20 w-full max-w-[1040px] flex flex-col md:flex-row gap-0 md:gap-14 min-h-[100dvh] md:min-h-fit h-auto items-stretch md:items-start transition-all duration-300 ease-in-out md:bg-white/95 md:dark:bg-[#1B212D]/95 md:rounded-[36px] md:p-12 md:shadow-2xl md:border md:border-white/60 md:dark:border-slate-800/80">
-        {/* Top Section (Mobile Photo Header / Desktop Left Column) */}
-        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start px-5 pt-6 pb-6 md:p-0 min-h-0 md:min-h-[420px]">
+      <div className="relative z-20 w-full max-w-[1040px] bg-white/95 dark:bg-[#1B212D]/95 rounded-none md:rounded-[36px] p-5 sm:p-8 md:p-12 shadow-none md:shadow-2xl border-0 md:border md:border-white/60 dark:md:border-slate-800/80 flex flex-col md:flex-row gap-6 md:gap-14 min-h-[100dvh] md:min-h-fit h-auto items-stretch md:items-start transition-all duration-300 ease-in-out">
+        {/* Left Column: Compact Mobile Progress & Step Headers */}
+        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start min-h-0 md:min-h-[420px]">
           <div className="space-y-3 w-full">
             {/* Integrated Unified Step Progress Bar & Milestone Indicator */}
             {mainStepIndex <= 8 && (
-              <div className="space-y-3 w-full">
+              <div className="space-y-2.5 w-full">
                 {/* Milestone Pill & Draft Saved Indicator */}
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
@@ -1791,8 +1791,8 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       style={{ width: 'auto', height: 'auto' }}
                       className="object-contain shrink-0"
                     />
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 md:bg-blue-50 dark:md:bg-blue-950/60 text-white md:text-[#0B57D0] dark:md:text-[#93C5FD] border border-white/30 md:border-blue-200/80 dark:md:border-blue-800 text-xs font-bold shadow-xs backdrop-blur-md">
-                      <span className="w-1.5 h-1.5 rounded-full bg-white md:bg-[#0B57D0] dark:md:bg-[#60A5FA] animate-pulse" />
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#0B57D0] dark:text-[#93C5FD] border border-blue-200/80 dark:border-blue-800 text-xs font-bold shadow-xs">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#0B57D0] dark:bg-[#60A5FA] animate-pulse" />
                       <span>
                         <bdi suppressHydrationWarning>
                           {mainStepIndex === 8
@@ -1806,16 +1806,16 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   </div>
 
                   {/* Real-Time Local Draft Saved Visual Cue */}
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-500/25 md:bg-emerald-50 dark:md:bg-emerald-950/40 text-emerald-100 md:text-emerald-700 dark:md:text-emerald-300 border border-emerald-400/40 md:border-emerald-200 dark:md:border-emerald-800/60 text-[11px] font-semibold backdrop-blur-md">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300 md:text-emerald-500 shrink-0" />
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 text-[11px] font-semibold">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
                     <span><bdi>{isRtl ? 'المسودة محفوظة' : 'Draft saved'}</bdi></span>
                   </span>
                 </div>
 
                 {/* Smooth Animated Progress Bar */}
-                <div className="w-full h-1.5 rounded-full bg-white/30 md:bg-slate-100 dark:md:bg-slate-800 overflow-hidden relative backdrop-blur-xs">
+                <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden relative">
                   <div
-                    className="h-full bg-gradient-to-r from-white to-blue-200 md:from-[#0B57D0] md:to-[#3B82F6] dark:md:from-[#3B82F6] dark:md:to-[#60A5FA] rounded-full transition-all duration-300 shadow-xs"
+                    className="h-full bg-gradient-to-r from-[#0B57D0] to-[#3B82F6] dark:from-[#3B82F6] dark:to-[#60A5FA] rounded-full transition-all duration-300 shadow-xs"
                     style={{ width: `${progressPercentage}%` }}
                   />
                 </div>
@@ -1823,17 +1823,17 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
             )}
 
             {/* Dynamic Step Title & Subtitle */}
-            <h1 className="text-[28px] sm:text-[34px] font-bold md:font-normal text-white md:text-[#1F1F1F] dark:md:text-[#E3E3E3] tracking-tight leading-[1.15] pt-1 drop-shadow-sm md:drop-shadow-none">
+            <h1 className="text-[26px] sm:text-[34px] font-normal text-[#1F1F1F] dark:text-[#E3E3E3] tracking-tight leading-[1.15] pt-1">
               <bdi suppressHydrationWarning>{header.title}</bdi>
             </h1>
-            <p className="text-[14px] sm:text-[16px] text-slate-100 md:text-[#1F1F1F] dark:md:text-[#C4C7C5] font-normal leading-relaxed drop-shadow-xs md:drop-shadow-none">
+            <p className="text-[14px] sm:text-[16px] text-[#1F1F1F] dark:text-[#C4C7C5] font-normal leading-relaxed">
               <bdi suppressHydrationWarning>{header.subtitle}</bdi>
             </p>
           </div>
         </div>
 
-        {/* Bottom Section (Mobile Bottom Sheet / Desktop Right Column) */}
-        <div className="w-full md:w-1/2 flex-1 flex flex-col justify-between bg-white/95 dark:bg-[#1B212D]/95 md:bg-transparent md:dark:bg-transparent rounded-t-[32px] md:rounded-none p-5 pt-6 sm:p-8 md:p-0 shadow-2xl md:shadow-none border-t border-white/60 dark:border-slate-800/80 md:border-0 min-h-[55vh] md:min-h-[420px] overflow-hidden transition-all duration-300 ease-in-out mt-auto md:mt-0">
+        {/* Right Column: Dynamic Form Area */}
+        <div className="w-full md:w-1/2 flex-1 flex flex-col justify-between min-h-0 md:min-h-[420px] overflow-hidden transition-all duration-300 ease-in-out">
           {/* Milestone 1: Personal Info */}
           {mainStepIndex === 1 && (
             <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
@@ -1858,17 +1858,17 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                           setEnglishFullName(autoCapitalizeEnglishName(e.target.value));
                         }}
                         className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${errorMessage
-                            ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                            : isEnglishFullNameFocused
-                              ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                              : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                          ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                          : isEnglishFullNameFocused
+                            ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                            : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
                           }`}
                       />
                       <label
                         htmlFor="reg-full-name-en"
                         className={`absolute pointer-events-none transition-all duration-150 start-3 ${isEnglishFullNameFloating
-                            ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
-                            : 'top-4 text-[15px]'
+                          ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
+                          : 'top-4 text-[15px]'
                           } ${errorMessage
                             ? 'text-[#B3261E] dark:text-[#F2B8B5]'
                             : isEnglishFullNameFocused
@@ -1899,17 +1899,17 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                           setArabicFullName(e.target.value);
                         }}
                         className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border text-right ${errorMessage
-                            ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                            : isArabicFullNameFocused
-                              ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                              : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                          ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                          : isArabicFullNameFocused
+                            ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                            : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
                           }`}
                       />
                       <label
                         htmlFor="reg-full-name-ar"
                         className={`absolute pointer-events-none transition-all duration-150 start-3 ${isArabicFullNameFloating
-                            ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
-                            : 'top-4 text-[15px]'
+                          ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
+                          : 'top-4 text-[15px]'
                           } ${errorMessage
                             ? 'text-[#B3261E] dark:text-[#F2B8B5]'
                             : isArabicFullNameFocused
@@ -1931,8 +1931,8 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       data-testid="gender-option-male"
                       onClick={() => setGender('Male')}
                       className={`relative p-5 rounded-2xl border-2 flex flex-col items-center justify-center gap-2.5 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 ${gender === 'Male'
-                          ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/80 dark:bg-blue-950/40 font-semibold text-[#0B57D0] dark:text-[#A8C7FA] shadow-xs'
-                          : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-300'
+                        ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/80 dark:bg-blue-950/40 font-semibold text-[#0B57D0] dark:text-[#A8C7FA] shadow-xs'
+                        : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-300'
                         }`}
                     >
                       {gender === 'Male' && (
@@ -1952,8 +1952,8 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       data-testid="gender-option-female"
                       onClick={() => setGender('Female')}
                       className={`relative p-5 rounded-2xl border-2 flex flex-col items-center justify-center gap-2.5 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 ${gender === 'Female'
-                          ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-purple-50/80 dark:bg-purple-950/40 font-semibold text-purple-700 dark:text-purple-300 shadow-xs'
-                          : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-300'
+                        ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-purple-50/80 dark:bg-purple-950/40 font-semibold text-purple-700 dark:text-purple-300 shadow-xs'
+                        : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-300'
                         }`}
                     >
                       {gender === 'Female' && (
@@ -1995,19 +1995,19 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                           if (errorMessage) setErrorMessage(null);
                         }}
                         className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${errorMessage
-                            ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                            : isDobFocused
-                              ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                              : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                          ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                          : isDobFocused
+                            ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                            : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
                           }`}
                       />
                       <label
                         htmlFor="reg-dob"
                         className={`absolute pointer-events-none transition-all duration-150 start-3 -top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D] ${errorMessage
-                            ? 'text-[#B3261E] dark:text-[#F2B8B5]'
-                            : isDobFocused
-                              ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                              : 'text-[#444746] dark:text-[#8E918F]'
+                          ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                          : isDobFocused
+                            ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                            : 'text-[#444746] dark:text-[#8E918F]'
                           }`}
                       >
                         <bdi>{isRtl ? 'تاريخ الميلاد' : 'Date of Birth'}</bdi>
@@ -2040,17 +2040,17 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                           if (errorMessage) setErrorMessage(null);
                         }}
                         className={`w-full h-[56px] px-4 text-[16px] font-mono tracking-widest text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${errorMessage
-                            ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                            : isNationalIdFocused
-                              ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                              : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                          ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                          : isNationalIdFocused
+                            ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                            : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
                           }`}
                       />
                       <label
                         htmlFor="reg-national-id"
                         className={`absolute pointer-events-none transition-all duration-150 start-3 ${isNationalIdFloating
-                            ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
-                            : 'top-4 text-[15px]'
+                          ? '-top-2.5 px-1 text-xs bg-white dark:bg-[#1B212D]'
+                          : 'top-4 text-[15px]'
                           } ${errorMessage
                             ? 'text-[#B3261E] dark:text-[#F2B8B5]'
                             : isNationalIdFocused
@@ -2196,10 +2196,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       (subStepIndex === 2 && hasArabicNameCollision && countWords(arabicFullName) < 5)
                     }
                     className={`text-white text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full transition-colors flex items-center justify-center gap-2 shadow-sm ${checkingCollision ||
-                        (subStepIndex === 1 && hasNameCollision && countWords(englishFullName) < 5) ||
-                        (subStepIndex === 2 && hasArabicNameCollision && countWords(arabicFullName) < 5)
-                        ? 'bg-[#0B57D0]/50 cursor-not-allowed opacity-60'
-                        : 'bg-[#0B57D0] hover:bg-[#0842A0] active:bg-[#06337E] cursor-pointer'
+                      (subStepIndex === 1 && hasNameCollision && countWords(englishFullName) < 5) ||
+                      (subStepIndex === 2 && hasArabicNameCollision && countWords(arabicFullName) < 5)
+                      ? 'bg-[#0B57D0]/50 cursor-not-allowed opacity-60'
+                      : 'bg-[#0B57D0] hover:bg-[#0842A0] active:bg-[#06337E] cursor-pointer'
                       }`}
                   >
                     {checkingCollision ? (
@@ -2267,8 +2267,8 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                                 onChange={(e) => handleOtpDigitChange(index, e.target.value)}
                                 onKeyDown={(e) => handleOtpKeyDown(index, e)}
                                 className={`w-11 sm:w-12 h-13 sm:h-14 text-center font-mono text-xl sm:text-2xl font-bold rounded-lg border bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3] focus:outline-none transition-all box-border ${digit
-                                    ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/20 dark:bg-blue-900/10'
-                                    : 'border-[#747775] dark:border-[#8E918F]'
+                                  ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/20 dark:bg-blue-900/10'
+                                  : 'border-[#747775] dark:border-[#8E918F]'
                                   } focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] shadow-sm`}
                               />
                             ))}
@@ -2342,10 +2342,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                         <div className="relative">
                           <div
                             className={`w-full h-[56px] px-3.5 flex items-center bg-transparent rounded-[4px] border transition-all box-border ${errorMessage
-                                ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                                : isPhoneFocused
-                                  ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                                  : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                              ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                              : isPhoneFocused
+                                ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                                : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
                               }`}
                           >
                             {/* Dial Code Prefix */}
@@ -2383,10 +2383,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                           <label
                             htmlFor="reg-phone"
                             className={`absolute -top-2.5 px-1.5 text-xs bg-white dark:bg-[#1B212D] start-3 pointer-events-none z-10 transition-colors ${errorMessage
-                                ? 'text-[#B3261E] dark:text-[#F2B8B5]'
-                                : isPhoneFocused
-                                  ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
-                                  : 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                              ? 'text-[#B3261E] dark:text-[#F2B8B5]'
+                              : isPhoneFocused
+                                ? 'text-[#0B57D0] dark:text-[#A8C7FA]'
+                                : 'text-[#0B57D0] dark:text-[#A8C7FA]'
                               }`}
                           >
                             <bdi>{isRtl ? 'رقم الهاتف المحمول' : 'Mobile Phone Number'}</bdi>
@@ -2512,8 +2512,8 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                                 onChange={(e) => handleEmailOtpDigitChange(index, e.target.value)}
                                 onKeyDown={(e) => handleEmailOtpKeyDown(index, e)}
                                 className={`w-11 sm:w-12 h-13 sm:h-14 text-center font-mono text-xl sm:text-2xl font-bold rounded-lg border bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3] focus:outline-none transition-all box-border ${digit
-                                    ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/20 dark:bg-blue-900/10'
-                                    : 'border-[#747775] dark:border-[#8E918F]'
+                                  ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/20 dark:bg-blue-900/10'
+                                  : 'border-[#747775] dark:border-[#8E918F]'
                                   } focus:border-2 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] shadow-sm`}
                               />
                             ))}
@@ -2586,10 +2586,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                               if (errorMessage) setErrorMessage(null);
                             }}
                             className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${errorMessage
-                                ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                                : isEmailFocused
-                                  ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                                  : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                              ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                              : isEmailFocused
+                                ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                                : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
                               }`}
                           />
                           <label
@@ -2894,8 +2894,8 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       type="submit"
                       disabled={!isStep3Valid}
                       className={`text-xs sm:text-sm font-semibold px-6 py-2.5 rounded-full transition-all flex items-center justify-center gap-2 shadow-sm ${isStep3Valid
-                          ? 'bg-[#0B57D0] hover:bg-[#0842A0] active:bg-[#06337E] text-white cursor-pointer'
-                          : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-80 pointer-events-none'
+                        ? 'bg-[#0B57D0] hover:bg-[#0842A0] active:bg-[#06337E] text-white cursor-pointer'
+                        : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed opacity-80 pointer-events-none'
                         }`}
                     >
                       <bdi>{isRtl ? 'التالي' : 'Next'}</bdi>
@@ -3132,10 +3132,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       if (errorMessage) setErrorMessage(null);
                     }}
                     className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${errorMessage
-                        ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                        : isPasswordFocused
-                          ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                          : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                      ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                      : isPasswordFocused
+                        ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                        : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
                       }`}
                   />
                   <label
@@ -3172,10 +3172,10 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       if (errorMessage) setErrorMessage(null);
                     }}
                     className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${errorMessage
-                        ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
-                        : isConfirmPasswordFocused
-                          ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
-                          : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
+                      ? 'border-2 border-[#B3261E] dark:border-[#F2B8B5]'
+                      : isConfirmPasswordFocused
+                        ? 'border-2 border-[#0B57D0] dark:border-[#A8C7FA]'
+                        : 'border border-[#747775] dark:border-[#8E918F] hover:border-[#1F1F1F] dark:hover:border-white'
                       }`}
                   />
                   <label
@@ -3275,8 +3275,8 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       type="button"
                       onClick={() => handleLanguageChange(loc)}
                       className={`w-full text-start px-3 py-2 rounded-xl text-xs flex items-center justify-between cursor-pointer transition ${loc === locale
-                          ? 'bg-blue-50 dark:bg-blue-950/50 text-[#0B57D0] dark:text-[#A8C7FA] font-semibold'
-                          : 'hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300'
+                        ? 'bg-blue-50 dark:bg-blue-950/50 text-[#0B57D0] dark:text-[#A8C7FA] font-semibold'
+                        : 'hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-300'
                         }`}
                     >
                       <span>{getLocaleDisplayName(loc)}</span>
