@@ -15,6 +15,7 @@ import {
   X,
 } from 'lucide-react';
 import { Diocese, Church, Step6ChurchPayload } from '@/types/database.types';
+import { searchChurchesDatabaseAction } from '@/app/actions/location-data';
 
 export interface Step6ChurchCommitmentProps {
   primaryCityId?: string;
@@ -52,7 +53,7 @@ const DEFAULT_CHURCHES: Church[] = [
 
 const MAX_SECONDARY_CHURCHES = 10;
 
-/* Custom Account-Picker Dropdown for Churches */
+/* Custom Account-Picker Dropdown for Churches with Live Supabase DB Search */
 interface ChurchDropdownProps {
   id: string;
   label: string;
@@ -82,6 +83,8 @@ function AccountPickerChurchDropdown({
 }: ChurchDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [dbResults, setDbResults] = useState<Church[]>([]);
+  const [isSearchingDb, setIsSearchingDb] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Click Outside Handler
@@ -95,17 +98,49 @@ function AccountPickerChurchDropdown({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Live Supabase Database Search
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setDbResults([]);
+      return;
+    }
+
+    const timer = setTimeout(async () => {
+      setIsSearchingDb(true);
+      try {
+        const res = await searchChurchesDatabaseAction(searchQuery);
+        if (res.success && res.churches) {
+          setDbResults(res.churches as Church[]);
+        }
+      } catch (e) {
+        console.warn('DB church search notice:', e);
+      } finally {
+        setIsSearchingDb(false);
+      }
+    }, 250);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Merge passed churches with live DB search results
+  const combinedChurches = useMemo(() => {
+    const map = new Map<string, Church>();
+    churches.forEach((c) => map.set(c.id, c));
+    dbResults.forEach((c) => map.set(c.id, c));
+    return Array.from(map.values());
+  }, [churches, dbResults]);
+
   const selectedChurch = useMemo(() => {
-    return churches.find((c) => c.id === value);
-  }, [churches, value]);
+    return combinedChurches.find((c) => c.id === value);
+  }, [combinedChurches, value]);
 
   const filteredChurches = useMemo(() => {
-    if (!searchQuery.trim()) return churches;
+    if (!searchQuery.trim()) return combinedChurches;
     const q = searchQuery.toLowerCase().trim();
-    return churches.filter(
+    return combinedChurches.filter(
       (c) => c.name_en.toLowerCase().includes(q) || c.name_ar.includes(q)
     );
-  }, [churches, searchQuery]);
+  }, [combinedChurches, searchQuery]);
 
   return (
     <div className="relative space-y-1.5" ref={containerRef}>
@@ -175,11 +210,13 @@ function AccountPickerChurchDropdown({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={isRtl ? 'ابحث عن اسم الكنيسة...' : 'Search church name...'}
+                  placeholder={isRtl ? 'ابحث في قاعدة البيانات عن الكنيسة...' : 'Search database for church...'}
                   autoFocus
                   className="w-full ps-8 pe-7 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
-                {searchQuery && (
+                {isSearchingDb ? (
+                  <Loader2 className="w-3 h-3 absolute top-1/2 -translate-y-1/2 end-2.5 text-blue-500 animate-spin" />
+                ) : searchQuery ? (
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
@@ -187,7 +224,7 @@ function AccountPickerChurchDropdown({
                   >
                     <X className="w-3 h-3" />
                   </button>
-                )}
+                ) : null}
               </div>
             </div>
 
@@ -195,7 +232,7 @@ function AccountPickerChurchDropdown({
             <div className="overflow-y-auto p-1.5 space-y-1 flex-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-300 dark:[&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-full">
               {filteredChurches.length === 0 ? (
                 <div className="p-4 text-center text-xs text-slate-400">
-                  {isRtl ? 'لم يتم العثور على كنائس' : 'No churches found'}
+                  {isRtl ? 'لم يتم العثور على كنائس في قاعدة البيانات' : 'No churches found in database'}
                 </div>
               ) : (
                 filteredChurches.map((ch) => {
@@ -460,8 +497,8 @@ export function Step6ChurchCommitment({
               onChange={handlePrimaryChurchChange}
               churches={primaryFilteredChurches}
               isRtl={isRtl}
-              placeholder="Select your primary church..."
-              placeholderAr="اختر كنيستك الأساسية..."
+              placeholder="Search database for primary church..."
+              placeholderAr="ابحث في قاعدة البيانات عن الكنيسة..."
               error={errors.primaryChurchId}
             />
           </div>
@@ -501,8 +538,8 @@ export function Step6ChurchCommitment({
                   onChange={(chId) => handleSecondaryChurchChangeAt(idx, chId)}
                   churches={secondaryFilteredChurches}
                   isRtl={isRtl}
-                  placeholder="Select another church you attend..."
-                  placeholderAr="اختر كنيسة أخرى تتردد عليها..."
+                  placeholder="Search database for secondary church..."
+                  placeholderAr="ابحث في قاعدة البيانات عن الكنيسة الثانوية..."
                 />
               </div>
             ))}
