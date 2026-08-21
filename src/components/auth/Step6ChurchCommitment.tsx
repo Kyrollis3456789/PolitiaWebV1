@@ -22,7 +22,9 @@ import { searchChurchesDatabaseAction, fetchChurchesDataAction } from '@/app/act
 
 export interface Step6ChurchCommitmentProps {
   primaryCityId?: string;
+  primaryGovernorateId?: string;
   secondaryCityId?: string;
+  secondaryGovernorateId?: string;
   dioceses?: Diocese[];
   churches?: Church[];
   defaultValues?: Partial<Step6ChurchPayload>;
@@ -359,7 +361,9 @@ function AccountPickerChurchDropdown({
 
 export function Step6ChurchCommitment({
   primaryCityId,
+  primaryGovernorateId,
   secondaryCityId,
+  secondaryGovernorateId,
   dioceses = [],
   churches = [],
   defaultValues,

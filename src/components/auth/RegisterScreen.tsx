@@ -2780,7 +2780,9 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
               {subStepIndex === 1 && (
                 <Step6ChurchCommitment
                   primaryCityId={step5Payload?.city_id}
+                  primaryGovernorateId={step5Payload?.governorate_id}
                   secondaryCityId={step5Payload?.secondary_city_id}
+                  secondaryGovernorateId={step5Payload?.secondary_governorate_id}
                   dioceses={diocesesList}
                   churches={churchesList}
                   defaultValues={step6Payload || undefined}
