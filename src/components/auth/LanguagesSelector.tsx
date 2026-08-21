@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { clsx } from 'clsx';
+import { createClient } from '@/lib/supabase/client';
 import {
   Search,
   Check,
@@ -31,7 +32,23 @@ export default function LanguagesSelector({
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [customLanguageInput, setCustomLanguageInput] = useState('');
   const [customLanguagesList, setCustomLanguagesList] = useState<{ code: string; name: string }[]>([]);
+  const [dbLanguages, setDbLanguages] = useState<LanguageItem[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.from('languages').select('id, name_ar, name_en').then(({ data }) => {
+      if (data && data.length > 0) {
+        const mapped: LanguageItem[] = data.map((d: any) => ({
+          code: d.id,
+          nameAr: d.name_ar,
+          nameEn: d.name_en,
+          flag: '🌐',
+        }));
+        setDbLanguages(mapped);
+      }
+    });
+  }, []);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -80,11 +97,16 @@ export default function LanguagesSelector({
     onChange([]);
   };
 
+  // Combine database languages with static global languages
+  const combinedLanguages = useMemo(() => {
+    return [...dbLanguages, ...ALL_GLOBAL_LANGUAGES];
+  }, [dbLanguages]);
+
   // Filter global languages by search query
   const filteredLanguages = useMemo(() => {
-    if (!searchQuery.trim()) return ALL_GLOBAL_LANGUAGES;
+    if (!searchQuery.trim()) return combinedLanguages;
     const q = searchQuery.toLowerCase().trim();
-    return ALL_GLOBAL_LANGUAGES.filter((l: LanguageItem) => {
+    return combinedLanguages.filter((l: LanguageItem) => {
       return (
         l.nameEn.toLowerCase().includes(q) ||
         l.nameAr.includes(q) ||
@@ -92,12 +114,12 @@ export default function LanguagesSelector({
         l.code.toLowerCase().includes(q)
       );
     });
-  }, [searchQuery]);
+  }, [combinedLanguages, searchQuery]);
 
   // Selected language items metadata
   const selectedItemsDetails = useMemo(() => {
     return selectedLanguages.map((code) => {
-      const predefined = ALL_GLOBAL_LANGUAGES.find((l: LanguageItem) => l.code === code);
+      const predefined = combinedLanguages.find((l: LanguageItem) => l.code === code);
       if (predefined) {
         return {
           code: predefined.code,
@@ -112,7 +134,7 @@ export default function LanguagesSelector({
         name: custom ? custom.name : code,
       };
     });
-  }, [selectedLanguages, isRtl, customLanguagesList]);
+  }, [selectedLanguages, isRtl, customLanguagesList, combinedLanguages]);
 
   return (
     <div ref={containerRef} className="w-full space-y-3.5">

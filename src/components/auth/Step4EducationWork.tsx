@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { clsx } from 'clsx';
+import { createClient } from '@/lib/supabase/client';
 
 // --- Types ---
 export type EducationPath = 'BASIC' | 'UNIVERSITY' | 'GRADUATED' | null;
@@ -13,6 +14,8 @@ export interface Step4Payload {
   education_system?: string | null;
   grade_level?: string | null;
   school_name?: string | null;
+  school_id?: string | null;
+  school_custom_name?: string | null;
   prev_school_stage?: SchoolStage;
   prev_education_system?: string | null;
   prev_grade_level?: string | null;
@@ -24,8 +27,10 @@ export interface Step4Payload {
   high_school_name?: string | null;
   university_id?: string | null;
   university_name?: string | null;
+  university_custom_name?: string | null;
   faculty_id?: string | null;
   faculty_name?: string | null;
+  faculty_custom_name?: string | null;
   academic_year?: string | null;
   is_employed?: boolean | null;
   job_type?: 'STANDARD' | 'NON_STANDARD' | null;
@@ -41,8 +46,9 @@ export interface Step4Payload {
 
 export interface Step4Props {
   age: number;
-  universities?: { id: string; name_en: string; name_ar?: string }[];
-  faculties?: { id: string; university_id: string; name_en: string; name_ar?: string }[];
+  universities?: { id: string; name_en: string; name_ar?: string; logo_url?: string | null }[];
+  faculties?: { id: string; university_id: string; name_en: string; name_ar?: string; logo_url?: string | null }[];
+  schools?: { id: string; name_en: string; name_ar?: string; logo_url?: string | null }[];
   defaultValues?: Step4Payload;
   isRtl?: boolean;
   onPartChange?: (current: number, total: number) => void;
@@ -69,16 +75,42 @@ export default function Step4EducationWork({
   const [path, setPath] = useState<EducationPath>(initialPath);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // --- Dynamic DB Loaders ---
+  const [dbUniversities, setDbUniversities] = useState<any[]>(universities);
+  const [dbFaculties, setDbFaculties] = useState<any[]>(faculties);
+  const [dbSchools, setDbSchools] = useState<any[]>([]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    if (dbUniversities.length === 0) {
+      supabase.from('universities').select('id, name_en, name_ar, logo_url').then(({ data }) => {
+        if (data) setDbUniversities(data);
+      });
+    }
+    if (dbFaculties.length === 0) {
+      supabase.from('faculties').select('id, university_id, name_en, name_ar, logo_url').then(({ data }) => {
+        if (data) setDbFaculties(data);
+      });
+    }
+    supabase.from('schools').select('id, name_en, name_ar, logo_url, education_stage, education_system').then(({ data }) => {
+      if (data) setDbSchools(data);
+    });
+  }, []);
+
   // --- Path A & Prev School State ---
   const [schoolStage, setSchoolStage] = useState<SchoolStage>(defaultValues?.school_stage || null);
   const [educationSystem, setEducationSystem] = useState(defaultValues?.education_system || 'Local');
   const [grade, setGrade] = useState(defaultValues?.grade_level || '');
   const [schoolName, setSchoolName] = useState(defaultValues?.school_name || '');
+  const [schoolId, setSchoolId] = useState(defaultValues?.school_id || '');
+  const [schoolCustomName, setSchoolCustomName] = useState(defaultValues?.school_custom_name || '');
   const [skipSchoolName, setSkipSchoolName] = useState(!defaultValues?.school_name && !!defaultValues?.education_path);
 
   // --- Path B State ---
   const [universityId, setUniversityId] = useState(defaultValues?.university_id || '');
+  const [universityCustomName, setUniversityCustomName] = useState(defaultValues?.university_custom_name || '');
   const [facultyId, setFacultyId] = useState(defaultValues?.faculty_id || '');
+  const [facultyCustomName, setFacultyCustomName] = useState(defaultValues?.faculty_custom_name || '');
   const [academicYear, setAcademicYear] = useState(defaultValues?.academic_year || '');
   const [addPreviousSchool, setAddPreviousSchool] = useState(!!defaultValues?.school_stage && initialPath === 'UNIVERSITY');
 
@@ -379,44 +411,49 @@ export default function Step4EducationWork({
     </div>
   );
 
+  const filteredFacultiesList = useMemo(() => {
+    if (!universityId || universityId === 'OTHER') return dbFaculties;
+    return dbFaculties.filter((f) => f.university_id === universityId);
+  }, [dbFaculties, universityId]);
+
   const renderUniversityInputs = () => (
     <div className="space-y-4">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">University</label>
-          <select
-            value={universityId}
-            onChange={(e) => {
-              setUniversityId(e.target.value);
+          <EntityPicker
+            labelAr="الجامعة / الكلية العالية"
+            labelEn="University"
+            items={dbUniversities}
+            selectedId={universityId}
+            customValue={universityCustomName}
+            onSelect={(id) => {
+              setUniversityId(id);
+              if (id !== 'OTHER') setUniversityCustomName('');
               setFacultyId('');
+              setFacultyCustomName('');
               setErrors((prev) => ({ ...prev, universityId: '', facultyId: '' }));
             }}
-            className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-          >
-            <option value="" className="bg-white dark:bg-slate-900">Select</option>
-            {universities.map((u) => (
-              <option key={u.id} value={u.id} className="bg-white dark:bg-slate-900">{u.name_en}</option>
-            ))}
-          </select>
+            onCustomChange={(val) => setUniversityCustomName(val)}
+            isRtl={isRtl}
+          />
           {errors.universityId && <p className="text-red-500 text-xs mt-1">{errors.universityId}</p>}
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Faculty</label>
-          <select
-            value={facultyId}
-            onChange={(e) => {
-              setFacultyId(e.target.value);
+          <EntityPicker
+            labelAr="الكلية / التخصص"
+            labelEn="Faculty / Major"
+            items={filteredFacultiesList}
+            selectedId={facultyId}
+            customValue={facultyCustomName}
+            onSelect={(id) => {
+              setFacultyId(id);
+              if (id !== 'OTHER') setFacultyCustomName('');
               setErrors((prev) => ({ ...prev, facultyId: '' }));
             }}
-            disabled={!universityId}
-            className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 disabled:opacity-50 shadow-xs focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-          >
-            <option value="" className="bg-white dark:bg-slate-900">Select</option>
-            {availableFaculties.map((f) => (
-              <option key={f.id} value={f.id} className="bg-white dark:bg-slate-900">{f.name_en}</option>
-            ))}
-          </select>
+            onCustomChange={(val) => setFacultyCustomName(val)}
+            isRtl={isRtl}
+          />
           {errors.facultyId && <p className="text-red-500 text-xs mt-1">{errors.facultyId}</p>}
         </div>
       </div>
@@ -852,6 +889,136 @@ export default function Step4EducationWork({
           {currentPart === totalParts ? 'Finish' : 'Next'}
         </button>
       </div>
+    </div>
+  );
+}
+
+interface EntityItem {
+  id: string;
+  name_ar: string;
+  name_en: string;
+  logo_url?: string | null;
+  university_id?: string | null;
+}
+
+function EntityPicker({
+  labelAr,
+  labelEn,
+  items,
+  selectedId,
+  customValue,
+  onSelect,
+  onCustomChange,
+  isRtl,
+}: {
+  labelAr: string;
+  labelEn: string;
+  items: EntityItem[];
+  selectedId: string;
+  customValue: string;
+  onSelect: (id: string) => void;
+  onCustomChange: (val: string) => void;
+  isRtl: boolean;
+}) {
+  const [search, setSearch] = useState('');
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return items;
+    const q = search.toLowerCase().trim();
+    return items.filter(
+      (item) =>
+        (item.name_en && item.name_en.toLowerCase().includes(q)) ||
+        (item.name_ar && item.name_ar.includes(q))
+    );
+  }, [items, search]);
+
+  const isOtherSelected = selectedId === 'OTHER';
+
+  return (
+    <div className="space-y-2.5">
+      <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+        {isRtl ? labelAr : labelEn}
+      </label>
+
+      <div className="relative">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={isRtl ? 'بحث...' : 'Search...'}
+          className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-blue-500/20"
+        />
+      </div>
+
+      <div className="max-h-48 overflow-y-auto space-y-1.5 p-1 border border-slate-200/80 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900/60 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {filtered.map((item) => {
+          const isSelected = selectedId === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onSelect(item.id)}
+              className={clsx(
+                'w-full text-start p-2 rounded-xl transition flex items-center gap-3 cursor-pointer select-none',
+                isSelected
+                  ? 'bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 font-semibold'
+                  : 'hover:bg-slate-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200'
+              )}
+            >
+              <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center shrink-0 overflow-hidden text-xs font-bold">
+                {item.logo_url ? (
+                  <img src={item.logo_url} alt="" className="w-full h-full object-cover" />
+                ) : (
+                  <span>{(isRtl ? item.name_ar || item.name_en : item.name_en || item.name_ar).charAt(0).toUpperCase()}</span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-semibold truncate text-slate-900 dark:text-slate-100">
+                  {item.name_ar || item.name_en}
+                </div>
+                <div className="text-[11px] text-slate-400 truncate">
+                  {item.name_en || item.name_ar}
+                </div>
+              </div>
+            </button>
+          );
+        })}
+
+        <button
+          type="button"
+          onClick={() => onSelect('OTHER')}
+          className={clsx(
+            'w-full text-start p-2 rounded-xl transition flex items-center gap-3 cursor-pointer border border-dashed select-none',
+            isOtherSelected
+              ? 'bg-amber-50 dark:bg-amber-950/40 border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 font-semibold'
+              : 'border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800/60'
+          )}
+        >
+          <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/60 flex items-center justify-center shrink-0 text-amber-600 dark:text-amber-300 text-xs font-bold">
+            ✨
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-xs font-semibold">
+              {isRtl ? 'أخرى (إدخال يدوياً)' : 'Other (Specify Custom)'}
+            </div>
+            <div className="text-[11px] text-slate-400">
+              {isRtl ? 'غير موجودة بالقائمة' : 'Not listed in directory'}
+            </div>
+          </div>
+        </button>
+      </div>
+
+      {isOtherSelected && (
+        <div className="pt-1 animate-fadeIn">
+          <input
+            type="text"
+            value={customValue}
+            onChange={(e) => onCustomChange(e.target.value)}
+            placeholder={isRtl ? 'أدخل الاسم يدوياً...' : 'Type custom name...'}
+            className="w-full px-3.5 py-2.5 text-xs rounded-xl border border-amber-300 dark:border-amber-700 bg-amber-50/50 dark:bg-amber-950/20 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-amber-500/20"
+          />
+        </div>
+      )}
     </div>
   );
 }

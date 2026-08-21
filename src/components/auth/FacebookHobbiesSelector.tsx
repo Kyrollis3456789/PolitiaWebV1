@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { clsx } from 'clsx';
+import { createClient } from '@/lib/supabase/client';
 import {
   Search,
   Check,
@@ -32,6 +33,23 @@ export default function FacebookHobbiesSelector({
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [customHobbyInput, setCustomHobbyInput] = useState('');
   const [customHobbiesList, setCustomHobbiesList] = useState<{ id: string; name: string }[]>([]);
+  const [dbHobbies, setDbHobbies] = useState<HobbyItem[]>([]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.from('hobbies').select('id, name_ar, name_en').then(({ data }) => {
+      if (data && data.length > 0) {
+        const mapped: HobbyItem[] = data.map((d: any) => ({
+          id: d.id,
+          labelAr: d.name_ar,
+          labelEn: d.name_en,
+          category: 'social',
+          emoji: '⭐',
+        }));
+        setDbHobbies(mapped);
+      }
+    });
+  }, []);
 
   // Toggle selection
   const handleToggleHobby = (hobbyId: string) => {
@@ -59,9 +77,14 @@ export default function FacebookHobbiesSelector({
     onChange([]);
   };
 
+  // Combine master database hobbies with static list
+  const allHobbiesList = useMemo(() => {
+    return [...dbHobbies, ...COMPREHENSIVE_HOBBIES];
+  }, [dbHobbies]);
+
   // Filter hobbies by category and search query
   const filteredHobbies = useMemo(() => {
-    return COMPREHENSIVE_HOBBIES.filter((h: HobbyItem) => {
+    return allHobbiesList.filter((h: HobbyItem) => {
       const matchesCategory = activeCategory === 'all' || h.category === activeCategory;
       if (!matchesCategory) return false;
 
@@ -74,12 +97,12 @@ export default function FacebookHobbiesSelector({
         h.id.toLowerCase().includes(q)
       );
     });
-  }, [activeCategory, searchQuery]);
+  }, [allHobbiesList, activeCategory, searchQuery]);
 
   // Selected items with metadata
   const selectedItemsDetails = useMemo(() => {
     return selectedHobbies.map((id) => {
-      const predefined = COMPREHENSIVE_HOBBIES.find((h: HobbyItem) => h.id === id);
+      const predefined = allHobbiesList.find((h: HobbyItem) => h.id === id);
       if (predefined) {
         return {
           id: predefined.id,
@@ -94,7 +117,7 @@ export default function FacebookHobbiesSelector({
         label: custom ? custom.name : id,
       };
     });
-  }, [selectedHobbies, isRtl, customHobbiesList]);
+  }, [selectedHobbies, isRtl, customHobbiesList, allHobbiesList]);
 
   return (
     <div className="w-full space-y-3.5">
