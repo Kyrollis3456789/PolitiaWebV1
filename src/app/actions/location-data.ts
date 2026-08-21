@@ -122,6 +122,71 @@ export async function fetchChurchesDataAction(): Promise<{
 }
 
 /**
+ * Fetches churches strictly matching the resolved Diocese / City from Supabase database, eliminating cross-diocese pollution.
+ */
+export async function fetchChurchesByLocationAction(params: {
+  cityId?: string;
+  governorateId?: string;
+}): Promise<{
+  success: boolean;
+  churches: { id: string; diocese_id: string; city_id: string; name_en: string; name_ar: string; denomination?: string; image_url?: string }[];
+  resolvedDiocese?: { id: string; name_en: string; name_ar: string };
+  error?: string;
+}> {
+  const { cityId } = params;
+
+  try {
+    const supabase = await createClient();
+
+    let targetDioceseId: string | null = null;
+    let targetDioceseObj: { id: string; name_en: string; name_ar: string } | undefined = undefined;
+
+    if (cityId) {
+      const { data: sampleCityChurch } = await supabase
+        .from('churches')
+        .select('diocese_id')
+        .eq('city_id', cityId)
+        .limit(1)
+        .maybeSingle();
+
+      if (sampleCityChurch?.diocese_id) {
+        targetDioceseId = sampleCityChurch.diocese_id;
+        const { data: dioData } = await supabase
+          .from('dioceses')
+          .select('id, name_en, name_ar')
+          .eq('id', targetDioceseId)
+          .maybeSingle();
+        if (dioData) targetDioceseObj = dioData;
+      }
+    }
+
+    let churchQuery = supabase.from('churches').select('id, diocese_id, city_id, name_en, name_ar, denomination, image_url');
+
+    if (targetDioceseId) {
+      churchQuery = churchQuery.eq('diocese_id', targetDioceseId);
+    } else if (cityId) {
+      churchQuery = churchQuery.eq('city_id', cityId);
+    }
+
+    const { data: churchData, error: churchErr } = await churchQuery.order('name_ar', { ascending: true });
+    if (churchErr) throw churchErr;
+
+    return {
+      success: true,
+      churches: (churchData as any[]) || [],
+      resolvedDiocese: targetDioceseObj,
+    };
+  } catch (err: any) {
+    console.error('Error fetching churches by location from Supabase:', err);
+    return {
+      success: false,
+      churches: [],
+      error: err.message || 'Failed to query churches',
+    };
+  }
+}
+
+/**
  * Searches the Supabase `churches` table live by query string (matching name_en or name_ar).
  */
 export async function searchChurchesDatabaseAction(query: string): Promise<{
