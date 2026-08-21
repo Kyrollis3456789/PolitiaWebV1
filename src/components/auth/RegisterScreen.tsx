@@ -1979,11 +1979,19 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       data-testid="input-dob"
                       type="date"
                       autoFocus
-                      value={dob}
+                      min="1920-01-01"
+                      max={new Date().toISOString().split('T')[0]}
+                      value={dob || ''}
                       onFocus={() => setIsDobFocused(true)}
                       onBlur={() => setIsDobFocused(false)}
                       onChange={(e) => {
-                        setDob(e.target.value);
+                        const val = e.target.value;
+                        setDob(val);
+                        if (errorMessage) setErrorMessage(null);
+                      }}
+                      onInput={(e: React.FormEvent<HTMLInputElement>) => {
+                        const val = (e.target as HTMLInputElement).value;
+                        setDob(val);
                         if (errorMessage) setErrorMessage(null);
                       }}
                       className={`w-full h-[56px] px-4 text-[15px] text-[#1F1F1F] dark:text-[#E3E3E3] bg-transparent rounded-[4px] focus:outline-none transition-all box-border ${
@@ -2166,6 +2174,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
               <div className="flex items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800/80">
                 <button
                   type="button"
+                  data-testid="onboarding-back-btn"
                   onClick={handleBack}
                   className="text-xs sm:text-sm font-semibold text-[#0B57D0] dark:text-[#93C5FD] hover:underline px-3 py-2 rounded-full transition-colors cursor-pointer"
                 >
@@ -2185,6 +2194,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
 
                   <button
                     type="submit"
+                    data-testid="onboarding-next-btn"
                     disabled={
                       checkingCollision ||
                       (subStepIndex === 1 && hasNameCollision && countWords(englishFullName) < 5) ||
