@@ -76,7 +76,7 @@ export async function sendEmailOtp(email: string): Promise<SendEmailOtpResult> {
       const { error: sbErr } = await supabase.auth.signInWithOtp({
         email: cleanEmail,
         options: {
-          shouldCreateUser: true,
+          shouldCreateUser: false,
         },
       });
 

@@ -905,6 +905,16 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const totalTotalSteps = TOTAL_REGISTRATION_SUBSTEPS + 1; // including password
   const progressPercentage = Math.min(100, Math.round((currentFlatStep / totalTotalSteps) * 100));
 
+  // Dynamic Skip Button Visibility
+  const isSkipVisible = useMemo(() => {
+    if (!currentSubConfig?.isOptional) return false;
+    // Step 2, Sub-step 2 (Email): Hide skip immediately when text is typed
+    if (mainStepIndex === 2 && subStepIndex === 2 && email.trim().length > 0) {
+      return false;
+    }
+    return true;
+  }, [currentSubConfig?.isOptional, mainStepIndex, subStepIndex, email]);
+
   // Language changer
   const filteredLocales = langSearch.trim()
     ? SUPPORTED_LOCALES.filter((loc: string) => {
@@ -2182,7 +2192,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 </button>
 
                 <div className="flex items-center gap-2">
-                  {currentSubConfig?.isOptional && (
+                  {isSkipVisible && (
                     <button
                       type="button"
                       onClick={handleSkip}
@@ -2765,7 +2775,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                 </button>
 
                 <div className="flex items-center gap-2">
-                  {currentSubConfig?.isOptional && (
+                  {isSkipVisible && (
                     <button
                       type="button"
                       onClick={handleSkip}
