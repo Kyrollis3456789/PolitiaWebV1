@@ -8,6 +8,7 @@ import { useLocale, useTranslations } from 'next-intl';
 import { isRtlLocale, SUPPORTED_LOCALES, getLocaleDisplayName } from '@/i18n/locales';
 import { createClient } from '@/lib/supabase/client';
 import { checkUserAccountExists } from '@/app/actions/auth-check';
+import { sanitizeInput } from '@/lib/validation/sanitizer';
 
 interface LoginScreenProps {
   onNavigateRegister?: () => void;
@@ -101,10 +102,11 @@ export function LoginScreen({
 
     try {
       const supabase = createClient();
-      const targetEmail = (resolvedEmail || email).trim();
+      const targetEmail = sanitizeInput(resolvedEmail || email).toLowerCase();
+      const cleanPassword = password;
       const { data, error } = await supabase.auth.signInWithPassword({
         email: targetEmail,
-        password,
+        password: cleanPassword,
       });
 
       if (error) {
@@ -114,7 +116,7 @@ export function LoginScreen({
       }
 
       if (data?.session || data?.user) {
-        window.location.href = '/dashboard';
+        router.push('/dashboard');
       }
     } catch (err: any) {
       console.error('Sign-in catch error:', err);

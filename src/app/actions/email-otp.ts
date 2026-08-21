@@ -47,8 +47,10 @@ function generateRandomOtp(): string {
  * 1. Dispatches real email via Supabase Auth signInWithOtp
  * 2. Caches OTP token in cryptographic in-memory store for instant verification fallback
  */
+import { sanitizeInput } from '@/lib/validation/sanitizer';
+
 export async function sendEmailOtp(email: string): Promise<SendEmailOtpResult> {
-  const cleanEmail = email.trim().toLowerCase();
+  const cleanEmail = sanitizeInput(email).toLowerCase();
   if (!cleanEmail) {
     return { success: false, error: 'Email address is required' };
   }
@@ -155,8 +157,8 @@ export async function verifyEmailOtp(
   email: string,
   enteredCode: string
 ): Promise<VerifyEmailOtpResult> {
-  const cleanEmail = email.trim().toLowerCase();
-  const trimmedCode = enteredCode.trim().replace(/\D/g, '');
+  const cleanEmail = sanitizeInput(email).toLowerCase();
+  const trimmedCode = sanitizeInput(enteredCode).replace(/\D/g, '');
 
   if (!cleanEmail || !trimmedCode || trimmedCode.length !== 6) {
     return { success: false, error: 'Please enter a valid 6-digit code' };

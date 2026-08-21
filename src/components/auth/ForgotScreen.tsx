@@ -12,6 +12,7 @@ import {
   sendRecoveryEmailOtp,
   verifyRecoveryEmailOtp,
 } from '@/app/actions/auth-check';
+import { sanitizeInput } from '@/lib/validation/sanitizer';
 
 /**
  * Ensures only English alphabet letters and spaces are typed,
@@ -89,7 +90,7 @@ export function ForgotScreen() {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    const trimmed = identifier.trim();
+    const trimmed = sanitizeInput(identifier);
     if (!trimmed) {
       setErrorMessage(t('emptyIdentifierError'));
       return;
@@ -122,7 +123,7 @@ export function ForgotScreen() {
     setErrorMessage(null);
     setSuccessMessage(null);
 
-    const trimmedName = fullName.trim();
+    const trimmedName = sanitizeInput(fullName);
     if (!trimmedName) {
       setErrorMessage(t('enterFullNameError'));
       return;

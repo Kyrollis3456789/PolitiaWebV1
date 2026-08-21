@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { validateEnglishName, validateArabicName } from '@/lib/validation/name-rules';
 import { validateEgyptianNationalId } from '@/lib/validation/national-id';
 import { GenderType, SocialPlatform, FamilyMemberEntry } from '@/types/database.types';
+import { sanitizePayload } from '@/lib/validation/sanitizer';
 
 export interface CreateAccountPayload {
   englishName: string;
@@ -87,8 +88,9 @@ export interface ActionResponse {
   userId?: string;
 }
 
-export async function createAccountAction(payload: CreateAccountPayload): Promise<ActionResponse> {
+export async function createAccountAction(rawPayload: CreateAccountPayload): Promise<ActionResponse> {
   try {
+    const payload = sanitizePayload(rawPayload);
     // 1. Server-side validation guards
     const engValidation = validateEnglishName(payload.englishName, payload.hasNameCollision);
     if (!engValidation.isValid) {
