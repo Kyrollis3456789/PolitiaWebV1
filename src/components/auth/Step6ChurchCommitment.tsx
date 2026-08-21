@@ -15,6 +15,7 @@ import {
   MapPin,
   Sparkles,
   AlertCircle,
+  ShieldCheck,
 } from 'lucide-react';
 import { Diocese, Church, Step6ChurchPayload } from '@/types/database.types';
 import { searchChurchesDatabaseAction, fetchChurchesDataAction } from '@/app/actions/location-data';
@@ -47,6 +48,8 @@ interface ChurchDropdownProps {
   placeholder?: string;
   placeholderAr?: string;
   error?: string;
+  dioceseNameEn?: string;
+  dioceseNameAr?: string;
   onShowAllRequested?: () => void;
 }
 
@@ -64,6 +67,8 @@ function AccountPickerChurchDropdown({
   placeholder = 'Select church...',
   placeholderAr = 'اختر الكنيسة...',
   error,
+  dioceseNameEn,
+  dioceseNameAr,
   onShowAllRequested,
 }: ChurchDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -119,7 +124,7 @@ function AccountPickerChurchDropdown({
     return combinedChurches.find((c) => c.id === value);
   }, [combinedChurches, value]);
 
-  // Location-Priority Sorting & Text Query Filtering Engine
+  // Location & Diocese Priority Sorting Engine
   const filteredAndSortedChurches = useMemo(() => {
     let list = combinedChurches;
 
@@ -131,25 +136,19 @@ function AccountPickerChurchDropdown({
       );
     }
 
-    // 2. Location Ranking
+    // 2. Strict Ranking: Rank 1 (Exact District), Rank 2 (Same Diocese), Rank 3 (Others)
     return [...list].sort((a, b) => {
-      const aIsPrimary = primaryCityId && a.city_id === primaryCityId ? 1 : 0;
-      const bIsPrimary = primaryCityId && b.city_id === primaryCityId ? 1 : 0;
-      if (aIsPrimary !== bIsPrimary) return bIsPrimary - aIsPrimary;
+      const aIsExactCity = primaryCityId && a.city_id === primaryCityId ? 1 : 0;
+      const bIsExactCity = primaryCityId && b.city_id === primaryCityId ? 1 : 0;
+      if (aIsExactCity !== bIsExactCity) return bIsExactCity - aIsExactCity;
 
-      const aIsSecondary = secondaryCityId && a.city_id === secondaryCityId ? 1 : 0;
-      const bIsSecondary = secondaryCityId && b.city_id === secondaryCityId ? 1 : 0;
-      if (aIsSecondary !== bIsSecondary) return bIsSecondary - aIsSecondary;
+      const aIsSecondaryCity = secondaryCityId && a.city_id === secondaryCityId ? 1 : 0;
+      const bIsSecondaryCity = secondaryCityId && b.city_id === secondaryCityId ? 1 : 0;
+      if (aIsSecondaryCity !== bIsSecondaryCity) return bIsSecondaryCity - aIsSecondaryCity;
 
       return (isRtl ? a.name_ar : a.name_en).localeCompare(isRtl ? b.name_ar : b.name_en);
     });
   }, [combinedChurches, searchQuery, primaryCityId, secondaryCityId, isRtl]);
-
-  const hasLocationMatch = useMemo(() => {
-    return filteredAndSortedChurches.some(
-      (c) => (primaryCityId && c.city_id === primaryCityId) || (secondaryCityId && c.city_id === secondaryCityId)
-    );
-  }, [filteredAndSortedChurches, primaryCityId, secondaryCityId]);
 
   return (
     <div className="relative space-y-1.5" ref={containerRef}>
@@ -185,7 +184,7 @@ function AccountPickerChurchDropdown({
                 {primaryCityId && selectedChurch.city_id === primaryCityId && (
                   <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/80 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800">
                     <MapPin className="w-2.5 h-2.5" />
-                    <bdi>{isRtl ? 'الرئيسي' : 'Primary Area'}</bdi>
+                    <bdi>{isRtl ? 'الرئيسي' : 'Primary District'}</bdi>
                   </span>
                 )}
               </div>
@@ -225,7 +224,7 @@ function AccountPickerChurchDropdown({
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={isRtl ? 'ابحث في قاعدة بيانات Supabase...' : 'Search Supabase database...'}
+                  placeholder={isRtl ? 'ابحث في كنائس الإيبارشية...' : 'Search diocese churches...'}
                   autoFocus
                   className="w-full ps-8 pe-7 py-1.5 text-xs rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
                 />
@@ -243,15 +242,20 @@ function AccountPickerChurchDropdown({
               </div>
             </div>
 
-            {/* Location Recommendation Banner Badge */}
-            {hasLocationMatch && !searchQuery && (
-              <div className="px-3 py-1.5 bg-blue-50/80 dark:bg-blue-950/40 border-b border-blue-100 dark:border-blue-900/40 text-[11px] font-semibold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
-                <Sparkles className="w-3 h-3 text-blue-500 shrink-0" />
-                <bdi>
-                  {isRtl
-                    ? 'مقترحة بناءً على موقعك الجغرافي المسجل'
-                    : 'Suggested based on your location'}
-                </bdi>
+            {/* Diocese Jurisdictional Header Badge */}
+            {(dioceseNameAr || dioceseNameEn) && !searchQuery && (
+              <div className="px-3 py-1.5 bg-blue-50/80 dark:bg-blue-950/40 border-b border-blue-100 dark:border-blue-900/40 text-[11px] font-semibold text-blue-700 dark:text-blue-300 flex items-center justify-between gap-1.5">
+                <span className="flex items-center gap-1.5">
+                  <Sparkles className="w-3 h-3 text-blue-500 shrink-0" />
+                  <bdi>
+                    {isRtl
+                      ? `كنائس ${dioceseNameAr}`
+                      : `Churches in ${dioceseNameEn}`}
+                  </bdi>
+                </span>
+                <span className="text-[9px] bg-blue-100 dark:bg-blue-900/60 px-1.5 py-0.5 rounded font-bold">
+                  {filteredAndSortedChurches.length}
+                </span>
               </div>
             )}
 
@@ -264,8 +268,8 @@ function AccountPickerChurchDropdown({
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">
                     {isRtl
-                      ? 'لم يتم العثور على كنائس مسجلة لهذا الموقع'
-                      : 'No churches found for this location'}
+                      ? 'لم يتم العثور على كنائس في نطاق هذه الإيبارشية'
+                      : 'No churches found in this diocese range'}
                   </p>
                   {onShowAllRequested && (
                     <button
@@ -284,7 +288,6 @@ function AccountPickerChurchDropdown({
                 filteredAndSortedChurches.map((ch) => {
                   const isSelected = ch.id === value;
                   const isPrimaryMatch = primaryCityId && ch.city_id === primaryCityId;
-                  const isSecondaryMatch = secondaryCityId && ch.city_id === secondaryCityId;
 
                   return (
                     <button
@@ -323,13 +326,7 @@ function AccountPickerChurchDropdown({
                             {isPrimaryMatch && (
                               <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-950 px-1.5 py-0.5 rounded border border-blue-200 dark:border-blue-800">
                                 <Sparkles className="w-2.5 h-2.5 text-blue-500" />
-                                <bdi>{isRtl ? 'منطقتك الأساسية' : 'Primary Area'}</bdi>
-                              </span>
-                            )}
-                            {isSecondaryMatch && !isPrimaryMatch && (
-                              <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-purple-700 dark:text-purple-300 bg-purple-100 dark:bg-purple-950 px-1.5 py-0.5 rounded border border-purple-200 dark:border-purple-800">
-                                <MapPin className="w-2.5 h-2.5 text-purple-500" />
-                                <bdi>{isRtl ? 'عنوانك الثانوي' : 'Secondary Area'}</bdi>
+                                <bdi>{isRtl ? 'حي المكان' : 'Exact District'}</bdi>
                               </span>
                             )}
                           </div>
@@ -422,16 +419,53 @@ export function Step6ChurchCommitment({
     loadPureSupabaseData();
   }, [dioceses, churches]);
 
-  // Filter & Rank Primary Churches strictly from Supabase data
+  // Selected Primary Church object
+  const selectedPrimaryChurchObj = useMemo(() => {
+    return dbChurches.find((c) => c.id === primaryChurchId);
+  }, [dbChurches, primaryChurchId]);
+
+  // Resolve target Diocese based on selected church or primaryCityId mapping
+  const targetDioceseObj = useMemo(() => {
+    if (selectedPrimaryChurchObj && selectedPrimaryChurchObj.diocese_id) {
+      return dbDioceses.find((d) => d.id === selectedPrimaryChurchObj.diocese_id);
+    }
+    if (primaryDioceseId) {
+      return dbDioceses.find((d) => d.id === primaryDioceseId);
+    }
+    if (primaryCityId) {
+      const cityChurches = dbChurches.filter((c) => c.city_id === primaryCityId);
+      if (cityChurches.length > 0 && cityChurches[0].diocese_id) {
+        return dbDioceses.find((d) => d.id === cityChurches[0].diocese_id);
+      }
+    }
+    return undefined;
+  }, [dbDioceses, dbChurches, primaryCityId, primaryDioceseId, selectedPrimaryChurchObj]);
+
+  // Strictly Filter Primary Churches by Diocese & City (Removing Cross-Diocese Pollution)
   const primaryFilteredChurches = useMemo(() => {
-    if (showAllPrimaryChurches || !primaryCityId) {
+    if (showAllPrimaryChurches) {
       return dbChurches;
     }
-    const filtered = dbChurches.filter((c) => c.city_id === primaryCityId);
-    return filtered.length > 0 ? filtered : dbChurches;
-  }, [dbChurches, primaryCityId, showAllPrimaryChurches]);
+    if (!primaryCityId) {
+      return dbChurches;
+    }
 
-  // Filter & Rank Secondary Churches strictly from Supabase data
+    // 1. Find churches in exact city
+    const exactCityMatches = dbChurches.filter((c) => c.city_id === primaryCityId);
+    const resolvedDioId = targetDioceseObj?.id || (exactCityMatches.length > 0 ? exactCityMatches[0].diocese_id : null);
+
+    // 2. Strict Diocese Filter: Include ONLY churches in the resolved Diocese (or exact city match)
+    if (resolvedDioId) {
+      const dioceseMatches = dbChurches.filter((c) => c.diocese_id === resolvedDioId || c.city_id === primaryCityId);
+      if (dioceseMatches.length > 0) {
+        return dioceseMatches;
+      }
+    }
+
+    return exactCityMatches.length > 0 ? exactCityMatches : dbChurches;
+  }, [dbChurches, primaryCityId, showAllPrimaryChurches, targetDioceseObj]);
+
+  // Strictly Filter Secondary Churches
   const secondaryFilteredChurches = useMemo(() => {
     if (showAllSecondaryChurches || !secondaryCityId) {
       return dbChurches;
@@ -472,16 +506,6 @@ export function Step6ChurchCommitment({
     setSecondaryChurchIds((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Lookup Diocese objects for display
-  const primaryDioceseObj = useMemo(() => {
-    return dbDioceses.find((d) => d.id === primaryDioceseId);
-  }, [dbDioceses, primaryDioceseId]);
-
-  // Selected Primary Church object
-  const selectedPrimaryChurchObj = useMemo(() => {
-    return dbChurches.find((c) => c.id === primaryChurchId);
-  }, [dbChurches, primaryChurchId]);
-
   const handleNext = async (e?: React.MouseEvent) => {
     if (e) {
       e.preventDefault();
@@ -515,16 +539,16 @@ export function Step6ChurchCommitment({
 
     const payload: Step6ChurchPayload = {
       primary_church_id: primaryChurchId,
-      primary_diocese_id: primaryDioceseId || undefined,
+      primary_diocese_id: primaryDioceseId || targetDioceseObj?.id || undefined,
       primary_church_name: selectedPrimaryChurchObj
         ? isRtl
           ? selectedPrimaryChurchObj.name_ar
           : selectedPrimaryChurchObj.name_en
         : undefined,
-      primary_diocese_name: primaryDioceseObj
+      primary_diocese_name: targetDioceseObj
         ? isRtl
-          ? primaryDioceseObj.name_ar
-          : primaryDioceseObj.name_en
+          ? targetDioceseObj.name_ar
+          : targetDioceseObj.name_en
         : undefined,
 
       secondary_church_id: firstSecondaryId || undefined,
@@ -557,8 +581,8 @@ export function Step6ChurchCommitment({
           <Loader2 className="w-6 h-6 text-blue-600 dark:text-blue-400 animate-spin" />
           <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
             {isRtl
-              ? 'جاري تحميل قائمة الكنائس من قاعدة البيانات...'
-              : 'Loading churches strictly from Supabase database...'}
+              ? 'جاري تحميل كنائس الإيبارشية من قاعدة البيانات...'
+              : 'Loading diocese churches from Supabase database...'}
           </p>
         </div>
       ) : (
@@ -585,7 +609,7 @@ export function Step6ChurchCommitment({
                     {showAllPrimaryChurches
                       ? isRtl
                         ? 'عرض كنائس منطقتي فقط'
-                        : 'Show my area only'
+                        : 'Show my diocese only'
                       : isRtl
                       ? 'عرض جميع الكنائس'
                       : 'Show all churches'}
@@ -605,11 +629,28 @@ export function Step6ChurchCommitment({
                 primaryCityId={primaryCityId}
                 secondaryCityId={secondaryCityId}
                 isRtl={isRtl}
-                placeholder="Search Supabase database for primary church..."
+                placeholder="Search database for primary church..."
                 placeholderAr="ابحث في قاعدة البيانات عن الكنيسة..."
                 error={errors.primaryChurchId}
+                dioceseNameEn={targetDioceseObj?.name_en}
+                dioceseNameAr={targetDioceseObj?.name_ar}
                 onShowAllRequested={() => setShowAllPrimaryChurches(true)}
               />
+
+              {/* Auto-linked Diocese Lock Metadata Display */}
+              {targetDioceseObj && (
+                <div className="p-2.5 rounded-xl bg-blue-50/60 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/40 flex items-center gap-2 text-xs font-medium text-blue-800 dark:text-blue-300">
+                  <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 shrink-0" />
+                  <div className="min-w-0 flex-1 truncate">
+                    <span className="text-slate-500 dark:text-slate-400 me-1">
+                      {isRtl ? 'الإيبارشية التابع لها تلقائياً:' : 'Auto-linked Diocese:'}
+                    </span>
+                    <strong className="font-bold text-blue-900 dark:text-blue-200">
+                      {isRtl ? targetDioceseObj.name_ar : targetDioceseObj.name_en}
+                    </strong>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* SECONDARY CHURCHES LIST SECTION (UP TO 10) */}
@@ -649,7 +690,7 @@ export function Step6ChurchCommitment({
                     primaryCityId={primaryCityId}
                     secondaryCityId={secondaryCityId}
                     isRtl={isRtl}
-                    placeholder="Search Supabase database for secondary church..."
+                    placeholder="Search database for secondary church..."
                     placeholderAr="ابحث في قاعدة البيانات عن الكنيسة الثانوية..."
                     onShowAllRequested={() => setShowAllSecondaryChurches(true)}
                   />
