@@ -8,6 +8,8 @@ import {
   Camera,
   Upload,
   User,
+  UserCheck,
+  Check,
   Trash2,
   Pencil,
   CheckCircle2,
@@ -1732,61 +1734,46 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
         {/* Left Column: Dynamic Progress Indicator & Step Headers */}
         <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start min-h-[420px]">
           <div className="space-y-3 w-full">
-            {/* Integrated Step Progress Bar & Milestone Indicator */}
+            {/* Integrated Unified Step Progress Bar & Milestone Indicator */}
             {mainStepIndex <= 8 && (
-              <div className="space-y-2.5 w-full">
-                {/* Milestone & Sub-step Pill */}
-                <div className="flex flex-wrap items-center gap-3">
-                  <Image
-                    src="/logo.png"
-                    alt="Politia logo"
-                    width={32}
-                    height={32}
-                    priority
-                    style={{ height: 'auto' }}
-                    className="object-contain shrink-0"
-                  />
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/50 text-[#0B57D0] dark:text-[#93C5FD] border border-blue-200 dark:border-blue-700/50 text-xs font-semibold">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#0B57D0] dark:bg-[#60A5FA] animate-pulse" />
-                    <span>
-                      <bdi suppressHydrationWarning>
-                        {mainStepIndex === 8
-                          ? isRtl ? 'الخطوة الأخيرة: كلمة المرور' : 'Final Step: Password'
-                          : isRtl
-                          ? `الخطوة ${mainStepIndex} من ${TOTAL_REGISTRATION_MAIN_STEPS}: ${currentMainConfig?.titleAr}`
-                          : `Step ${mainStepIndex} of ${TOTAL_REGISTRATION_MAIN_STEPS}: ${currentMainConfig?.titleEn}`}
-                      </bdi>
+              <div className="space-y-3 w-full">
+                {/* Milestone Pill & Draft Saved Indicator */}
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Image
+                      src="/logo.png"
+                      alt="Politia logo"
+                      width={28}
+                      height={28}
+                      priority
+                      style={{ height: 'auto' }}
+                      className="object-contain shrink-0"
+                    />
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#0B57D0] dark:text-[#93C5FD] border border-blue-200/80 dark:border-blue-800 text-xs font-bold shadow-xs">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#0B57D0] dark:bg-[#60A5FA] animate-pulse" />
+                      <span>
+                        <bdi suppressHydrationWarning>
+                          {mainStepIndex === 8
+                            ? isRtl ? 'الخطوة الأخيرة: كلمة المرور' : 'Final Step: Password'
+                            : isRtl
+                            ? `الخطوة ${mainStepIndex} من 7 • ${currentMainConfig?.titleAr}`
+                            : `Step ${mainStepIndex} of 7 • ${currentMainConfig?.titleEn}`}
+                        </bdi>
+                      </span>
                     </span>
+                  </div>
+
+                  {/* Real-Time Local Draft Saved Visual Cue */}
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 text-[11px] font-semibold">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                    <span><bdi>{isRtl ? 'المسودة محفوظة' : 'Draft saved'}</bdi></span>
                   </span>
-
-                  {mainStepIndex <= 7 && (
-                    <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800/60 border border-slate-200/60 dark:border-slate-700/50">
-                      <bdi suppressHydrationWarning>
-                        {mainStepIndex === 4
-                          ? isRtl
-                            ? `القسم ${step4Parts.current}/${step4Parts.total}`
-                            : `Part ${step4Parts.current}/${step4Parts.total}`
-                          : mainStepIndex === 3 && currentAge !== null && currentAge < 18
-                          ? isRtl ? 'القسم 1/1' : 'Part 1/1'
-                          : isRtl
-                          ? `القسم ${subStepIndex}/${currentMainConfig?.subSteps.length}`
-                          : `Part ${subStepIndex}/${currentMainConfig?.subSteps.length}`}
-                      </bdi>
-                    </span>
-                  )}
-
-                  {mainStepIndex === 2 && subStepIndex === 4 && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 text-[11px] font-bold">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                      <bdi suppressHydrationWarning>{isRtl ? 'مُوصى به' : 'Recommended'}</bdi>
-                    </span>
-                  )}
                 </div>
 
                 {/* Smooth Animated Progress Bar */}
                 <div className="w-full h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden relative">
                   <div
-                    className="h-full bg-gradient-to-r from-[#0B57D0] to-[#3B82F6] dark:from-[#3B82F6] dark:to-[#60A5FA] rounded-full transition-all duration-300 shadow-sm"
+                    className="h-full bg-gradient-to-r from-[#0B57D0] to-[#3B82F6] dark:from-[#3B82F6] dark:to-[#60A5FA] rounded-full transition-all duration-300 shadow-xs"
                     style={{ width: `${progressPercentage}%` }}
                   />
                 </div>
@@ -1904,27 +1891,45 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                   <button
                     type="button"
                     onClick={() => setGender('Male')}
-                    className={`p-5 rounded-2xl border-2 flex flex-col items-center justify-center gap-2.5 transition cursor-pointer ${
+                    className={`relative p-5 rounded-2xl border-2 flex flex-col items-center justify-center gap-2.5 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 ${
                       gender === 'Male'
-                        ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/70 dark:bg-blue-950/40 font-semibold text-[#0B57D0] dark:text-[#A8C7FA] shadow-sm'
-                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-400 text-slate-700 dark:text-slate-300'
+                        ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/80 dark:bg-blue-950/40 font-semibold text-[#0B57D0] dark:text-[#A8C7FA] shadow-xs'
+                        : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-300'
                     }`}
                   >
-                    <span className="text-3xl">👨</span>
-                    <span className="text-sm font-semibold"><bdi>{isRtl ? 'ذكر' : 'Male'}</bdi></span>
+                    {gender === 'Male' && (
+                      <span className="absolute top-2.5 end-2.5 w-5 h-5 rounded-full bg-[#0B57D0] text-white flex items-center justify-center text-[10px] shadow-xs">
+                        <Check className="w-3 h-3 stroke-[2.5]" />
+                      </span>
+                    )}
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                      gender === 'Male' ? 'bg-blue-100 dark:bg-blue-900/60 text-[#0B57D0] dark:text-[#A8C7FA]' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                    }`}>
+                      <User className="w-5 h-5" strokeWidth={1.75} />
+                    </div>
+                    <span className="text-xs sm:text-sm font-bold"><bdi>{isRtl ? 'ذكر' : 'Male'}</bdi></span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setGender('Female')}
-                    className={`p-5 rounded-2xl border-2 flex flex-col items-center justify-center gap-2.5 transition cursor-pointer ${
+                    className={`relative p-5 rounded-2xl border-2 flex flex-col items-center justify-center gap-2.5 transition-all duration-150 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30 ${
                       gender === 'Female'
-                        ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-blue-50/70 dark:bg-blue-950/40 font-semibold text-[#0B57D0] dark:text-[#A8C7FA] shadow-sm'
-                        : 'border-slate-200 dark:border-slate-700 hover:border-slate-400 text-slate-700 dark:text-slate-300'
+                        ? 'border-[#0B57D0] dark:border-[#A8C7FA] bg-purple-50/80 dark:bg-purple-950/40 font-semibold text-purple-700 dark:text-purple-300 shadow-xs'
+                        : 'border-slate-200 dark:border-slate-700/80 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-900/60 text-slate-700 dark:text-slate-300'
                     }`}
                   >
-                    <span className="text-3xl">👩</span>
-                    <span className="text-sm font-semibold"><bdi>{isRtl ? 'أنثى' : 'Female'}</bdi></span>
+                    {gender === 'Female' && (
+                      <span className="absolute top-2.5 end-2.5 w-5 h-5 rounded-full bg-purple-600 text-white flex items-center justify-center text-[10px] shadow-xs">
+                        <Check className="w-3 h-3 stroke-[2.5]" />
+                      </span>
+                    )}
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+                      gender === 'Female' ? 'bg-purple-100 dark:bg-purple-900/60 text-purple-600 dark:text-purple-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                    }`}>
+                      <UserCheck className="w-5 h-5" strokeWidth={1.75} />
+                    </div>
+                    <span className="text-xs sm:text-sm font-bold"><bdi>{isRtl ? 'أنثى' : 'Female'}</bdi></span>
                   </button>
                 </div>
               )}
@@ -2015,6 +2020,16 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                       <bdi>{isRtl ? 'الرقم القومي (14 رقماً)' : 'National ID (14 Digits)'}</bdi>
                     </label>
                   </div>
+                  <p className="text-[12px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 pt-0.5">
+                    <Info className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                    <span>
+                      <bdi>
+                        {isRtl
+                          ? 'يجب أن يتكون من 14 رقماً ويطابق تاريخ ميلادك المسجل'
+                          : 'Must contain 14 digits and match your registered date of birth'}
+                      </bdi>
+                    </span>
+                  </p>
                   {nationalIdValidation.parsedData && (
                     <span className="inline-flex items-center text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold">
                       <bdi>
