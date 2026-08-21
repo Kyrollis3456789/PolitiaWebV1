@@ -52,7 +52,7 @@ const DEFAULT_DIOCESES: Diocese[] = [
   { id: 'dio-dakahlia-1', name_ar: 'إيبارشية المنصورة وتوابعها', name_en: 'Diocese of Mansoura' },
 ];
 
-// Comprehensive offline fallback dataset for famous Coptic Churches in Egypt
+// Comprehensive offline fallback dataset for famous Coptic Churches in Egypt (Assiut, Cairo, Alexandria, Giza, Minya, Sohag, etc.)
 const DEFAULT_CHURCHES: Church[] = [
   // Assiut
   { id: 'ch-assiut-1', diocese_id: 'dio-assiut-1', city_id: '33333333-3333-3333-3333-333333333321', name_ar: 'كاتدرائية رئيس الملائكة ميخائيل (الجمهورية)', name_en: 'Archangel Michael Cathedral (Al Gomhoureya)' },
@@ -97,7 +97,7 @@ const DEFAULT_CHURCHES: Church[] = [
 
 const MAX_SECONDARY_CHURCHES = 10;
 
-/* Custom Account-Picker Dropdown for Churches with Location-Priority Search */
+/* Custom Account-Picker Dropdown for Churches with Location Recommendation Engine */
 interface ChurchDropdownProps {
   id: string;
   label: string;
@@ -170,7 +170,7 @@ function AccountPickerChurchDropdown({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  // Merge passed churches with live DB search results
+  // Merge passed churches with live DB search results & fallback map ingestion
   const combinedChurches = useMemo(() => {
     const map = new Map<string, Church>();
     churches.forEach((c) => map.set(c.id, c));
@@ -182,7 +182,7 @@ function AccountPickerChurchDropdown({
     return combinedChurches.find((c) => c.id === value);
   }, [combinedChurches, value]);
 
-  // Location-Priority Sorting & Query Filtering
+  // Location-Priority Sorting & Query Filtering Engine
   const filteredAndSortedChurches = useMemo(() => {
     let list = combinedChurches;
 
@@ -194,7 +194,7 @@ function AccountPickerChurchDropdown({
       );
     }
 
-    // 2. Priority Sorting by Location
+    // 2. Priority Sorting Engine by Location
     return [...list].sort((a, b) => {
       const aIsPrimary = primaryCityId && a.city_id === primaryCityId ? 1 : 0;
       const bIsPrimary = primaryCityId && b.city_id === primaryCityId ? 1 : 0;
@@ -207,6 +207,12 @@ function AccountPickerChurchDropdown({
       return (isRtl ? a.name_ar : a.name_en).localeCompare(isRtl ? b.name_ar : b.name_en);
     });
   }, [combinedChurches, searchQuery, primaryCityId, secondaryCityId, isRtl]);
+
+  const hasLocationMatch = useMemo(() => {
+    return filteredAndSortedChurches.some(
+      (c) => (primaryCityId && c.city_id === primaryCityId) || (secondaryCityId && c.city_id === secondaryCityId)
+    );
+  }, [filteredAndSortedChurches, primaryCityId, secondaryCityId]);
 
   return (
     <div className="relative space-y-1.5" ref={containerRef}>
@@ -299,6 +305,18 @@ function AccountPickerChurchDropdown({
                 ) : null}
               </div>
             </div>
+
+            {/* Location Recommendation Banner Badge */}
+            {hasLocationMatch && !searchQuery && (
+              <div className="px-3 py-1.5 bg-blue-50/80 dark:bg-blue-950/40 border-b border-blue-100 dark:border-blue-900/40 text-[11px] font-semibold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+                <Sparkles className="w-3 h-3 text-blue-500 shrink-0" />
+                <bdi>
+                  {isRtl
+                    ? 'مقترحة بناءً على موقعك الجغرافي المسجل'
+                    : 'Suggested based on your location'}
+                </bdi>
+              </div>
+            )}
 
             {/* Account-Picker Tile List with Location-Priority Badges */}
             <div className="overflow-y-auto p-1.5 space-y-1 flex-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-slate-300 dark:[&::-webkit-scrollbar-thumb]:bg-slate-700 [&::-webkit-scrollbar-thumb]:rounded-full">
