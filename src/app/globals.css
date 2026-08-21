@@ -165,7 +165,7 @@ html.dark {
 }
 
 .shared-bg {
-  background-image: linear-gradient(var(--splash-overlay-1), var(--splash-overlay-2)), url('/splash-bg.jpg');
+  background-image: linear-gradient(var(--splash-overlay-1), var(--splash-overlay-2)), url('/splash-bg.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -361,7 +361,7 @@ export function ForgotScreen() {
         <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start min-h-auto md:min-h-[320px]">
           <div className="w-14 h-14 rounded-2xl bg-white dark:bg-slate-800/90 p-2 shadow-sm border border-slate-200/60 dark:border-slate-700/80 flex items-center justify-center transition-all">
             <Image
-              src="/logo.png"
+              src="/logo.webp"
               alt="Politia logo"
               width={48}
               height={48}

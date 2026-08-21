@@ -63,7 +63,7 @@ export function SplashScreen() {
         id="splash-content"
       >
         <Image
-          src="/logo.png"
+          src="/logo.webp"
           alt="At Church Logo"
           width={192}
           height={192}

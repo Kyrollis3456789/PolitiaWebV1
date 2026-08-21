@@ -139,7 +139,7 @@ export function GenderStep({
               {/* Left: App Emblem */}
               <div className="w-9 h-9 rounded-xl bg-white border border-slate-200/80 shadow-xs flex items-center justify-center p-1.5 shrink-0">
                 <Image
-                  src="/logo.png"
+                  src="/logo.webp"
                   alt="Politia"
                   width={28}
                   height={28}
