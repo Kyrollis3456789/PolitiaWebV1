@@ -82,7 +82,7 @@ export async function fetchStreetsByCityAction(cityId: string): Promise<{
 }
 
 /**
- * Fetches all Dioceses, Churches, and Priests strictly from Supabase database (single source of truth).
+ * Fetches strictly Coptic Orthodox Dioceses, Churches, and Priests from Supabase database (single source of truth).
  */
 export async function fetchChurchesDataAction(): Promise<{
   success: boolean;
@@ -96,7 +96,11 @@ export async function fetchChurchesDataAction(): Promise<{
 
     const [dioRes, churchRes, priestRes] = await Promise.all([
       supabase.from('dioceses').select('id, name_en, name_ar, governorate_id').order('name_ar', { ascending: true }),
-      supabase.from('churches').select('id, diocese_id, city_id, name_en, name_ar, denomination, image_url').order('name_ar', { ascending: true }),
+      supabase
+        .from('churches')
+        .select('id, diocese_id, city_id, name_en, name_ar, denomination, image_url')
+        .eq('denomination', 'Coptic Orthodox')
+        .order('name_ar', { ascending: true }),
       supabase.from('priests').select('id, church_id, diocese_id, name_en, name_ar, title_en, title_ar').order('name_ar', { ascending: true }),
     ]);
 
@@ -110,7 +114,7 @@ export async function fetchChurchesDataAction(): Promise<{
       priests: (priestRes.data as any[]) || [],
     };
   } catch (err: any) {
-    console.error('Error fetching churches data strictly from Supabase:', err);
+    console.error('Error fetching Coptic Orthodox churches data strictly from Supabase:', err);
     return {
       success: false,
       dioceses: [],
@@ -122,7 +126,7 @@ export async function fetchChurchesDataAction(): Promise<{
 }
 
 /**
- * Fetches churches strictly matching the resolved Diocese / City from Supabase database, eliminating cross-diocese pollution.
+ * Fetches churches strictly matching the resolved Coptic Orthodox Diocese / City from Supabase database, eliminating cross-diocese pollution.
  */
 export async function fetchChurchesByLocationAction(params: {
   cityId?: string;
@@ -146,6 +150,7 @@ export async function fetchChurchesByLocationAction(params: {
         .from('churches')
         .select('diocese_id')
         .eq('city_id', cityId)
+        .eq('denomination', 'Coptic Orthodox')
         .limit(1)
         .maybeSingle();
 
@@ -160,7 +165,10 @@ export async function fetchChurchesByLocationAction(params: {
       }
     }
 
-    let churchQuery = supabase.from('churches').select('id, diocese_id, city_id, name_en, name_ar, denomination, image_url');
+    let churchQuery = supabase
+      .from('churches')
+      .select('id, diocese_id, city_id, name_en, name_ar, denomination, image_url')
+      .eq('denomination', 'Coptic Orthodox');
 
     if (targetDioceseId) {
       churchQuery = churchQuery.eq('diocese_id', targetDioceseId);
@@ -177,7 +185,7 @@ export async function fetchChurchesByLocationAction(params: {
       resolvedDiocese: targetDioceseObj,
     };
   } catch (err: any) {
-    console.error('Error fetching churches by location from Supabase:', err);
+    console.error('Error fetching Coptic Orthodox churches by location from Supabase:', err);
     return {
       success: false,
       churches: [],
@@ -187,7 +195,7 @@ export async function fetchChurchesByLocationAction(params: {
 }
 
 /**
- * Searches the Supabase `churches` table live by query string (matching name_en or name_ar).
+ * Searches the Supabase `churches` table live by query string (matching name_en or name_ar), enforcing Coptic Orthodox denomination.
  */
 export async function searchChurchesDatabaseAction(query: string): Promise<{
   success: boolean;
@@ -204,6 +212,7 @@ export async function searchChurchesDatabaseAction(query: string): Promise<{
     const { data, error } = await supabase
       .from('churches')
       .select('id, diocese_id, city_id, name_en, name_ar, denomination, image_url')
+      .eq('denomination', 'Coptic Orthodox')
       .or(`name_en.ilike.%${trimmed}%,name_ar.ilike.%${trimmed}%`)
       .limit(50);
 
@@ -214,7 +223,7 @@ export async function searchChurchesDatabaseAction(query: string): Promise<{
       churches: (data as any[]) || [],
     };
   } catch (err: any) {
-    console.error('Error searching churches from DB:', err);
+    console.error('Error searching Coptic Orthodox churches from DB:', err);
     return {
       success: false,
       churches: [],
