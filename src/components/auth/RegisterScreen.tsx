@@ -1769,8 +1769,21 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
-      className="relative w-full min-h-[100dvh] sm:min-h-screen bg-[#F0F4F9] dark:bg-[#0E121A] md:shared-bg flex flex-col justify-between md:justify-center items-center p-0 md:p-6 transition-colors duration-300 overflow-x-hidden"
+      className="relative w-full min-h-[100dvh] sm:min-h-screen bg-[#F0F4F9] dark:bg-[#0E121A] flex flex-col justify-between md:justify-center items-center p-0 md:p-6 transition-colors duration-300 overflow-x-hidden"
     >
+      {/* Desktop Background Layer (>= md only) */}
+      <div className="hidden md:block absolute inset-0 z-0 overflow-hidden pointer-events-none">
+        <Image
+          src="/splash-bg.webp"
+          alt="Background"
+          fill
+          priority
+          quality={90}
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-50/85 to-slate-50/95 dark:from-[#090D16]/90 dark:to-[#090D16]/97" />
+      </div>
       {/* Main Authentication Card Container */}
       <div className="relative z-20 w-full max-w-[1040px] bg-white/95 dark:bg-[#1B212D]/95 rounded-none md:rounded-[36px] p-5 sm:p-8 md:p-12 shadow-none md:shadow-2xl border-0 md:border md:border-white/60 dark:md:border-slate-800/80 flex flex-col md:flex-row gap-6 md:gap-14 min-h-[100dvh] md:min-h-fit h-auto items-stretch md:items-start transition-all duration-300 ease-in-out">
         {/* Left Column: Compact Mobile Progress & Step Headers */}
