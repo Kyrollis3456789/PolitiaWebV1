@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 
 // In-memory cryptographic OTP store for fallback verification (10 minute expiry)
 const secureEmailOtpStore = new Map<string, { code: string; expiresAt: number; attempts: number }>();
+const REGISTRATION_EMAIL_OTP_TEMPLATE_ID = 'registration_email_otp_v1';
 
 export interface SendEmailOtpResult {
   success: boolean;
@@ -73,28 +74,45 @@ export async function sendEmailOtp(email: string): Promise<SendEmailOtpResult> {
   try {
     const supabase = await getSupabaseAuthClient();
     if (supabase) {
-      const { error: sbErr } = await supabase.auth.signInWithOtp({
+      const signInPayload = {
         email: cleanEmail,
         options: {
           shouldCreateUser: false,
         },
+      } as const;
+
+      console.log('=====================================================================');
+      console.log('[POLITIA REGISTRATION EMAIL OTP] Dispatch request');
+      console.log('Template metadata:', {
+        templateId: REGISTRATION_EMAIL_OTP_TEMPLATE_ID,
+        supabaseMethod: 'auth.signInWithOtp',
+        shouldCreateUser: false,
+      });
+      console.log('Payload:', signInPayload);
+
+      const { error: sbErr } = await supabase.auth.signInWithOtp({
+        email: signInPayload.email,
+        options: signInPayload.options,
       });
 
       if (!sbErr) {
         sentViaSupabase = true;
-        console.log('✅ [Supabase Auth] Official Email OTP dispatched to:', cleanEmail);
+        console.log('API response:', { success: true, error: null });
       } else {
         supabaseError = sbErr.message;
-        console.warn('⚠️ [Supabase Auth Email OTP notice]:', sbErr.message);
+        console.log('API response:', { success: false, error: sbErr.message });
       }
     }
   } catch (err: any) {
     supabaseError = err?.message || 'Supabase exception';
-    console.warn('⚠️ [Supabase Auth Email Exception]:', err);
+    console.log('API response:', { success: false, error: supabaseError });
   }
 
-  console.log('=====================================================================');
-  console.log('📧 [POLITIA EMAIL OTP DISPATCH]');
+  console.log('Dispatch summary:', {
+    email: cleanEmail,
+    provider: sentViaSupabase ? 'supabase_email_otp' : 'sandbox_fallback',
+    templateId: REGISTRATION_EMAIL_OTP_TEMPLATE_ID,
+  });
   console.log(`Target Email : ${cleanEmail}`);
   console.log(`Generated OTP: ${generatedCode}`);
   console.log(`Supabase OTP : ${sentViaSupabase ? 'Dispatched to Inbox' : supabaseError || 'Fallback mode'}`);

@@ -1769,12 +1769,12 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   return (
     <div
       dir={isRtl ? 'rtl' : 'ltr'}
-      className="relative w-full min-h-screen shared-bg flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 transition-colors duration-300 overflow-x-hidden"
+      className="relative w-full min-h-[100dvh] sm:min-h-screen shared-bg flex flex-col items-center justify-center p-3.5 sm:p-6 md:p-8 transition-colors duration-300 overflow-x-hidden"
     >
       {/* Main Authentication Card */}
-      <div className="relative z-20 w-full max-w-[1040px] bg-white/95 dark:bg-[#1B212D]/95 rounded-[28px] sm:rounded-[36px] p-6 sm:p-8 md:p-12 shadow-2xl border border-white/60 dark:border-slate-800/80 flex flex-col md:flex-row gap-8 md:gap-14 min-h-fit h-auto items-start transition-all duration-300 ease-in-out">
+      <div className="relative z-20 w-full max-w-[1040px] bg-white/95 dark:bg-[#1B212D]/95 rounded-[24px] sm:rounded-[36px] p-4.5 sm:p-8 md:p-12 shadow-2xl border border-white/60 dark:border-slate-800/80 flex flex-col md:flex-row gap-6 md:gap-14 min-h-fit h-auto items-start transition-all duration-300 ease-in-out">
         {/* Left Column: Dynamic Progress Indicator & Step Headers */}
-        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start min-h-[420px]">
+        <div className="w-full md:w-1/2 flex flex-col justify-start items-start text-start min-h-0 md:min-h-[420px]">
           <div className="space-y-3 w-full">
             {/* Integrated Unified Step Progress Bar & Milestone Indicator */}
             {mainStepIndex <= 8 && (
@@ -1833,7 +1833,7 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
         </div>
 
         {/* Right Column: Dynamic Form Area (Vertically Centered with lateral slide transition) */}
-        <div className="w-full md:w-1/2 flex flex-col justify-between min-h-[420px] overflow-hidden transition-all duration-300 ease-in-out">
+        <div className="w-full md:w-1/2 flex flex-col justify-between min-h-0 md:min-h-[420px] overflow-hidden transition-all duration-300 ease-in-out">
           {/* Milestone 1: Personal Info */}
           {mainStepIndex === 1 && (
             <form onSubmit={handleAdvance} className="w-full flex-1 flex flex-col justify-between min-h-[420px] space-y-4">
