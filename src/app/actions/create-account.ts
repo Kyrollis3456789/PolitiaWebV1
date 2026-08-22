@@ -242,11 +242,17 @@ export async function createAccountAction(rawPayload: CreateAccountPayload): Pro
     let avatarUrl: string | null = null;
     if (payload.avatarBase64) {
       try {
+        let storageDb = supabase;
+        try {
+          const admin = createAdminClient();
+          if (admin) storageDb = admin;
+        } catch {}
+
         const base64Data = payload.avatarBase64.replace(/^data:image\/\w+;base64,/, '');
         const buffer = Buffer.from(base64Data, 'base64');
         const fileName = `${userId}/${Date.now()}_avatar.jpg`;
 
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError } = await storageDb.storage
           .from('avatars')
           .upload(fileName, buffer, {
             contentType: 'image/jpeg',
@@ -254,10 +260,12 @@ export async function createAccountAction(rawPayload: CreateAccountPayload): Pro
           });
 
         if (!uploadError) {
-          const { data: publicUrlData } = supabase.storage
+          const { data: publicUrlData } = storageDb.storage
             .from('avatars')
             .getPublicUrl(fileName);
           avatarUrl = publicUrlData.publicUrl;
+        } else {
+          console.warn('Avatar upload error:', uploadError.message);
         }
       } catch (uploadErr) {
         console.warn('Avatar upload warning (non-fatal):', uploadErr);
