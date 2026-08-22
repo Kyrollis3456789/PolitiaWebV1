@@ -58,11 +58,17 @@ interface UserProfile {
   profession?: string | null;
   education_path?: string | null;
   school_stage?: string | null;
+  school_id?: string | null;
+  school_custom_name?: string | null;
   education_system?: string | null;
   grade_level?: string | null;
   school_name?: string | null;
   university_id?: string | null;
+  university_name?: string | null;
+  university_custom_name?: string | null;
   faculty_id?: string | null;
+  faculty_name?: string | null;
+  faculty_custom_name?: string | null;
   academic_year?: string | null;
   is_working?: boolean | null;
   job_title?: string | null;
@@ -187,17 +193,130 @@ export default async function DashboardPage({
     console.warn('Relational church lookups note:', e);
   }
 
-  const formatTimestamp = (ts?: string | null) => {
-    if (!ts) return '—';
-    try {
-      return new Date(ts).toLocaleString(locale, {
-        dateStyle: 'medium',
-        timeStyle: 'short',
-      });
-    } catch {
-      return ts;
+  // Helper to detect UUID strings to prevent raw UUID display
+  const isUUID = (str?: string | null): boolean =>
+    Boolean(str && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str.trim()));
+
+  // 1. Resolve Location & Address Names
+  let resolvedPrimaryGov: string | null = null;
+  let resolvedPrimaryCity: string | null = null;
+  let resolvedPrimaryCountry: string | null = null;
+  let secondaryAddressesList: { type: string; formatted: string }[] = [];
+
+  try {
+    if (profile?.governorate_id) {
+      const { data: g } = await supabase.from('governorates').select('name_en, name_ar').eq('id', profile.governorate_id).maybeSingle();
+      if (g) resolvedPrimaryGov = isRtl ? g.name_ar : g.name_en;
     }
-  };
+    if (!resolvedPrimaryGov && profile?.address_governorate && !isUUID(profile.address_governorate)) {
+      resolvedPrimaryGov = profile.address_governorate;
+    }
+
+    if (profile?.city_id) {
+      const { data: c } = await supabase.from('cities').select('name_en, name_ar').eq('id', profile.city_id).maybeSingle();
+      if (c) resolvedPrimaryCity = isRtl ? c.name_ar : c.name_en;
+    }
+    if (!resolvedPrimaryCity && profile?.address_city && !isUUID(profile.address_city)) {
+      resolvedPrimaryCity = profile.address_city;
+    }
+
+    if (profile?.country_id) {
+      const { data: ct } = await supabase.from('countries').select('name_en, name_ar').eq('id', profile.country_id).maybeSingle();
+      if (ct) resolvedPrimaryCountry = isRtl ? ct.name_ar : ct.name_en;
+    }
+
+    // Fetch User Addresses table
+    const { data: userAddrs } = await supabase
+      .from('user_addresses')
+      .select('address_type, country_id, governorate_id, city_id, street_address, building_no, floor_no, apartment')
+      .eq('user_id', user.id);
+
+    if (userAddrs && userAddrs.length > 0) {
+      for (const addr of userAddrs) {
+        let gName: string | null = null;
+        let cName: string | null = null;
+
+        if (addr.governorate_id) {
+          const { data: g } = await supabase.from('governorates').select('name_en, name_ar').eq('id', addr.governorate_id).maybeSingle();
+          if (g) gName = isRtl ? g.name_ar : g.name_en;
+        }
+        if (addr.city_id) {
+          const { data: c } = await supabase.from('cities').select('name_en, name_ar').eq('id', addr.city_id).maybeSingle();
+          if (c) cName = isRtl ? c.name_ar : c.name_en;
+        }
+
+        const bldgStr = addr.building_no ? `${isRtl ? 'عمارة' : 'Bldg'} ${addr.building_no}` : null;
+        const floorStr = addr.floor_no ? `${isRtl ? 'دور' : 'Floor'} ${addr.floor_no}` : null;
+        const aptStr = addr.apartment ? `${isRtl ? 'شقة' : 'Apt'} ${addr.apartment}` : null;
+        const streetStr = addr.street_address && !isUUID(addr.street_address) ? addr.street_address : null;
+
+        const parts = [bldgStr, floorStr, aptStr, streetStr, cName, gName].filter(Boolean);
+        if (parts.length > 0) {
+          secondaryAddressesList.push({
+            type: addr.address_type || 'Other',
+            formatted: parts.join(', '),
+          });
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Address resolution note:', e);
+  }
+
+  // 2. Resolve Education & Institution Names
+  let resolvedSchoolName: string | null = null;
+  let resolvedUniversityName: string | null = null;
+  let resolvedFacultyName: string | null = null;
+
+  try {
+    if (profile?.school_id) {
+      const { data: s } = await supabase.from('schools').select('name_en, name_ar').eq('id', profile.school_id).maybeSingle();
+      if (s) resolvedSchoolName = isRtl ? s.name_ar : s.name_en;
+    }
+    if (!resolvedSchoolName) {
+      resolvedSchoolName = (profile as any)?.school_custom_name ||
+        (profile?.school_name && !isUUID(profile.school_name) ? profile.school_name : null) ||
+        (profile?.faculty_or_school && !isUUID(profile.faculty_or_school) ? profile.faculty_or_school : null);
+    }
+
+    if (profile?.university_id) {
+      const { data: u } = await supabase.from('universities').select('name_en, name_ar').eq('id', profile.university_id).maybeSingle();
+      if (u) resolvedUniversityName = isRtl ? u.name_ar : u.name_en;
+    }
+    if (!resolvedUniversityName) {
+      resolvedUniversityName = (profile as any)?.university_custom_name ||
+        (profile?.university_name && !isUUID(profile.university_name) ? profile.university_name : null);
+    }
+
+    if (profile?.faculty_id) {
+      const { data: f } = await supabase.from('faculties').select('name_en, name_ar').eq('id', profile.faculty_id).maybeSingle();
+      if (f) resolvedFacultyName = isRtl ? f.name_ar : f.name_en;
+    }
+    if (!resolvedFacultyName) {
+      resolvedFacultyName = (profile as any)?.faculty_custom_name ||
+        (profile?.faculty_name && !isUUID(profile.faculty_name) ? profile.faculty_name : null);
+    }
+  } catch (e) {
+    console.warn('Education resolution note:', e);
+  }
+
+  // Format primary address line cleanly
+  const primaryBldgStr = profile?.building_no ? `${isRtl ? 'عمارة' : 'Bldg'} ${profile.building_no}` : (profile?.address_building ? `${isRtl ? 'عمارة' : 'Bldg'} ${profile.address_building}` : null);
+  const primaryFloorStr = profile?.floor_no ? `${isRtl ? 'دور' : 'Floor'} ${profile.floor_no}` : (profile?.address_floor ? `${isRtl ? 'دور' : 'Floor'} ${profile.address_floor}` : null);
+  const primaryAptStr = profile?.apartment ? `${isRtl ? 'شقة' : 'Apt'} ${profile.apartment}` : (profile?.address_apartment ? `${isRtl ? 'شقة' : 'Apt'} ${profile.address_apartment}` : null);
+  const primaryStreetStr = (profile?.street_address && !isUUID(profile.street_address))
+    ? profile.street_address
+    : ((profile?.address_street && !isUUID(profile.address_street)) ? profile.address_street : null);
+
+  const primaryAddressFormatted = [
+    primaryBldgStr,
+    primaryFloorStr,
+    primaryAptStr,
+    primaryStreetStr,
+    resolvedPrimaryCity,
+    resolvedPrimaryGov,
+    resolvedPrimaryCountry,
+  ].filter(Boolean).join(', ');
 
   const calculateAge = (dobString?: string | null) => {
     if (!dobString) return null;
@@ -212,6 +331,18 @@ export default async function DashboardPage({
       return age >= 0 ? age : null;
     } catch {
       return null;
+    }
+  };
+
+  const formatTimestamp = (ts?: string | null) => {
+    if (!ts) return '—';
+    try {
+      return new Date(ts).toLocaleString(locale, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      });
+    } catch {
+      return ts;
     }
   };
 
@@ -519,18 +650,24 @@ export default async function DashboardPage({
                   <span>{isRtl ? 'محل الإقامة الأساسي:' : 'Primary Residence:'}</span>
                 </span>
                 <p className="font-medium text-slate-800 dark:text-slate-200">
-                  {[
-                    profile?.street_address || profile?.address_street,
-                    profile?.building_no ? `${isRtl ? 'عمارة' : 'Bldg'} ${profile.building_no}` : null,
-                    profile?.floor_no ? `${isRtl ? 'دور' : 'Floor'} ${profile.floor_no}` : null,
-                    profile?.apartment ? `${isRtl ? 'شقة' : 'Apt'} ${profile.apartment}` : null,
-                    profile?.address_city || profile?.address_governorate,
-                  ].filter(Boolean).join(' - ') || '—'}
+                  {primaryAddressFormatted || '—'}
                 </p>
               </div>
 
-              {/* Secondary Address (if any) */}
-              {(profile?.secondary_street_address || profile?.secondary_address) && (
+              {/* Secondary Addresses (from user_addresses or secondary profile fields) */}
+              {secondaryAddressesList.length > 0 ? (
+                secondaryAddressesList.map((addr, idx) => (
+                  <div key={idx} className="space-y-1 pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
+                      <Building className="w-3.5 h-3.5 text-indigo-600" />
+                      <span>{isRtl ? `العنوان الثانوي (${addr.type}):` : `Secondary Address (${addr.type}):`}</span>
+                    </span>
+                    <p className="font-medium text-slate-700 dark:text-slate-300">
+                      {addr.formatted}
+                    </p>
+                  </div>
+                ))
+              ) : (profile?.secondary_street_address || profile?.secondary_address) && (
                 <div className="space-y-1 pt-2 border-t border-slate-100 dark:border-slate-800">
                   <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1">
                     <Building className="w-3.5 h-3.5 text-indigo-600" />
@@ -538,11 +675,11 @@ export default async function DashboardPage({
                   </span>
                   <p className="font-medium text-slate-700 dark:text-slate-300">
                     {[
-                      profile.secondary_street_address || profile.secondary_address,
+                      !isUUID(profile.secondary_street_address) ? profile.secondary_street_address : (!isUUID(profile.secondary_address) ? profile.secondary_address : null),
                       profile.secondary_building_no ? `${isRtl ? 'عمارة' : 'Bldg'} ${profile.secondary_building_no}` : null,
                       profile.secondary_floor_no ? `${isRtl ? 'دور' : 'Floor'} ${profile.secondary_floor_no}` : null,
                       profile.secondary_apartment ? `${isRtl ? 'شقة' : 'Apt'} ${profile.secondary_apartment}` : null,
-                    ].filter(Boolean).join(' - ')}
+                    ].filter(Boolean).join(', ')}
                   </p>
                 </div>
               )}
@@ -560,28 +697,54 @@ export default async function DashboardPage({
               <div>
                 <span className="text-slate-400 block mb-0.5">{isRtl ? 'المسار التعليمي:' : 'Educational Path:'}</span>
                 <p className="font-semibold text-slate-800 dark:text-slate-200 capitalize">
-                  {profile?.education_path || profile?.education_stage || '—'}
+                  {profile?.education_path === 'BASIC'
+                    ? (isRtl ? 'تعليم أساسي / قبلي (مدارس)' : 'Basic School Education')
+                    : profile?.education_path === 'UNIVERSITY'
+                    ? (isRtl ? 'تعليم جامعي (طالب)' : 'University Student')
+                    : profile?.education_path === 'GRADUATED'
+                    ? (isRtl ? 'خريج جامعي' : 'University Graduate')
+                    : (profile?.education_path || profile?.education_stage || '—')}
                 </p>
               </div>
 
-              {(profile?.school_name || profile?.faculty_or_school) && (
+              {/* School Name */}
+              {resolvedSchoolName && (
                 <div>
-                  <span className="text-slate-400 block mb-0.5">{isRtl ? 'المدرسة / الكلية:' : 'Institution / Faculty:'}</span>
-                  <p className="font-medium text-slate-800 dark:text-slate-200">
-                    {profile.school_name || profile.faculty_or_school}
+                  <span className="text-slate-400 block mb-0.5">{isRtl ? 'المدرسة:' : 'School:'}</span>
+                  <p className="font-medium text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                    <span>🏫</span>
+                    <span>
+                      {resolvedSchoolName}
+                      {profile?.school_stage ? ` (${profile.school_stage})` : ''}
+                    </span>
                   </p>
                 </div>
               )}
 
-              {profile?.academic_year && (
+              {/* University & Faculty Name */}
+              {(resolvedUniversityName || resolvedFacultyName) && (
+                <div>
+                  <span className="text-slate-400 block mb-0.5">{isRtl ? 'الجامعة والكلية:' : 'University & Faculty:'}</span>
+                  <p className="font-medium text-slate-800 dark:text-slate-200 flex items-center gap-1">
+                    <span>🎓</span>
+                    <span>
+                      {[resolvedUniversityName, resolvedFacultyName].filter(Boolean).join(' - ')}
+                    </span>
+                  </p>
+                </div>
+              )}
+
+              {/* Grade / Academic Year */}
+              {(profile?.academic_year || profile?.grade_level) && (
                 <div>
                   <span className="text-slate-400 block mb-0.5">{isRtl ? 'السنة الدراسية / الصف:' : 'Grade / Academic Year:'}</span>
                   <p className="font-medium text-slate-800 dark:text-slate-200">
-                    {profile.academic_year || profile.grade_level}
+                    {profile?.academic_year || profile?.grade_level}
                   </p>
                 </div>
               )}
 
+              {/* Job Title & Company */}
               {profile?.job_title && (
                 <div className="pt-1">
                   <span className="text-slate-400 block mb-0.5">{isRtl ? 'الوظيفة الحالية:' : 'Current Job / Profession:'}</span>
@@ -592,6 +755,7 @@ export default async function DashboardPage({
                 </div>
               )}
 
+              {/* Postgrad Studies */}
               {profile?.is_postgrad && (
                 <div className="pt-1">
                   <span className="text-slate-400 block mb-0.5">{isRtl ? 'الدراسات العليا:' : 'Post-Graduate Studies:'}</span>
