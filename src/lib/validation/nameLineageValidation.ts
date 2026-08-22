@@ -359,6 +359,27 @@ export function validateFamilyNameLineage(params: {
 
   // 3. Siblings (Brother / Sister): Compare all patronymic tokens starting from index 1
   if (relationType === 'brother' || relationType === 'sister') {
+    const userFirstNameEn = userTokensEn[0];
+    const userFirstNameAr = userTokensAr[0];
+    const siblingFirstNameEn = relativeTokensEn[0];
+    const siblingFirstNameAr = relativeTokensAr[0];
+
+    // Prevent sibling from having the exact same first name as the user
+    if (
+      (userFirstNameEn && siblingFirstNameEn && areNameTokensMatching(userFirstNameEn, siblingFirstNameEn)) ||
+      (userFirstNameAr && siblingFirstNameAr && areNameTokensMatching(userFirstNameAr, siblingFirstNameAr))
+    ) {
+      return {
+        isValid: false,
+        confidence: 'low',
+        linkStatus: 'disputed',
+        verificationMethod: 'heuristic_name_match',
+        errorCode: 'ERR_SAME_NAME_SIBLING',
+        errorEn: 'A sibling cannot have the exact same first name as you.',
+        errorAr: 'لا يمكن إدخال شقيق أو شقيقة بنفس اسمك الأول.',
+      };
+    }
+
     const userAncestryEn = userTokensEn.slice(1);
     const userAncestryAr = userTokensAr.slice(1);
     const siblingAncestryEn = relativeTokensEn.slice(1);

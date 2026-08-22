@@ -202,7 +202,11 @@ export const FamilyRelationsStep: React.FC<FamilyRelationsStepProps> = ({
     if (lineageError?.cardId === cardId) {
       setLineageError(null);
     }
-    if (!query || query.trim().length < 2) {
+    const rawTrimmed = query.trim();
+    const hasSpaceAfterWord = query.includes(' ') && rawTrimmed.length >= 2;
+    const hasFourChars = rawTrimmed.length >= 4;
+
+    if (!hasSpaceAfterWord && !hasFourChars) {
       setSearchResults([]);
       return;
     }
@@ -1198,7 +1202,11 @@ export const FamilyRelationsStep: React.FC<FamilyRelationsStepProps> = ({
                             type="text"
                             placeholder={isRtl ? 'الاسم بالكامل' : 'Full Name'}
                             value={member.fullName || ''}
-                            onChange={(e) => handleUpdateCard(member.id, { fullName: e.target.value })}
+                            onChange={(e) => {
+                              const val = e.target.value;
+                              const formatted = isRtl ? val : val.replace(/\b[a-z]/g, (char) => char.toUpperCase());
+                              handleUpdateCard(member.id, { fullName: formatted });
+                            }}
                             className="h-[46px] px-3 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-transparent text-[#1F1F1F] dark:text-[#E3E3E3] placeholder:text-slate-400 focus:border-[#0B57D0] dark:focus:border-[#A8C7FA] focus:outline-none"
                           />
 
