@@ -248,14 +248,21 @@ export async function createAccountAction(rawPayload: CreateAccountPayload): Pro
           if (admin) storageDb = admin;
         } catch {}
 
+        let contentType = 'image/jpeg';
+        const mimeMatch = payload.avatarBase64.match(/^data:(image\/\w+);base64,/);
+        if (mimeMatch && mimeMatch[1]) {
+          contentType = mimeMatch[1];
+        }
+
         const base64Data = payload.avatarBase64.replace(/^data:image\/\w+;base64,/, '');
         const buffer = Buffer.from(base64Data, 'base64');
-        const fileName = `${userId}/${Date.now()}_avatar.jpg`;
+        const fileExt = contentType.split('/')[1] || 'jpg';
+        const fileName = `${userId}/${Date.now()}_avatar.${fileExt}`;
 
         const { error: uploadError } = await storageDb.storage
           .from('avatars')
           .upload(fileName, buffer, {
-            contentType: 'image/jpeg',
+            contentType,
             upsert: true,
           });
 
@@ -265,10 +272,10 @@ export async function createAccountAction(rawPayload: CreateAccountPayload): Pro
             .getPublicUrl(fileName);
           avatarUrl = publicUrlData.publicUrl;
         } else {
-          console.warn('Avatar upload error:', uploadError.message);
+          console.error('❌ Avatar upload failed:', uploadError.message, uploadError);
         }
       } catch (uploadErr) {
-        console.warn('Avatar upload warning (non-fatal):', uploadErr);
+        console.error('❌ Avatar upload exception (non-fatal):', uploadErr);
       }
     }
 

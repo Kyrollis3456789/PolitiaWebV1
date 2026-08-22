@@ -1514,8 +1514,6 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
     } else if (mainStepIndex < TOTAL_REGISTRATION_MAIN_STEPS) {
       setMainStepIndex((prev) => prev + 1);
       setSubStepIndex(1);
-    } else {
-      setMainStepIndex(8);
     }
   };
 
@@ -1523,6 +1521,17 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
   const handleFinalSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+
+    let avatarBase64: string | undefined;
+    let avatarFileName: string | undefined;
+
+    if (avatarFile) {
+      avatarBase64 = await fileToBase64(avatarFile);
+      avatarFileName = avatarFile.name;
+    } else if (avatarPreview && avatarPreview.startsWith('data:image')) {
+      avatarBase64 = avatarPreview;
+      avatarFileName = `avatar_${Date.now()}.jpg`;
+    }
 
     // Password Strength & Match Validations
     const strength = checkPasswordStrength(password);
