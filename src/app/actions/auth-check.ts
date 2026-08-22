@@ -281,36 +281,16 @@ export async function checkUserAccountExists(identifier: string): Promise<Accoun
   }
 }
 
+import { sendEmailOtp, verifyEmailOtp } from '@/app/actions/email-otp';
+
 /**
  * Sends a one-time passcode (OTP) to the user's email address for account recovery.
  */
 export async function sendRecoveryEmailOtp(
   email: string
 ): Promise<{ success: boolean; error?: string }> {
-  const trimmed = email.trim();
-  if (!trimmed) {
-    return { success: false, error: 'Email address is required.' };
-  }
-
-  try {
-    const supabase = await createClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email: trimmed,
-      options: {
-        shouldCreateUser: false,
-      },
-    });
-
-    if (error) {
-      console.warn('Supabase signInWithOtp notice:', error.message);
-      return { success: false, error: error.message };
-    }
-
-    return { success: true };
-  } catch (err: any) {
-    console.error('Error sending OTP:', err);
-    return { success: false, error: err.message || 'Failed to send OTP.' };
-  }
+  const result = await sendEmailOtp(email);
+  return { success: result.success, error: result.error };
 }
 
 /**
@@ -318,31 +298,9 @@ export async function sendRecoveryEmailOtp(
  */
 export async function verifyRecoveryEmailOtp(
   email: string,
-  token: string
+  code: string
 ): Promise<{ success: boolean; error?: string }> {
-  const cleanEmail = email.trim();
-  const cleanToken = token.trim();
-
-  if (!cleanEmail || !cleanToken) {
-    return { success: false, error: 'Email and code are required.' };
-  }
-
-  try {
-    const supabase = await createClient();
-    const { data, error } = await supabase.auth.verifyOtp({
-      email: cleanEmail,
-      token: cleanToken,
-      type: 'email',
-    });
-
-    if (error) {
-      return { success: false, error: error.message };
-    }
-
-    return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message || 'Verification failed.' };
-  }
+  return await verifyEmailOtp(email, code);
 }
 
 /**

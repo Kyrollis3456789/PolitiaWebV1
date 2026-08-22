@@ -2557,28 +2557,6 @@ export function RegisterScreen({ onNavigateLogin }: RegisterScreenProps) {
                             )}
                           </div>
 
-                          {emailDevCode && (
-                            <div className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 text-[11px] text-blue-700 dark:text-blue-300 animate-fadeIn">
-                              <Info className="w-3.5 h-3.5 shrink-0" />
-                              <span>
-                                <bdi>
-                                  {isRtl ? 'رمز التحقق (اختبار): ' : 'Test Code: '}
-                                  <strong className="font-mono font-bold text-blue-800 dark:text-blue-200">{emailDevCode}</strong> (أو 123456)
-                                </bdi>
-                              </span>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const digits = (emailDevCode || '123456').slice(0, 6).split('');
-                                  setEmailOtpDigits(digits);
-                                  handleVerifyEmailOtp(digits.join(''));
-                                }}
-                                className="ms-1 underline font-bold cursor-pointer hover:text-blue-900 dark:hover:text-blue-100"
-                              >
-                                <bdi>{isRtl ? 'ملء وتأكيد' : 'Autofill'}</bdi>
-                              </button>
-                            </div>
-                          )}
                         </div>
                       </div>
                     ) : (

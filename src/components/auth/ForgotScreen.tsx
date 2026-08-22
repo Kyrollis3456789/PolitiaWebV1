@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Loader2, ChevronDown, Smartphone, CheckCircle2 } from 'lucide-react';
+import { Loader2, ChevronDown, Smartphone, CheckCircle2, RotateCw } from 'lucide-react';
 import { useRouter, Link } from '@/i18n/routing';
 import { useLocale, useTranslations } from 'next-intl';
 import { isRtlLocale, SUPPORTED_LOCALES, getLocaleDisplayName } from '@/i18n/locales';
@@ -46,9 +46,43 @@ export function ForgotScreen() {
   const [fullName, setFullName] = useState('');
   const [isFullNameFocused, setIsFullNameFocused] = useState(false);
 
-  // Step 4 State: 6-digit OTP Code
+  // Step 4 State: 6-digit OTP Code & Resend Timer
   const [otpCode, setOtpCode] = useState('');
   const [isOtpFocused, setIsOtpFocused] = useState(false);
+  const [otpResendTimer, setOtpResendTimer] = useState<number>(0);
+
+  useEffect(() => {
+    if (otpResendTimer > 0) {
+      const timer = setInterval(() => {
+        setOtpResendTimer((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [otpResendTimer]);
+
+  const handleResendRecoveryOtp = async () => {
+    if (otpResendTimer > 0) return;
+    const emailToSend = targetEmail || identifier.trim();
+    if (!emailToSend) return;
+
+    setLoading(true);
+    setErrorMessage(null);
+    setSuccessMessage(null);
+
+    try {
+      const result = await sendRecoveryEmailOtp(emailToSend);
+      if (result.success) {
+        setSuccessMessage(isRtl ? 'تم إعادة إرسال رمز التحقق إلى بريدك الإلكتروني' : 'Verification code resent to your email.');
+        setOtpResendTimer(60);
+      } else {
+        setErrorMessage(result.error || (isRtl ? 'فشل في إعادة إرسال الرمز' : 'Failed to resend code.'));
+      }
+    } catch {
+      setErrorMessage(isRtl ? 'حدث خطأ أثناء إرسال الرمز' : 'An error occurred while resending code.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Step 5 State: Reset Password
   const [newPassword, setNewPassword] = useState('');
@@ -683,6 +717,33 @@ export function ForgotScreen() {
                     <bdi>{successMessage}</bdi>
                   </div>
                 )}
+
+                {/* Resend Code Link & Timer */}
+                <div className="flex items-center justify-between text-xs pt-2">
+                  <span className="text-[#444746] dark:text-[#8E918F]">
+                    <bdi>{isRtl ? 'لم يصلك الرمز؟' : "Didn't receive code?"}</bdi>
+                  </span>
+
+                  {otpResendTimer > 0 ? (
+                    <span className="text-slate-500 dark:text-slate-400 font-medium">
+                      <bdi>
+                        {isRtl
+                          ? `إعادة إرسال الرمز خلال 0:${otpResendTimer < 10 ? '0' : ''}${otpResendTimer}`
+                          : `Resend code in 0:${otpResendTimer < 10 ? '0' : ''}${otpResendTimer}`}
+                      </bdi>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResendRecoveryOtp}
+                      disabled={loading}
+                      className="text-[#0B57D0] dark:text-[#93C5FD] font-semibold hover:underline cursor-pointer flex items-center gap-1.5"
+                    >
+                      <RotateCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                      <span><bdi>{isRtl ? 'إعادة إرسال الرمز' : 'Resend Code'}</bdi></span>
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="flex justify-between md:justify-end items-center gap-4 pt-6 mt-auto">

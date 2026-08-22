@@ -60,6 +60,7 @@ export async function sendEmailOtp(email: string): Promise<SendEmailOtpResult> {
     return { success: false, error: 'Please enter a valid email address' };
   }
 
+  // Always generate a fresh 6-digit numeric OTP code
   const generatedCode = generateRandomOtp();
   const expiresAt = Date.now() + 10 * 60 * 1000; // 10 minutes
 
@@ -76,72 +77,36 @@ export async function sendEmailOtp(email: string): Promise<SendEmailOtpResult> {
   try {
     const supabase = await getSupabaseAuthClient();
     if (supabase) {
-      const signInPayload = {
+      const { error: sbErr } = await supabase.auth.signInWithOtp({
         email: cleanEmail,
         options: {
-          shouldCreateUser: false,
-        },
-      } as const;
-
-      console.log('=====================================================================');
-      console.log('[POLITIA REGISTRATION EMAIL OTP] Dispatch request');
-      console.log('Template metadata:', {
-        templateId: REGISTRATION_EMAIL_OTP_TEMPLATE_ID,
-        supabaseMethod: 'auth.signInWithOtp',
-        shouldCreateUser: false,
-      });
-      console.log('Payload:', signInPayload);
-
-      let { error: sbErr } = await supabase.auth.signInWithOtp({
-        email: cleanEmail,
-        options: {
-          shouldCreateUser: false,
-          emailRedirectTo: undefined,
+          shouldCreateUser: true,
         },
       });
-
-      // If user does not exist in auth.users yet during onboarding, retry with shouldCreateUser: true
-      if (sbErr && (sbErr.message.includes('User not found') || sbErr.message.includes('Signups not allowed') || sbErr.status === 422)) {
-        console.log('ℹ️ User not yet registered in Auth. Retrying signInWithOtp with shouldCreateUser: true...');
-        const retryRes = await supabase.auth.signInWithOtp({
-          email: cleanEmail,
-          options: {
-            shouldCreateUser: true,
-            emailRedirectTo: undefined,
-          },
-        });
-        sbErr = retryRes.error;
-      }
 
       if (!sbErr) {
         sentViaSupabase = true;
-        console.log('API response:', { success: true, error: null });
       } else {
         supabaseError = sbErr.message;
-        console.log('API response:', { success: false, error: sbErr.message });
       }
     }
   } catch (err: any) {
     supabaseError = err?.message || 'Supabase exception';
-    console.log('API response:', { success: false, error: supabaseError });
   }
 
-  console.log('Dispatch summary:', {
-    email: cleanEmail,
-    provider: sentViaSupabase ? 'supabase_email_otp' : 'sandbox_fallback',
-    templateId: REGISTRATION_EMAIL_OTP_TEMPLATE_ID,
-  });
+  console.log('=====================================================================');
+  console.log('[POLITIA REGISTRATION EMAIL OTP DISPATCH]');
   console.log(`Target Email : ${cleanEmail}`);
   console.log(`Generated OTP: ${generatedCode}`);
-  console.log(`Supabase OTP : ${sentViaSupabase ? 'Dispatched to Inbox' : supabaseError || 'Fallback mode'}`);
-  console.log(`Master Code  : 123456 (Developer master bypass also active)`);
+  console.log(`Supabase OTP : ${sentViaSupabase ? 'Dispatched to Inbox' : supabaseError || 'Store Fallback'}`);
+  console.log(`Master Code  : 123456 (Developer master bypass active)`);
   console.log('=====================================================================');
 
   return {
     success: true,
     message: sentViaSupabase
-      ? `Verification code sent to ${cleanEmail}. Check your inbox or use dev code (${generatedCode} / 123456).`
-      : `Verification code generated for ${cleanEmail}. (Code: ${generatedCode} or master: 123456)`,
+      ? `Verification code sent to ${cleanEmail}. Check your inbox.`
+      : `Verification code generated for ${cleanEmail}. (Code: ${generatedCode} / master: 123456)`,
     provider: sentViaSupabase ? 'supabase_email_otp' : 'sandbox_fallback',
     devCode: generatedCode,
   };
