@@ -240,6 +240,7 @@ export async function createAccountAction(rawPayload: CreateAccountPayload): Pro
 
     // 4. Upload Avatar if provided
     let avatarUrl: string | null = null;
+    console.log('[DEBUG-SERVER] incoming avatarBase64 length:', payload.avatarBase64 ? payload.avatarBase64.length : 0);
     if (payload.avatarBase64) {
       try {
         let storageDb = supabase;
