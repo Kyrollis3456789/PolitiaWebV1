@@ -249,14 +249,16 @@ export async function createAccountAction(rawPayload: CreateAccountPayload): Pro
         } catch {}
 
         let contentType = 'image/jpeg';
-        const mimeMatch = payload.avatarBase64.match(/^data:(image\/\w+);base64,/);
+        const mimeMatch = payload.avatarBase64.match(/^data:(image\/[a-zA-Z0-9\+\-\.]+);base64,/);
         if (mimeMatch && mimeMatch[1]) {
           contentType = mimeMatch[1];
         }
 
-        const base64Data = payload.avatarBase64.replace(/^data:image\/\w+;base64,/, '');
-        const buffer = Buffer.from(base64Data, 'base64');
-        const fileExt = contentType.split('/')[1] || 'jpg';
+        const cleanBase64 = payload.avatarBase64
+          .replace(/^data:image\/[a-zA-Z0-9\+\-\.]+;base64,/, '')
+          .replace(/\s+/g, '');
+        const buffer = Buffer.from(cleanBase64, 'base64');
+        const fileExt = contentType.split('/')[1]?.replace(/[^a-z0-9]/gi, '') || 'jpg';
         const fileName = `${userId}/${Date.now()}_avatar.${fileExt}`;
 
         const { error: uploadError } = await storageDb.storage
