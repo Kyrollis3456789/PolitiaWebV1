@@ -2,6 +2,7 @@ import { setRequestLocale } from 'next-intl/server';
 import { redirect } from '@/i18n/routing';
 import { createClient } from '@/lib/supabase/server';
 import { SignOutButton } from '@/components/shared/SignOutButton';
+import { UserAvatar } from '@/components/shared/UserAvatar';
 import { isRtlLocale } from '@/i18n/locales';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -413,17 +414,11 @@ export default async function DashboardPage({
         {/* 1. Hero Profile Banner */}
         <section className="p-6 sm:p-8 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-[#18202F] shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            {profile?.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt={primaryDisplay}
-                className="w-20 h-20 rounded-2xl object-cover border-2 border-blue-600 shadow-md shrink-0"
-              />
-            ) : (
-              <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center font-black text-3xl shadow-md shrink-0 select-none">
-                {primaryDisplay.charAt(0).toUpperCase()}
-              </div>
-            )}
+            <UserAvatar
+              src={profile?.avatar_url}
+              alt={primaryDisplay}
+              initialLetter={primaryDisplay}
+            />
 
             <div className="space-y-1.5">
               <div className="flex flex-wrap items-center gap-2">
